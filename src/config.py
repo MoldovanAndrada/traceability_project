@@ -1,0 +1,23 @@
+import os
+
+# Project root (directory above /src)
+BASE = os.path.dirname(os.path.dirname(__file__))
+
+# Data directories
+DATA_DIR = os.path.join(BASE, "traceability_lang")
+EMB_DIR = os.path.join(BASE, "embeddings")
+
+# File paths
+TEST_CASES     = os.path.join(DATA_DIR, "test_cases.xlsx")
+USER_STORIES   = os.path.join(DATA_DIR, "user_stories.xlsx")
+FAULTS         = os.path.join(DATA_DIR, "faults.xlsx")
+GITHUB_REPO = "MoldovanAndrada/traceability-system"
+GITHUB_TOKEN = "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"
+
+# Folder containing the source code you want to watch
+CODE_DIR       = os.path.join(DATA_DIR, "code")
+
+# Embedding files
+FAISS_INDEX    = os.path.join(EMB_DIR, "index.faiss")
+EMB_FILE       = os.path.join(EMB_DIR, "embeddings.npy")
+META_FILE      = os.path.join(EMB_DIR, "metadata.json")

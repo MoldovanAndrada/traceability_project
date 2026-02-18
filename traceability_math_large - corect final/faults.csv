@@ -1,0 +1,21 @@
+bug_id,file_path,related_story,description,fixed_code,buggy_code
+Bug-01,AddCore.java,US-01,Overflow ignored,Clamp result,return a+b;
+Bug-02,DivCore.java,US-02,Missing zero guard,throw exception,return a/b;
+Bug-03,NumberTheory.java,US-03,Modulo reversed,b=a%b,a=b%a
+Bug-04,LcmCore.java,US-04,Overflow risk,use long,a*b
+Bug-05,PrimeChecker.java,US-05,1 treated as prime,n<=1 false,n==1 true
+Bug-06,Factorial.java,US-06,Negative allowed,guard n,loop anyway
+Bug-07,Fibonacci.java,US-07,Wrong base case,return n,return 1
+Bug-08,StatsMean.java,US-08,Divide by zero,check length,s/v.length
+Bug-09,StatsVariance.java,US-09,Mean skipped,call mean,hardcode
+Bug-10,MatrixAdd.java,US-10,Dimension unchecked,validate dims,assume equal
+Bug-11,MatrixMul.java,US-11,Index bug,correct loop,wrong k
+Bug-12,VectorNorm.java,US-12,No sqrt,apply sqrt,return s
+Bug-13,RandomGen.java,US-13,Negative bound crash,guard bound,direct call
+Bug-14,Clamp.java,US-14,Min/max swapped,normalize,return v
+Bug-15,LogUtils.java,US-15,Log negative,guard input,direct log
+Bug-16,Various.java,US-01,Synthetic regression,Correct boundary,Incorrect boundary
+Bug-17,Various.java,US-02,Synthetic regression,Correct boundary,Incorrect boundary
+Bug-18,Various.java,US-03,Synthetic regression,Correct boundary,Incorrect boundary
+Bug-19,Various.java,US-04,Synthetic regression,Correct boundary,Incorrect boundary
+Bug-20,Various.java,US-05,Synthetic regression,Correct boundary,Incorrect boundary

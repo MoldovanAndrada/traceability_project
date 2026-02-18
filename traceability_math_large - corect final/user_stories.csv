@@ -1,0 +1,16 @@
+user_story_id,feature_sentence,documentation_text
+US-01,Safe integer addition,Clamp overflow
+US-02,Division safety,Throw on zero
+US-03,Compute gcd,Euclidean algorithm
+US-04,Compute lcm,Reuse gcd
+US-05,Detect primes,Reject <=1
+US-06,Factorial computation,Iterative
+US-07,Fibonacci generation,Avoid recursion
+US-08,Mean calculation,Accurate average
+US-09,Variance calculation,Use mean
+US-10,Matrix addition,Cell-wise
+US-11,Matrix multiplication,Triple loop
+US-12,Vector norm,sqrt(sum squares)
+US-13,Random bounded ints,Respect bound
+US-14,Clamp values,Respect min/max
+US-15,Logarithm support,Use natural log

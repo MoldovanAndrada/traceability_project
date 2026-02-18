@@ -1,0 +1,19 @@
+user_story_id,feature_sentence,documentation_text
+US-01,"As a user, I want to correctly identify leap years.",Calendar computations must reflect leap year rules including centuries.
+US-02,"As a user, I want to know how many days are in a given year.",Year length must adjust for leap years.
+US-03,"As a user, I want accurate month length calculations.",Month boundaries must respect leap years.
+US-04,"As a user, I want to convert time units safely.",Large unit conversions must not overflow.
+US-05,"As a user, I want to compute durations from milliseconds.",Durations must convert reliably to seconds and minutes.
+US-06,"As a user, I want to add days to timestamps reliably.",Date arithmetic must remain correct across offsets.
+US-07,"As a user, I want to parse ISO-formatted dates.",Year and month extraction must be reliable.
+US-08,"As a user, I want to format dates in ISO format.",Formatted dates must be consistent and standardized.
+US-09,"As a user, I want to compute validated time intervals.",Invalid intervals must be rejected.
+US-10,"As a user, I want to detect overlapping time intervals.",Scheduling conflicts must be detectable.
+US-11,"As a user, I want to test timestamp containment in ranges.",Boundary-inclusive containment must hold.
+US-12,"As a user, I want invalid hour values rejected.",Time-of-day inputs must be validated.
+US-13,"As a user, I want weekday values normalized.",Weekday values must stay within range.
+US-14,"As a user, I want reliable timezone offset resolution.",Known zones must work and unknown zones must fail fast.
+US-15,"As a user, I want to compare timestamps consistently.",Timestamp ordering must be deterministic.
+US-16,"As a user, I want to detect expired deadlines.",Deadline checks must be accurate.
+US-17,"As a user, I want to measure elapsed execution time.",Elapsed time measurement must be safe.
+US-18,"As a user, I want a reliable current-time source.",All time logic must use a consistent clock.
