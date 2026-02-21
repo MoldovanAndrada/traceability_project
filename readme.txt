@@ -22,3 +22,7 @@ am ajuns la concluzia ca pt credibilitate si practice approapiation voi folosi d
 -> se va folosi o singura clasa de cod (referentiat, pt ca intreaga clasa e prea mult) - StringUtils
 
 documentatia privine din documentatia oficiala: https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/StringUtils.html
+
+TODO next: 1.toggle from tests/from stories
+2. sa extindem la ~5 proiecte asemanatoare (pt ENASE 3 - inca 2 defects 4j)
+3. tool (de exemplu plugin)
