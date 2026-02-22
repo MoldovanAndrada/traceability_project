@@ -1,5 +1,5 @@
 user_story_id,feature_sentence,documentation_text
-US-01,"As a user, I want safe integer addition with overflow protection.",Addition must clamp to integer limits and be reusable via ArithmeticUtils and MathFacade.
+US-01,"As a user, I want safe integer addition and multiplication with overflow protection.",Addition must clamp to integer limits and be reusable via ArithmeticUtils and MathFacade.
 US-02,"As a user, I want safe integer subtraction operations.",Arithmetic operations must behave consistently and be accessible through ArithmeticUtils.
 US-03,"As a user, I want safe division that rejects division by zero.",Division must throw a clear ArithmeticException and be used by AdvancedMathService computations.
 US-04,"As a user, I want to compute logarithms with domain validation.",Log computations must reject non-positive inputs and support AdvancedMathService expressions.
