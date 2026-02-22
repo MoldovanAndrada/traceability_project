@@ -1,18 +1,19 @@
 import io
 import json
+from collections import defaultdict
+from pathlib import PurePosixPath
 from typing import Any
 
 import pandas as pd
 import requests
 
+from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
-from src.agents import (
-    get_impacted_code,
-    get_related_faults,
-    get_related_test_cases,
-    search,
-)
 from src.config import GITHUB_REPO, GITHUB_TOKEN
+
+CODE_DIR_NAMES = {"code", "src"}
+CODE_EXTENSIONS = {".java"}
+STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 
 
 def _get_file_content(sha: str, path: str) -> bytes | None:
@@ -58,11 +59,7 @@ def _extract_story_records(path: str, content: bytes | None) -> dict[str, str]:
             if records:
                 return records
 
-        return {
-            str(i): text
-            for i, text in enumerate(text_values.tolist(), start=1)
-            if text
-        }
+        return {str(i): text for i, text in enumerate(text_values.tolist(), start=1) if text}
 
     stories: dict[str, str] = {}
     for column in df.columns:
@@ -95,44 +92,98 @@ def _find_changed_stories(commit: dict[str, Any], filename: str) -> list[dict[st
     return changed
 
 
+def _dataset_from_path(filename: str) -> str | None:
+    parts = PurePosixPath(filename).parts
+    if not parts:
+        return None
+    first = parts[0]
+    if first.startswith("traceability_"):
+        return first
+    return None
+
+
+def _is_code_class_file(filename: str) -> bool:
+    path = PurePosixPath(filename)
+    return path.suffix.lower() in CODE_EXTENSIONS and any(part in CODE_DIR_NAMES for part in path.parts)
+
+
 def _is_story_file(filename: str) -> bool:
     lowered = filename.lower()
-    return "story" in lowered and lowered.endswith((".csv", ".xlsx", ".xls", ".txt", ".md"))
+    return "story" in lowered and PurePosixPath(filename).suffix.lower() in STORY_EXTENSIONS
+
+
+def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str]) -> list[dict[str, Any]]:
+    return [record for record in records if record.get("type") in allowed_types]
+
 
 def run_once():
     commit = get_latest_commit()
     sha = commit["sha"]
+    files = commit.get("files", [])
 
-    impacted = []
+    code_changes_by_dataset: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    story_changes: list[dict[str, str]] = []
 
-    for f in commit["files"]:
-        filename = f["filename"]
-        text = f.get("patch", "")
-        story_file = _is_story_file(filename)
+    for file_change in files:
+        filename = file_change["filename"]
+        dataset = _dataset_from_path(filename)
+        if not dataset:
+            continue
 
-        # Default impact analysis for code/documentation diffs.
-        results = search(text) if text and not story_file else []
+        if _is_code_class_file(filename):
+            code_changes_by_dataset[dataset].append(file_change)
+            continue
 
-        # Additional analysis for changed user stories.
-        if story_file:
-            changed_stories = _find_changed_stories(commit, filename)
-            for story in changed_stories:
-                results.append({"type": "story", "id": story["id"], "text": story["text"]})
-                story_results = []
-                story_results.extend(get_related_test_cases(story["text"]))
-                story_results.extend(get_related_faults(story["text"]))
-                story_results.extend(get_impacted_code(story["text"]))
-                results.extend(story_results)
+        if _is_story_file(filename):
+            story_changes.append({"dataset": dataset, "filename": filename})
 
-        impacted.append({
-            "file": filename,
-            "results": results
-        })
+    impacted: list[dict[str, Any]] = []
 
-    print(json.dumps({
-        "sha": sha,
-        "impact": impacted
-    }))
+    # Trigger analysis only for commits that modify at least one code class file.
+    for dataset, code_changes in code_changes_by_dataset.items():
+        for file_change in code_changes:
+            patch_text = file_change.get("patch", "")
+            if not patch_text:
+                continue
+            results = _filter_artifact_types(
+                search(patch_text, dataset=dataset),
+                {"story", "test_case", "fault"},
+            )
+            impacted.append(
+                {
+                    "trigger": "code_class_modified",
+                    "dataset": dataset,
+                    "file": file_change["filename"],
+                    "results": results,
+                }
+            )
+
+    # Trigger analysis for user story file modifications.
+    for story_change in story_changes:
+        dataset = story_change["dataset"]
+        filename = story_change["filename"]
+        changed_stories = _find_changed_stories(commit, filename)
+
+        results: list[dict[str, Any]] = []
+        for story in changed_stories:
+            results.append({"type": "story", "id": story["id"], "text": story["text"]})
+            story_results = []
+            story_results.extend(get_related_test_cases(story["text"], dataset=dataset))
+            story_results.extend(get_related_faults(story["text"], dataset=dataset))
+            story_results.extend(get_impacted_code(story["text"], dataset=dataset))
+            results.extend(story_results)
+
+        impacted.append(
+            {
+                "trigger": "user_story_modified",
+                "dataset": dataset,
+                "file": filename,
+                "results": results,
+            }
+        )
+
+    print(json.dumps({"sha": sha, "impact": impacted}))
+
 
 if __name__ == "__main__":
     run_once()
