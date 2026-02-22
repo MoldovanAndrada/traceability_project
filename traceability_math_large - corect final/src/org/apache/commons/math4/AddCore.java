@@ -4,7 +4,6 @@ public class AddCore{
         long r=(long)a+(long)b;
         if(r>Integer.MAX_VALUE) return Integer.MAX_VALUE;
         if(r<Integer.MIN_VALUE) return Integer.MIN_VALUE;
-        
         return (int)r;
     }
 }
