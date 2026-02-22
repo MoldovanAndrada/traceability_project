@@ -65,7 +65,8 @@ def _is_code_class_file(filename: str) -> bool:
 
 def _is_story_file(filename: str) -> bool:
     lowered = filename.lower()
-    return "story" in lowered and PurePosixPath(filename).suffix.lower() in STORY_EXTENSIONS
+    story_markers = ("story", "stories")
+    return any(marker in lowered for marker in story_markers) and PurePosixPath(filename).suffix.lower() in STORY_EXTENSIONS
 
 
 def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str]) -> list[dict[str, Any]]:
