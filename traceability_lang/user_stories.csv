@@ -1,0 +1,16 @@
+user_story_id,feature_sentence,documentation_text
+US-01,"As a user, I want to normalize text and capitalize it safely.","Remove accents, normalize whitespace, and capitalize the first character via LangFacade.normalizeAndCapitalize without crashing on nulls."
+US-02,"As a user, I want to convert sentences to Title Case.",Convert every word to title case using StringFormatter.toTitleCaseWords and ensure blank inputs are handled consistently.
+US-03,"As a user, I want to detect blank strings reliably.","Treat null, empty, and whitespace-only (including tabs/newlines) as blank via StringValidator.checkBlank and CharUtils.isWhitespace."
+US-04,"As a user, I want to wrap text to a maximum width.","Wrap normalized text at a given width using TextWrapper.wrap, preserving content and avoiding crashes for null input."
+US-05,"As a user, I want smart wrapping that avoids breaking words.",Use TextWrapper.smartWrap to break at a word boundary when possible and avoid producing empty lines.
+US-06,"As a user, I want to reverse strings reliably.","Reverse a string using StringUtils.reverse and ArrayUtils.reverseArray, returning null safely for null input."
+US-07,"As a user, I want to search strings for overlapping matches.",Count overlapping occurrences of a substring using StringSearcher.countOccurrences and handle blank inputs safely.
+US-08,"As a user, I want case-insensitive searching and word containment checks.",Find substrings ignoring case and detect whole-word containment using StringSearcher.indexOfIgnoreCase and containsWord.
+US-09,"As a user, I want to validate and parse numeric inputs safely.",Determine whether text is numeric and parse integers with defaults using NumberUtils.isParsable and parseIntOrDefault.
+US-10,"As a user, I want bounded numeric parsing for configuration inputs.","Parse an integer and clamp it to [min,max] using LangFacade.safeParseBoundedInt and Clamp.clamp."
+US-11,"As a user, I want to validate ASCII-safe identifiers.","Check whether an identifier is non-blank, ASCII printable, and composed of letters/digits/underscore via LangFacade.isSafeIdentifier."
+US-12,"As a user, I want to compute text analytics like word/line counts.","Compute word count, line count, and numeric-likeness using TextAnalytics with shared normalization and searching utilities."
+US-13,"As a user, I want to detect palindromes robustly.","Detect palindromes while ignoring accents, whitespace differences, and case via StringValidator.isPalindrome and StringUtils.reverse."
+US-14,"As a user, I want safe regex replacements and literal-safe replacements.",Perform regex replaceAll and literal replacements using RegExUtils with validation and safe default replacement behavior.
+US-15,"As a user, I want word transformations like swap case and initials.",Swap case of letters and compute initials using WordUtils and CharUtils while handling blanks gracefully.

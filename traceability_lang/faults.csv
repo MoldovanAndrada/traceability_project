@@ -1,0 +1,21 @@
+bug_id,file_path,related_story,description,fixed_code,buggy_code
+Bug-01,StringFormatter.java,US-01,normalizeWhitespace fails to collapse tabs/newlines,"return s.trim().replaceAll(""\\s+"", "" "");","return s.trim().replace(""  "", "" "");"
+Bug-02,StringFormatter.java,US-02,Title case does not lowercase remaining letters,sb.append(toFirstUpper(parts[i].toLowerCase()));,sb.append(toFirstUpper(parts[i]));
+Bug-03,StringValidator.java,US-03,Blank check ignores tabs/newlines,if(!CharUtils.isWhitespace(cs.charAt(i))) return false;,if(cs.charAt(i)!=' ') return false;
+Bug-04,TextWrapper.java,US-04,wrap fails to normalize whitespace before wrapping,String s = StringFormatter.normalizeWhitespace(str);,String s = str;
+Bug-05,TextWrapper.java,US-05,smartWrap breaks words even when space exists,"int breakAt = s.lastIndexOf(' ', w);",int breakAt = w;
+Bug-06,ArrayUtils.java,US-06,reverseArray off-by-one swaps middle twice,for (int i = 0; i < len / 2; i++) {,for (int i = 0; i <= len / 2; i++) {
+Bug-07,StringSearcher.java,US-07,Overlapping matches not counted (skips by sub length),i += 1;,i += sub.length();
+Bug-08,StringSearcher.java,US-08,containsWord uses contains(substring) without word boundaries,return normalized.contains(w);,return s.toLowerCase().contains(word.toLowerCase());
+Bug-09,NumberUtils.java,US-09,isParsable fails to trim whitespace,Double.parseDouble(s.trim());,Double.parseDouble(s);
+Bug-10,NumberUtils.java,US-09,parseIntOrDefault throws on floats instead of defaulting,catch (RuntimeException ex) { return def; },return Integer.parseInt(s.trim());
+Bug-11,Clamp.java,US-10,Clamp does not handle swapped bounds,if (min > max) { int t=min; min=max; max=t; },// no swap bounds logic
+Bug-12,LangFacade.java,US-10,safeParseBoundedInt forgets to clamp,"return NumberUtils.clampInt(v, min, max);",return v;
+Bug-13,LangFacade.java,US-11,Identifier check forgets ASCII printable validation,if (!StringValidator.isAsciiPrintable(s)) return false;,// missing ASCII check
+Bug-14,TextAnalytics.java,US-12,lineCount uses non-overlapping count causing undercount,"return 1 + StringSearcher.countOccurrences(s, ""\\n"");","return 1 + (s.split(""\\n"").length/2);"
+Bug-15,StringValidator.java,US-13,Palindrome does not remove accents,String cleaned = StringFormatter.normalizeWhitespace(StringFormatter.removeAccents(s))...,String cleaned = StringFormatter.normalizeWhitespace(s)...
+Bug-16,RegExUtils.java,US-14,safeReplaceLiteral does not quote literal and crashes on metachar,String safe = Pattern.quote(literal);,String safe = literal;
+Bug-17,RegExUtils.java,US-14,replaceAll allows null regex and NPEs,"Validate.notNull(regex, ""regex"");",// missing validation
+Bug-18,WordUtils.java,US-15,swapCase uses toLowerCase only (breaks uppercase),a[i] = CharUtils.swapCase(a[i]);,a[i] = Character.toLowerCase(a[i]);
+Bug-19,WordUtils.java,US-15,initials fails to normalize whitespace causing empty tokens,"String[] parts = StringFormatter.normalizeWhitespace(s).split("" "");","String[] parts = s.split("" "");"
+Bug-20,StringUtils.java,US-01,normalizeAndCapitalize bypasses LangFacade and misses accent removal,return LangFacade.normalizeAndCapitalize(s);,return StringFormatter.toFirstUpper(s);

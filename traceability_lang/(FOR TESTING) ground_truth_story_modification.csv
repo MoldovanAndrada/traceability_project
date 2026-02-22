@@ -1,0 +1,16 @@
+Scenario ID,Change Trigger (User Story V1 → V2),Affected TCs (Ground Truth),Relevant Faults (Ground Truth),Impacted Code Artifacts,Impact Category
+1,US-01 (Normalize+Capitalize): V1: Capitalize only. → V2: Normalize whitespace + remove accents + capitalize via facade.,"TC-001 to TC-004, TC-061","Bug-01, Bug-20","StringFormatter, LangFacade, StringUtils",Functional Expansion
+2,US-02 (Title Case): V1: First letter only. → V2: Title-case every word with lowercasing remainder.,TC-005 to TC-008,Bug-02,"StringFormatter, StringValidator",Logic Refinement
+3,US-03 (Blank Detection): V1: Space-only blank check. → V2: Treat all ASCII whitespace (tabs/newlines) as blank.,TC-009 to TC-012,Bug-03,"StringValidator, CharUtils",Validation Strengthening
+4,US-04 (Wrap): V1: Wrap raw input. → V2: Normalize whitespace before wrapping and handle null safely.,TC-013 to TC-016,Bug-04,"TextWrapper, StringFormatter",Logic Refinement
+5,US-05 (Smart Wrap): V1: Hard break at width. → V2: Prefer word boundary breaks and avoid empty lines.,TC-017 to TC-020,Bug-05,"TextWrapper, StringValidator",Functional Improvement
+6,US-06 (Reverse): V1: Reverse may off-by-one. → V2: Correct in-place reverse with null safety.,TC-021 to TC-024,Bug-06,"StringUtils, ArrayUtils",Bug Fix
+7,US-07 (Count Matches): V1: Non-overlapping counting. → V2: Count overlapping matches safely.,"TC-025 to TC-028, TC-062",Bug-07,"StringSearcher, StringValidator",Behavior Change
+8,US-08 (Search Words): V1: Substring match. → V2: Case-insensitive search and whole-word containment.,TC-029 to TC-032,Bug-08,"StringSearcher, StringFormatter",Functional Expansion
+9,US-09 (Numeric Parsing): V1: Fragile parsing. → V2: Trim + defaulting behavior for invalid inputs.,TC-033 to TC-036,"Bug-09, Bug-10","NumberUtils, StringValidator",Robustness Enhancement
+10,US-10 (Bounded Parse): V1: Parse only. → V2: Clamp to range and handle swapped bounds.,"TC-037 to TC-040, TC-063","Bug-11, Bug-12","LangFacade, NumberUtils, Clamp",Safety/Constraints
+11,US-11 (Safe Identifier): V1: Basic check. → V2: Enforce ASCII printable and allowed character set.,"TC-041 to TC-044, TC-065",Bug-13,"LangFacade, StringValidator",Security/Validation
+12,US-12 (Text Analytics): V1: Simple counts. → V2: Normalize input and reuse search utilities for accurate metrics.,"TC-045 to TC-048, TC-067",Bug-14,"TextAnalytics, StringFormatter, StringSearcher, NumberUtils",Functional Composition
+13,US-13 (Palindrome): V1: Exact match. → V2: Ignore accents/whitespace/case using shared utilities.,"TC-049 to TC-052, TC-066",Bug-15,"StringValidator, StringFormatter, StringUtils",Logic Refinement
+14,US-14 (Regex Utils): V1: Unsafe literal handling. → V2: Validate inputs and quote literals to avoid regex crashes.,"TC-053 to TC-056, TC-064","Bug-16, Bug-17","RegExUtils, Validate, ObjectUtils, StringFormatter",Defensive Programming
+15,US-15 (Word Utils): V1: Simplistic transformations. → V2: Swap-case per character and robust initials splitting.,TC-057 to TC-060,"Bug-18, Bug-19","WordUtils, CharUtils, StringFormatter, StringValidator",Logic Refinement

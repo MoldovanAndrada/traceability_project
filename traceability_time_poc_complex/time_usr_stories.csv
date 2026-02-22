@@ -1,0 +1,21 @@
+user_story_id,feature_sentence,documentation_text
+US-01,"As a user, I want leap years computed using full Gregorian rules.",Leap-year detection must follow century and 400-year exceptions and be used in month/day computations.
+US-02,"As a user, I want accurate month length and day-of-year calculations.",Month length and day-of-year must validate inputs and use leap-year rules for February.
+US-03,"As a user, I want to parse ISO dates reliably.","ISO date parsing must extract year, month, and day and reject malformed or non-ISO inputs."
+US-04,"As a user, I want to normalize ISO dates into a canonical format.","DateService must parse, validate, and reformat dates into YYYY-MM-DD consistently."
+US-05,"As a user, I want to format dates in ISO and compact forms.",Date formatting must produce zero-padded ISO strings and compact YYYYMMDD strings.
+US-06,"As a user, I want to compute day-of-year directly from an ISO date string.",DateService must compute day-of-year from ISO input using CalendarUtils validation logic.
+US-07,"As a user, I want to add days to epoch timestamps safely.",DateMath must add days using exact arithmetic and reject overflow conditions.
+US-08,"As a user, I want to compute the number of days between two timestamps consistently.",DateMath must floor timestamps to day boundaries and compute whole-day differences.
+US-09,"As a user, I want time-of-day inputs validated before use.",TimeValidator must enforce valid hour/minute/second ranges and provide HMS validation.
+US-10,"As a user, I want to convert time units with overflow safety.",TimeUnitConverter must convert seconds/minutes/days to millis/seconds using exact arithmetic.
+US-11,"As a user, I want to add seconds to an epoch time using safe conversions.",TimeService must convert seconds to millis and add safely without silent overflow.
+US-12,"As a user, I want epoch times normalized to seconds-within-day.",TimeService must normalize epoch values into 0..86399 seconds within the current day.
+US-13,"As a user, I want consistent ordering and range checks for timestamps.",TimeComparator must compare times and support inclusive range checks with validation.
+US-14,"As a user, I want timezone offsets resolved for known zones and rejected for unknown zones.",TimeZoneRules must map known timezone IDs to offsets and fail fast on unknown IDs.
+US-15,"As a user, I want validated date ranges with inclusive containment checks.",DateRange must validate boundaries and support inclusive containment and interval conversion.
+US-16,"As a user, I want to detect interval overlaps and compute lengths for scheduling.","Interval must validate boundaries, compute length, and detect overlap with other intervals."
+US-17,"As a user, I want scheduling decisions based on windows, intervals, and deadlines.","SchedulingService must check window containment, detect conflicts, and evaluate deadlines using Clock."
+US-18,"As a user, I want a single facade API for common date/time workflows.","TimeFacade must orchestrate DateService, TimeService, and SchedulingService for end-to-end operations."
+US-19,"As a user, I want to measure elapsed execution time reliably.",Stopwatch must measure elapsed time safely and enforce correct start/stop state.
+US-20,"As a user, I want a reliable time source for time-based decisions.",Clock must provide wall-clock and monotonic time for use in scheduling and measurement.

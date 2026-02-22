@@ -1,0 +1,68 @@
+test_case_id,test_case_title,user_story_id,test_case_steps,expected_behavior
+TC-001,Add clamps positive overflow,US-01,"Inputs: a=Integer.MAX_VALUE, b=10; Call ArithmeticUtils.add(a,b).",Result equals Integer.MAX_VALUE (no wraparound).
+TC-002,Add clamps negative overflow,US-01,"Inputs: a=Integer.MIN_VALUE, b=-5; Call ArithmeticUtils.add(a,b).",Result equals Integer.MIN_VALUE (no wraparound).
+TC-003,Add preserves identity,US-01,"Inputs: a=0, b=123; Call ArithmeticUtils.add(a,b).",Result equals 123.
+TC-004,Facade advanced uses safe add,US-01,"Inputs: a=Integer.MAX_VALUE, b=1, x=2.0; Call MathFacade.advanced(a,b,x).",Addition clamps safely and computation proceeds without integer overflow wrap.
+TC-005,Subtraction basic correctness,US-02,"Inputs: a=10, b=7; Call ArithmeticUtils.sub(a,b).",Result equals 3.
+TC-006,Multiplication basic correctness,US-02,"Inputs: a=6, b=7; Call ArithmeticUtils.mul(a,b).",Result equals 42.
+TC-007,Subtraction with negatives,US-02,"Inputs: a=-5, b=10; Call ArithmeticUtils.sub(a,b).",Result equals -15.
+TC-008,Multiply by zero,US-02,"Inputs: a=0, b=999; Call ArithmeticUtils.mul(a,b).",Result equals 0.
+TC-009,Division produces decimal,US-03,"Inputs: a=7.0, b=2.0; Call ArithmeticUtils.div(a,b).",Result equals 3.5 within tolerance.
+TC-010,Division by zero throws,US-03,"Inputs: a=1.0, b=0.0; Call ArithmeticUtils.div(a,b).",ArithmeticException is thrown with message containing 'divide by zero'.
+TC-011,Division with negative divisor,US-03,"Inputs: a=10.0, b=-2.0; Call ArithmeticUtils.div(a,b).",Result equals -5.0.
+TC-012,Facade advanced division propagates errors,US-03,"Inputs: a=1, b=1, x=0.0; Call MathFacade.advanced(a,b,x).",ArithmeticException is thrown (division by zero).
+TC-013,Log of one is zero,US-04,Input: v=1.0; Call LogUtils.log(v).,Result equals 0.0.
+TC-014,Log rejects zero,US-04,Input: v=0.0; Call LogUtils.log(v).,IllegalArgumentException is thrown for non-positive input.
+TC-015,Log rejects negative,US-04,Input: v=-1.0; Call LogUtils.log(v).,IllegalArgumentException is thrown for non-positive input.
+TC-016,Advanced expression uses domain validation,US-04,"Inputs: a=1, b=1, x=-1.0; Call MathFacade.advanced(a,b,x).",IllegalArgumentException is thrown when log receives non-positive input.
+TC-017,Sqrt of perfect square,US-05,Input: v=49.0; Call RootFinder.sqrt(v).,Result equals 7.0.
+TC-018,Sqrt of non-square,US-05,Input: v=2.0; Call RootFinder.sqrt(v).,Result approximates 1.41421356 within tolerance.
+TC-019,Sqrt rejects negative,US-05,Input: v=-0.01; Call RootFinder.sqrt(v).,IllegalArgumentException is thrown for negative input.
+TC-020,VectorNorm reuses RootFinder validation,US-05,"Input: vector {3,4}; Call VectorNorm.norm(v).",Result equals 5.0 (computed via RootFinder.sqrt).
+TC-021,Vector norm classic 3-4-5,US-06,"Input: vector {3,4}; Call VectorNorm.norm(v).",Result equals 5.0.
+TC-022,Vector norm zero vector,US-06,"Input: vector {0,0,0}; Call VectorNorm.norm(v).",Result equals 0.0.
+TC-023,Vector norm rejects null,US-06,Input: v=null; Call VectorNorm.norm(v).,IllegalArgumentException is thrown with message containing 'null vector'.
+TC-024,Normalized norm clamps to 100,US-06,"Input: vector {1000,2000}; Call StatisticalService.normalizedNorm(v).",Result equals 100 (clamped).
+TC-025,Mean of mixed values,US-07,"Input: {2.5, 3.5, 4.0}; Call StatsMean.mean(v).",Result equals 3.3333333 within tolerance.
+TC-026,Mean single element,US-07,Input: {10}; Call StatsMean.mean(v).,Result equals 10.0.
+TC-027,Mean empty returns NaN,US-07,Input: {}; Call StatsMean.mean(v).,Result is NaN.
+TC-028,Mean null returns NaN,US-07,Input: null; Call StatsMean.mean(v).,Result is NaN.
+TC-029,Sample variance uniform is zero,US-08,"Input: {5,5,5,5}; Call StatsVariance.var(v).",Result equals 0.0.
+TC-030,Sample variance two values,US-08,"Input: {2,4}; Call StatsVariance.var(v).",Result equals 2.0 (sample variance with n-1).
+TC-031,Variance rejects length 1,US-08,Input: {7}; Call StatsVariance.var(v).,IllegalArgumentException is thrown for length < 2.
+TC-032,Variance rejects null,US-08,Input: null; Call StatsVariance.var(v).,IllegalArgumentException is thrown for null input.
+TC-033,Z-score of mean is zero,US-09,"Input values {10, 10, 10, 10}; Call StatisticalService.zScore(values, 10).",Result is NaN or Infinity is avoided; expected behavior is stable handling of zero variance (throw or return NaN).
+TC-034,Z-score typical dataset,US-09,"Input values {1,2,3,4,5}; x=3; Call StatisticalService.zScore(values,x).",Result equals 0.0 within tolerance (x equals mean).
+TC-035,Z-score rejects insufficient variance input,US-09,"Input values {1}; x=1; Call StatisticalService.zScore(values,x).",IllegalArgumentException is thrown due to variance precondition.
+TC-036,Facade computeStatistics delegates to StatisticalService,US-09,"Input values {1,2,3}; Call MathFacade.computeStatistics(values).",Method invokes StatisticalService and returns a finite z-score for first element.
+TC-037,MatrixAdd sums 2x2 correctly,US-10,"Inputs: A={{1,2},{3,4}}, B={{5,6},{7,8}}; Call MatrixAdd.add(A,B).","Result equals {{6,8},{10,12}}."
+TC-038,MatrixAdd rejects dimension mismatch,US-10,"Inputs: A=2x2, B=2x3; Call MatrixAdd.add(A,B).",IllegalArgumentException is thrown for dimension mismatch.
+TC-039,MatrixAdd rejects null,US-10,"Inputs: A=null, B={{1}}; Call MatrixAdd.add(A,B).",IllegalArgumentException is thrown for null matrix.
+TC-040,MatrixAdd rejects empty,US-10,"Inputs: A={}, B={}; Call MatrixAdd.add(A,B).",IllegalArgumentException is thrown for empty matrix.
+TC-041,MatrixMul identity property,US-11,"Inputs: A={{2,3},{4,5}}, I={{1,0},{0,1}}; Call MatrixMul.mul(A,I).",Result equals A.
+TC-042,MatrixMul rejects dimension mismatch,US-11,"Inputs: A=2x2, B=3x3; Call MatrixMul.mul(A,B).",IllegalArgumentException is thrown for dimension mismatch.
+TC-043,MatrixMul rejects null,US-11,"Inputs: A=null, B={{1}}; Call MatrixMul.mul(A,B).",IllegalArgumentException is thrown for null matrix.
+TC-044,LinearAlgebraService uses MatrixMul internally,US-11,"Inputs: A,B,C are 2x2; Call LinearAlgebraService.multiplyAndAdd(A,B,C).",No exception; multiplication result is added to C.
+TC-045,Multiply-and-add composition,US-12,"Inputs: A={{1,0},{0,1}}, B={{2,2},{2,2}}, C={{1,1},{1,1}}; Call LinearAlgebraService.multiplyAndAdd(A,B,C).","Result equals {{3,3},{3,3}}."
+TC-046,Frobenius norm of 2x2 ones,US-12,"Input: M={{1,1},{1,1}}; Call LinearAlgebraService.frobeniusNorm(M).",Result equals 2.0 within tolerance (sqrt(4)).
+TC-047,Frobenius norm rejects null,US-12,Input: M=null; Call LinearAlgebraService.frobeniusNorm(M).,IllegalArgumentException is thrown for null matrix.
+TC-048,Facade matrix workflow delegates,US-12,"Inputs: A,B,C are valid 2x2; Call MathFacade.processMatrices(A,B,C).","Result equals LinearAlgebraService.multiplyAndAdd(A,B,C)."
+TC-049,Coprime check true,US-13,"Inputs: a=8, b=15; Call NumberTheoryService.areCoprime(a,b).",Result is true.
+TC-050,Coprime check false,US-13,"Inputs: a=12, b=18; Call NumberTheoryService.areCoprime(a,b).",Result is false.
+TC-051,Safe LCM with zero is zero,US-13,"Inputs: a=0, b=9; Call NumberTheoryService.safeLcm(a,b).",Result equals 0.
+TC-052,Fib-GCD computation,US-13,"Inputs: n=10, m=15; Call NumberTheoryService.fibGcd(n,m).","Returns gcd(F(10), F(15)) as a non-negative integer."
+TC-053,RandomGen respects bound,US-14,Input: bound=10; generate 100 values via RandomGen.nextInt(bound).,All values are between 0 and 9 inclusive.
+TC-054,RandomGen rejects zero bound,US-14,Input: bound=0; Call RandomGen.nextInt(bound).,IllegalArgumentException is thrown for non-positive bound.
+TC-055,RandomGen rejects negative bound,US-14,Input: bound=-5; Call RandomGen.nextInt(bound).,IllegalArgumentException is thrown for non-positive bound.
+TC-056,RandomGen large bound stability,US-14,Input: bound=1_000_000; Call RandomGen.nextInt(bound).,Result is within range and call completes without error.
+TC-057,Facade number analysis delegates,US-15,"Inputs: a=10, b=15; Call MathFacade.numberAnalysis(a,b).","Returns NumberTheoryService.fibGcd(a,b)."
+TC-058,Facade advanced delegates,US-15,"Inputs: a=6, b=7, x=2.0; Call MathFacade.advanced(a,b,x).",Returns log((a+b)/x) with validations applied.
+TC-059,Facade stats delegates,US-15,"Input: values {1,2,3,4,5}; Call MathFacade.computeStatistics(values).",Returns a finite z-score for first value.
+TC-060,Facade enforces consistent exceptions,US-15,Input: values {1}; Call MathFacade.computeStatistics(values).,Throws IllegalArgumentException due to variance precondition.
+TC-061,Add boundary near max without clamp,US-01,"Inputs: a=Integer.MAX_VALUE-1, b=1; Call ArithmeticUtils.add(a,b).",Result equals Integer.MAX_VALUE (exact boundary).
+TC-062,Division by very small number,US-03,"Inputs: a=1.0, b=0.0001; Call ArithmeticUtils.div(a,b).",Result equals 10000.0 within tolerance.
+TC-063,Normalized norm clamps to 0,US-06,"Input: vector {0,0}; Call StatisticalService.normalizedNorm(v).",Result equals 0 (clamped).
+TC-064,Variance on three values,US-08,"Input: {1,2,3}; Call StatsVariance.var(v).",Result equals 1.0 (sample variance) within tolerance.
+TC-065,MatrixAdd handles negative entries,US-10,"Inputs: A={{-1,2},{-3,4}}, B={{5,-6},{7,-8}}; Call MatrixAdd.add(A,B).","Result equals {{4,-4},{4,-4}}."
+TC-066,MatrixMul zero matrix,US-11,"Inputs: A={{1,2},{3,4}}, Z={{0,0},{0,0}}; Call MatrixMul.mul(A,Z).",Result equals zero matrix.
+TC-067,Log of fraction,US-04,Input: v=0.5; Call LogUtils.log(v).,Result is negative and finite.

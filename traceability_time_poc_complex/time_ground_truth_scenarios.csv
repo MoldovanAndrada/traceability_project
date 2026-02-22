@@ -1,0 +1,9 @@
+Scenario ID,Change Trigger (User Story V1 → V2),Affected TCs (Ground Truth),Relevant Faults (Ground Truth),Impacted Code Artifacts,Impact Category
+1,US-01 (Leap Year): V1: Divisible by 4 rule only. → V2: Full Gregorian rule (century & 400 exception).,"TC-001, TC-002","Bug-01, Bug-02",TimeFactory.java,Functional Correction
+2,"US-02 (Time Addition): V1: Simple addition. → V2: Proper overflow handling (sec→min→hour, 24h wrap).","TC-003, TC-004, TC-005, TC-021, TC-022, TC-041, TC-042, TC-045","Bug-03, Bug-04, Bug-05, Bug-18",TimeArithmetic.java,Logic Refinement
+3,US-03 (Time Subtraction): V1: Direct subtraction. → V2: Wrap across midnight safely.,"TC-006, TC-007, TC-023, TC-024, TC-043, TC-044, TC-046",Bug-06,TimeArithmetic.java,Boundary Handling
+4,US-04 (Formatting): V1: Basic string conversion. → V2: Zero-padded ISO format (HH:mm:ss).,"TC-008, TC-025, TC-026, TC-047",Bug-09,TimeFormatter.java,Formatting Enhancement
+5,"US-05 (Comparison): V1: Compare hours & minutes only. → V2: Compare full precision (hours, minutes, seconds).","TC-009, TC-010, TC-027, TC-028, TC-048, TC-056, TC-057","Bug-10, Bug-11",TimeComparator.java,Precision Improvement
+6,US-06 (Parsing): V1: Basic split parsing. → V2: Strict validation & whitespace trimming.,"TC-011, TC-012, TC-029, TC-030, TC-049, TC-050, TC-055","Bug-07, Bug-08, Bug-18",TimeParser.java,Input Validation Strengthening
+7,US-08 (Duration): V1: Direct subtraction. → V2: Support midnight crossing & second-level precision.,"TC-015, TC-016, TC-033, TC-034, TC-051, TC-052","Bug-12, Bug-13",TimeDuration.java,Computation Correction
+8,US-11 & US-12 (Immutability & Concurrency): V1: Mutable/shared instances. → V2: Immutable objects & thread-safe access.,"TC-019, TC-038, TC-020, TC-039, TC-040, TC-060","Bug-16, Bug-17, Bug-20","TimeImmutable.java, TimeConcurrent.java, TimeSystem.java",Architectural Hardening
