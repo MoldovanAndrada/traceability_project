@@ -11,8 +11,8 @@ EMB_DIR = os.path.join(BASE, "embeddings")
 TEST_CASES     = os.path.join(DATA_DIR, "test_cases.xlsx")
 USER_STORIES   = os.path.join(DATA_DIR, "user_stories.xlsx")
 FAULTS         = os.path.join(DATA_DIR, "faults.xlsx")
-GITHUB_REPO = "MoldovanAndrada/traceability-system"
-GITHUB_TOKEN = "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"
+GITHUB_REPO = "MoldovanAndrada/traceability_project"
+GITHUB_TOKEN = "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"
 
 # Folder containing the source code you want to watch
 CODE_DIR       = os.path.join(DATA_DIR, "code")
