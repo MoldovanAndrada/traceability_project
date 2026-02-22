@@ -1,12 +1,18 @@
-
 package org.apache.commons.time;
-public class DateRange {
-    private long start, end;
-    public DateRange(long s, long e) {
-        if (e < s) throw new IllegalArgumentException();
-        start = s; end = e;
+
+public final class DateRange {
+    private final long startMillis;
+    private final long endMillis;
+
+    public DateRange(long startMillis, long endMillis) {
+        if (endMillis < startMillis) throw new IllegalArgumentException("End before start");
+        this.startMillis = startMillis;
+        this.endMillis = endMillis;
     }
-    public boolean contains(long t) {
-        return t >= start && t <= end;
+    public boolean contains(long tMillis){
+        return tMillis >= startMillis && tMillis <= endMillis;
+    }
+    public Interval asInterval(){
+        return new Interval(startMillis, endMillis);
     }
 }

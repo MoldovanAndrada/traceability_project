@@ -1,17 +1,19 @@
-
 package org.apache.commons.time;
-public class Interval {
-    private final long start;
-    private final long end;
-    public Interval(long start, long end) {
-        if (end < start) throw new IllegalArgumentException("End before start");
-        this.start = start;
-        this.end = end;
+
+public final class Interval {
+    private final long startMillis;
+    private final long endMillis;
+
+    public Interval(long startMillis, long endMillis) {
+        if (endMillis < startMillis) throw new IllegalArgumentException("End before start");
+        this.startMillis = startMillis;
+        this.endMillis = endMillis;
     }
-    public boolean overlaps(Interval other) {
-        return this.start <= other.end && other.start <= this.end;
+    public long start(){ return startMillis; }
+    public long end(){ return endMillis; }
+    public boolean overlaps(Interval other){
+        if(other==null) return false;
+        return this.startMillis <= other.endMillis && other.startMillis <= this.endMillis;
     }
-    public long length() {
-        return end - start;
-    }
+    public long lengthMillis(){ return endMillis - startMillis; }
 }
