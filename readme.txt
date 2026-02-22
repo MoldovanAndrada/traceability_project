@@ -26,3 +26,6 @@ documentatia privine din documentatia oficiala: https://commons.apache.org/prope
 TODO next: 1.toggle from tests/from stories
 2. sa extindem la ~5 proiecte asemanatoare (pt ENASE 3 - inca 2 defects 4j)
 3. tool (de exemplu plugin)
+
+
+Update 2026: watchers now support selecting datasets/projects via `python -m src.main --project <lang|time|math> --stories-only` so the setup can scale from one to multiple projects (next step toward ~5 projects).
