@@ -1,15 +1,7 @@
-try:
-    from src.embedder import model
-    from src.indexer import load_index
+from src.embedder import model
+from src.indexer import load_index
 
-    faiss_index, embeddings, metadata = load_index()
-    _HAS_VECTOR_STACK = True
-except Exception:
-    model = None
-    faiss_index = None
-    embeddings = None
-    metadata = []
-    _HAS_VECTOR_STACK = False
+faiss_index, embeddings, metadata = load_index()
 
 
 def _normalize(value: str) -> str:
@@ -17,6 +9,7 @@ def _normalize(value: str) -> str:
 
 
 def _matches_dataset(record: dict, dataset: str | None) -> bool:
+    """Best-effort filter that keeps only records belonging to one dataset."""
     if not dataset:
         return True
 
@@ -33,36 +26,19 @@ def _matches_dataset(record: dict, dataset: str | None) -> bool:
     return False
 
 
-def _tokenize(text: str) -> set[str]:
-    return {t for t in _normalize(text).replace("_", " ").split() if t}
-
-
 def search(query, k=10, dataset: str | None = None):
-    if _HAS_VECTOR_STACK:
-        q = model.encode([query])
-        _, I = faiss_index.search(q, k)
-        return [record for i in I[0] if (record := metadata[i]) and _matches_dataset(record, dataset)]
-
-    # Lexical fallback when embedding dependencies are unavailable.
-    q_tokens = _tokenize(query)
-    filtered = [r for r in metadata if _matches_dataset(r, dataset)]
-    scored = []
-    for r in filtered:
-        text = f"{r.get('id', '')} {r.get('text', '')}"
-        score = len(q_tokens & _tokenize(text))
-        if score > 0:
-            scored.append((score, r))
-    scored.sort(key=lambda x: x[0], reverse=True)
-    return [r for _, r in scored[:k]]
+    q = model.encode([query])
+    D, I = faiss_index.search(q, k)
+    return [record for i in I[0] if (record := metadata[i]) and _matches_dataset(record, dataset)]
 
 
 def get_related_test_cases(story, dataset: str | None = None):
-    return [r for r in search(story, dataset=dataset) if r.get("type") == "test_case"]
+    return [r for r in search(story, dataset=dataset) if r["type"] == "test_case"]
 
 
 def get_related_faults(story, dataset: str | None = None):
-    return [r for r in search(story, dataset=dataset) if r.get("type") == "fault"]
+    return [r for r in search(story, dataset=dataset) if r["type"] == "fault"]
 
 
 def get_impacted_code(story, dataset: str | None = None):
-    return [r for r in search(story, dataset=dataset) if r.get("type") == "code"]
+    return [r for r in search(story, dataset=dataset) if r["type"] == "code"]
