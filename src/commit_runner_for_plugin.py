@@ -6,13 +6,7 @@ from typing import Any
 
 import requests
 
-from src.agents import (
-    get_impacted_code,
-    get_related_faults,
-    get_related_test_cases,
-    search,
-    search_with_explanations,
-)
+from src.agents import search_with_explanations
 from src.code_watcher import get_latest_commit
 from src.config import GITHUB_REPO, GITHUB_TOKEN
 
@@ -21,17 +15,9 @@ CODE_EXTENSIONS = {".java"}
 STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 
 
-def _search_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> list[dict[str, Any]]:
-    """Try dataset-aware search first, then fall back to global search when metadata lacks dataset tags."""
-    results = _filter_artifact_types(search(query, dataset=dataset), allowed_types)
-    if results or not dataset:
-        return results
-    return _filter_artifact_types(search(query), allowed_types)
-
-
-def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> dict[str, Any]:
+def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str], k: int = 25) -> dict[str, Any]:
     """Run explanation-aware search with dataset filtering and global fallback."""
-    trace = search_with_explanations(query, dataset=dataset)
+    trace = search_with_explanations(query, k=k, dataset=dataset)
     filtered_results = _filter_artifact_types(trace["results"], allowed_types)
     if filtered_results or not dataset:
         return {
@@ -41,13 +27,25 @@ def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types:
             ],
         }
 
-    fallback = search_with_explanations(query)
+    fallback = search_with_explanations(query, k=k)
     return {
         "results": _filter_artifact_types(fallback["results"], allowed_types),
         "factorized_explanations": [
             item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types
         ],
     }
+
+
+def _attach_evidence_to_results(results: list[dict[str, Any]], explanations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Mirror factorized evidence into each result so consumers reading only `results` still get explanations."""
+    by_id = {str(item.get("id")): item.get("evidence", {}) for item in explanations}
+    enriched: list[dict[str, Any]] = []
+    for result in results:
+        item = dict(result)
+        rid = str(item.get("id", ""))
+        item["evidence"] = by_id.get(rid, {})
+        enriched.append(item)
+    return enriched
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
@@ -152,7 +150,7 @@ def run_once():
                     "trigger": "code_class_modified",
                     "dataset": dataset,
                     "file": filename,
-                    "results": trace["results"],
+                    "results": _attach_evidence_to_results(trace["results"], trace["factorized_explanations"]),
                     "factorized_explanations": trace["factorized_explanations"],
                 }
             )
@@ -170,20 +168,10 @@ def run_once():
         results: list[dict[str, Any]] = []
         factorized_explanations: list[dict[str, Any]] = []
         for story in changed_stories:
-            results.append({"type": "story", "id": story["id"], "text": story["text"]})
-            trace = search_with_explanations(story["text"], dataset=dataset)
-            story_results = [
-                *get_related_test_cases(story["text"], dataset=dataset),
-                *get_related_faults(story["text"], dataset=dataset),
-                *get_impacted_code(story["text"], dataset=dataset),
-            ]
-            if not story_results:
-                trace = search_with_explanations(story["text"])
-                story_results = [
-                    *get_related_test_cases(story["text"]),
-                    *get_related_faults(story["text"]),
-                    *get_impacted_code(story["text"]),
-                ]
+            results.append({"type": "story", "id": story["id"], "text": story["text"], "evidence": {}})
+
+            trace = _trace_with_dataset_fallback(story["text"], dataset, {"test_case", "fault", "code"})
+            story_results = _attach_evidence_to_results(trace["results"], trace["factorized_explanations"])
             results.extend(story_results)
             factorized_explanations.extend(trace["factorized_explanations"])
 
