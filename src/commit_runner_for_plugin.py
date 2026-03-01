@@ -4,7 +4,13 @@ from collections import defaultdict
 from pathlib import PurePosixPath
 from typing import Any
 
-from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
+from src.agents import (
+    get_impacted_code,
+    get_related_faults,
+    get_related_test_cases,
+    search,
+    search_with_explanations,
+)
 from src.code_watcher import get_latest_commit
 
 CODE_DIR_NAMES = {"code", "src"}
@@ -18,6 +24,27 @@ def _search_with_dataset_fallback(query: str, dataset: str | None, allowed_types
     if results or not dataset:
         return results
     return _filter_artifact_types(search(query), allowed_types)
+
+
+def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> dict[str, Any]:
+    """Run explanation-aware search with dataset filtering and global fallback."""
+    trace = search_with_explanations(query, dataset=dataset)
+    filtered_results = _filter_artifact_types(trace["results"], allowed_types)
+    if filtered_results or not dataset:
+        return {
+            "results": filtered_results,
+            "factorized_explanations": [
+                item for item in trace["factorized_explanations"] if item.get("type") in allowed_types
+            ],
+        }
+
+    fallback = search_with_explanations(query)
+    return {
+        "results": _filter_artifact_types(fallback["results"], allowed_types),
+        "factorized_explanations": [
+            item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types
+        ],
+    }
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
@@ -102,13 +129,15 @@ def run_once():
             patch_text = file_change.get("patch", "")
             if not patch_text:
                 continue
-            results = _search_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
+            trace = _trace_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
             impacted.append(
                 {
                     "trigger": "code_class_modified",
                     "dataset": dataset,
                     "file": file_change["filename"],
-                    "results": results,
+                    "results": trace["results"],
+                    # Include factorized reasons so UI can explain each retrieved artifact.
+                    "factorized_explanations": trace["factorized_explanations"],
                 }
             )
 
@@ -123,20 +152,24 @@ def run_once():
         changed_stories = _extract_story_changes_from_patch(patch_text)
 
         results: list[dict[str, Any]] = []
+        factorized_explanations: list[dict[str, Any]] = []
         for story in changed_stories:
             results.append({"type": "story", "id": story["id"], "text": story["text"]})
+            trace = search_with_explanations(story["text"], dataset=dataset)
             story_results = [
                 *get_related_test_cases(story["text"], dataset=dataset),
                 *get_related_faults(story["text"], dataset=dataset),
                 *get_impacted_code(story["text"], dataset=dataset),
             ]
             if not story_results:
+                trace = search_with_explanations(story["text"])
                 story_results = [
                     *get_related_test_cases(story["text"]),
                     *get_related_faults(story["text"]),
                     *get_impacted_code(story["text"]),
                 ]
             results.extend(story_results)
+            factorized_explanations.extend(trace["factorized_explanations"])
 
         impacted.append(
             {
@@ -144,6 +177,7 @@ def run_once():
                 "dataset": dataset,
                 "file": filename,
                 "results": results,
+                "factorized_explanations": factorized_explanations,
             }
         )
 
