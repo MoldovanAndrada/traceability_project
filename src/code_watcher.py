@@ -1,12 +1,9 @@
 import time
-
 import requests
-
-from src.agents import search_with_explanations
+from src.agents import search
 from src.config import GITHUB_REPO, GITHUB_TOKEN
 
 API = "https://api.github.com"
-
 
 def get_latest_commit():
     # Get the latest commit summary
@@ -44,9 +41,8 @@ def watch_code(interval=20):
                 raw_url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/{filename}"
                 text = requests.get(raw_url).text
 
-                # Run multi-index impact analysis and show factorized reasons.
-                trace = search_with_explanations(text, k=12)
-                results = trace["results"]
+                # Run SEMANTIC IMPACT ANALYSIS
+                results = search(text)
 
                 test_cases = [r for r in results if r["type"] == "test_case"]
                 faults = [r for r in results if r["type"] == "fault"]
@@ -58,10 +54,6 @@ def watch_code(interval=20):
                 print("\nRelated Faults:")
                 for bug in faults:
                     print(" •", bug["id"])
-
-                print("\nFactorized evidence (top-3):")
-                for item in trace["factorized_explanations"][:3]:
-                    print(" •", item["id"], item["evidence"])
 
             last_sha = sha
 
