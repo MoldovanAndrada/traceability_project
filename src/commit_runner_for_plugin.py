@@ -15,68 +15,25 @@ CODE_EXTENSIONS = {".java"}
 STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 
 
-def _select_diverse_results(
-    results: list[dict[str, Any]],
-    explanations: list[dict[str, Any]],
-    allowed_types: set[str],
-    max_results: int,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Keep retrieval ranking but enforce basic type diversity (story/test/fault) when possible."""
-    by_id = {str(item.get("id")): item for item in explanations}
-
-    selected: list[dict[str, Any]] = []
-    selected_ids: set[str] = set()
-
-    # First pass: ensure one hit per expected artifact type when available.
-    for wanted_type in ("story", "test_case", "fault", "code"):
-        if wanted_type not in allowed_types:
-            continue
-        for item in results:
-            rid = str(item.get("id", ""))
-            if item.get("type") == wanted_type and rid not in selected_ids:
-                selected.append(item)
-                selected_ids.add(rid)
-                break
-
-    # Second pass: fill remaining slots by original ranking.
-    for item in results:
-        rid = str(item.get("id", ""))
-        if rid in selected_ids:
-            continue
-        selected.append(item)
-        selected_ids.add(rid)
-        if len(selected) >= max_results:
-            break
-
-    selected = selected[:max_results]
-    selected_explanations = [by_id[str(item.get("id", ""))] for item in selected if str(item.get("id", "")) in by_id]
-    return selected, selected_explanations
-
-
-def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str], k: int = 60) -> dict[str, Any]:
+def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str], k: int = 25) -> dict[str, Any]:
     """Run explanation-aware search with dataset filtering and global fallback."""
     trace = search_with_explanations(query, k=k, dataset=dataset)
     filtered_results = _filter_artifact_types(trace["results"], allowed_types)
-    filtered_explanations = [item for item in trace["factorized_explanations"] if item.get("type") in allowed_types]
     if filtered_results or not dataset:
-        diverse_results, diverse_explanations = _select_diverse_results(
-            filtered_results,
-            filtered_explanations,
-            allowed_types,
-            max_results=25,
-        )
-        return {"results": diverse_results, "factorized_explanations": diverse_explanations}
+        return {
+            "results": filtered_results,
+            "factorized_explanations": [
+                item for item in trace["factorized_explanations"] if item.get("type") in allowed_types
+            ],
+        }
 
     fallback = search_with_explanations(query, k=k)
-    fallback_results = _filter_artifact_types(fallback["results"], allowed_types)
-    fallback_explanations = [item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types]
-    diverse_results, diverse_explanations = _select_diverse_results(
-        fallback_results,
-        fallback_explanations,
-        allowed_types,
-        max_results=25,
-    )
-    return {"results": diverse_results, "factorized_explanations": diverse_explanations}
+    return {
+        "results": _filter_artifact_types(fallback["results"], allowed_types),
+        "factorized_explanations": [
+            item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types
+        ],
+    }
 
 
 def _attach_evidence_to_results(results: list[dict[str, Any]], explanations: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -89,6 +46,27 @@ def _attach_evidence_to_results(results: list[dict[str, Any]], explanations: lis
         item["evidence"] = by_id.get(rid, {})
         enriched.append(item)
     return enriched
+
+
+def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> dict[str, Any]:
+    """Run explanation-aware search with dataset filtering and global fallback."""
+    trace = search_with_explanations(query, dataset=dataset)
+    filtered_results = _filter_artifact_types(trace["results"], allowed_types)
+    if filtered_results or not dataset:
+        return {
+            "results": filtered_results,
+            "factorized_explanations": [
+                item for item in trace["factorized_explanations"] if item.get("type") in allowed_types
+            ],
+        }
+
+    fallback = search_with_explanations(query)
+    return {
+        "results": _filter_artifact_types(fallback["results"], allowed_types),
+        "factorized_explanations": [
+            item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types
+        ],
+    }
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
