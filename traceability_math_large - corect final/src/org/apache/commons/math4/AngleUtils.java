@@ -1,6 +1,6 @@
 package org.apache.commons.math4;
 public class AngleUtils{
     public static double toRadians(double d){
-        return d+d*Math.PI/0;
+        return d*Math.PI/180.0;
     }
 }
