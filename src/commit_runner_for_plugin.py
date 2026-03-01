@@ -73,32 +73,6 @@ def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str
     return [record for record in records if record.get("type") in allowed_types]
 
 
-def _build_code_change_query(filename: str, patch_text: str) -> str:
-    """Build a robust retrieval query for code changes.
-
-    Git providers can omit/trim large patches, so we combine path-level context with
-    patch content and still produce a useful query even when the patch is empty.
-    """
-    path = PurePosixPath(filename)
-    class_name = path.stem
-
-    if not patch_text:
-        return f"{class_name} {path.name} {filename}"
-
-    changed_lines = []
-    for line in patch_text.splitlines():
-        if line.startswith(("+++", "---", "@@")):
-            continue
-        if line.startswith("+") or line.startswith("-"):
-            content = line[1:].strip()
-            if content:
-                changed_lines.append(content)
-
-    # Keep query concise while preserving the most informative tokens.
-    snippet = "\n".join(changed_lines[:80])
-    return f"{class_name} {path.name} {filename}\n{snippet}".strip()
-
-
 def run_once():
     commit = get_latest_commit()
     sha = commit["sha"]
@@ -126,8 +100,9 @@ def run_once():
     for dataset, code_changes in code_changes_by_dataset.items():
         for file_change in code_changes:
             patch_text = file_change.get("patch", "")
-            query = _build_code_change_query(file_change["filename"], patch_text)
-            results = _search_with_dataset_fallback(query, dataset, {"story", "test_case", "fault"})
+            if not patch_text:
+                continue
+            results = _search_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
             impacted.append(
                 {
                     "trigger": "code_class_modified",
