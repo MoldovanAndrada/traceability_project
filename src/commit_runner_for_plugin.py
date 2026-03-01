@@ -4,20 +4,91 @@ from collections import defaultdict
 from pathlib import PurePosixPath
 from typing import Any
 
-from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
+import requests
+
+from src.agents import search_with_explanations
 from src.code_watcher import get_latest_commit
+from src.config import GITHUB_REPO, GITHUB_TOKEN
 
 CODE_DIR_NAMES = {"code", "src"}
 CODE_EXTENSIONS = {".java"}
 STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 
 
-def _search_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> list[dict[str, Any]]:
-    """Try dataset-aware search first, then fall back to global search when metadata lacks dataset tags."""
-    results = _filter_artifact_types(search(query, dataset=dataset), allowed_types)
-    if results or not dataset:
-        return results
-    return _filter_artifact_types(search(query), allowed_types)
+def _select_diverse_results(
+    results: list[dict[str, Any]],
+    explanations: list[dict[str, Any]],
+    allowed_types: set[str],
+    max_results: int,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Keep retrieval ranking but enforce basic type diversity (story/test/fault) when possible."""
+    by_id = {str(item.get("id")): item for item in explanations}
+
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+
+    # First pass: ensure one hit per expected artifact type when available.
+    for wanted_type in ("story", "test_case", "fault", "code"):
+        if wanted_type not in allowed_types:
+            continue
+        for item in results:
+            rid = str(item.get("id", ""))
+            if item.get("type") == wanted_type and rid not in selected_ids:
+                selected.append(item)
+                selected_ids.add(rid)
+                break
+
+    # Second pass: fill remaining slots by original ranking.
+    for item in results:
+        rid = str(item.get("id", ""))
+        if rid in selected_ids:
+            continue
+        selected.append(item)
+        selected_ids.add(rid)
+        if len(selected) >= max_results:
+            break
+
+    selected = selected[:max_results]
+    selected_explanations = [by_id[str(item.get("id", ""))] for item in selected if str(item.get("id", "")) in by_id]
+    return selected, selected_explanations
+
+
+def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str], k: int = 60) -> dict[str, Any]:
+    """Run explanation-aware search with dataset filtering and global fallback."""
+    trace = search_with_explanations(query, k=k, dataset=dataset)
+    filtered_results = _filter_artifact_types(trace["results"], allowed_types)
+    filtered_explanations = [item for item in trace["factorized_explanations"] if item.get("type") in allowed_types]
+    if filtered_results or not dataset:
+        diverse_results, diverse_explanations = _select_diverse_results(
+            filtered_results,
+            filtered_explanations,
+            allowed_types,
+            max_results=25,
+        )
+        return {"results": diverse_results, "factorized_explanations": diverse_explanations}
+
+    fallback = search_with_explanations(query, k=k)
+    fallback_results = _filter_artifact_types(fallback["results"], allowed_types)
+    fallback_explanations = [item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types]
+    diverse_results, diverse_explanations = _select_diverse_results(
+        fallback_results,
+        fallback_explanations,
+        allowed_types,
+        max_results=25,
+    )
+    return {"results": diverse_results, "factorized_explanations": diverse_explanations}
+
+
+def _attach_evidence_to_results(results: list[dict[str, Any]], explanations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Mirror factorized evidence into each result so consumers reading only `results` still get explanations."""
+    by_id = {str(item.get("id")): item.get("evidence", {}) for item in explanations}
+    enriched: list[dict[str, Any]] = []
+    for result in results:
+        item = dict(result)
+        rid = str(item.get("id", ""))
+        item["evidence"] = by_id.get(rid, {})
+        enriched.append(item)
+    return enriched
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
@@ -73,6 +144,15 @@ def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str
     return [record for record in records if record.get("type") in allowed_types]
 
 
+def _fetch_file_text_at_commit(sha: str, filename: str) -> str:
+    """Fallback when GitHub commit API omits `patch` (common for larger diffs)."""
+    raw_url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{sha}/{filename}"
+    response = requests.get(raw_url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, timeout=20)
+    if response.status_code == 200:
+        return response.text
+    return ""
+
+
 def run_once():
     commit = get_latest_commit()
     sha = commit["sha"]
@@ -99,16 +179,22 @@ def run_once():
     # Trigger analysis only for commits that modify at least one code class file.
     for dataset, code_changes in code_changes_by_dataset.items():
         for file_change in code_changes:
+            filename = file_change["filename"]
             patch_text = file_change.get("patch", "")
-            if not patch_text:
+
+            # If no patch is returned by API, analyze current file content so we still emit explanations.
+            analysis_text = patch_text or _fetch_file_text_at_commit(sha, filename)
+            if not analysis_text:
                 continue
-            results = _search_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
+
+            trace = _trace_with_dataset_fallback(analysis_text, dataset, {"story", "test_case", "fault"})
             impacted.append(
                 {
                     "trigger": "code_class_modified",
                     "dataset": dataset,
-                    "file": file_change["filename"],
-                    "results": results,
+                    "file": filename,
+                    "results": _attach_evidence_to_results(trace["results"], trace["factorized_explanations"]),
+                    "factorized_explanations": trace["factorized_explanations"],
                 }
             )
 
@@ -123,20 +209,14 @@ def run_once():
         changed_stories = _extract_story_changes_from_patch(patch_text)
 
         results: list[dict[str, Any]] = []
+        factorized_explanations: list[dict[str, Any]] = []
         for story in changed_stories:
-            results.append({"type": "story", "id": story["id"], "text": story["text"]})
-            story_results = [
-                *get_related_test_cases(story["text"], dataset=dataset),
-                *get_related_faults(story["text"], dataset=dataset),
-                *get_impacted_code(story["text"], dataset=dataset),
-            ]
-            if not story_results:
-                story_results = [
-                    *get_related_test_cases(story["text"]),
-                    *get_related_faults(story["text"]),
-                    *get_impacted_code(story["text"]),
-                ]
+            results.append({"type": "story", "id": story["id"], "text": story["text"], "evidence": {}})
+
+            trace = _trace_with_dataset_fallback(story["text"], dataset, {"test_case", "fault", "code"})
+            story_results = _attach_evidence_to_results(trace["results"], trace["factorized_explanations"])
             results.extend(story_results)
+            factorized_explanations.extend(trace["factorized_explanations"])
 
         impacted.append(
             {
@@ -144,6 +224,7 @@ def run_once():
                 "dataset": dataset,
                 "file": filename,
                 "results": results,
+                "factorized_explanations": factorized_explanations,
             }
         )
 
