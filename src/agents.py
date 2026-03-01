@@ -1,13 +1,17 @@
 import math
+import os
 import re
-from collections import Counter, defaultdict
+from collections import Counter
 
 from src.embedder import model
+from src.graph_store import GraphStore
 from src.indexer import load_index
 
 faiss_index, embeddings, metadata = load_index()
 
 _TOKEN_PATTERN = re.compile(r"\b\w+\b")
+_BASE = os.path.dirname(os.path.dirname(__file__))
+_EDGES_FILE = os.path.join(_BASE, "embeddings", "edges.json")
 
 
 def _tokenize(text: str) -> list[str]:
@@ -17,11 +21,6 @@ def _tokenize(text: str) -> list[str]:
 
 def _normalize(value: str) -> str:
     return value.replace("\\", "/").lower()
-
-
-def _extract_story_refs(text: str) -> set[str]:
-    """Extract explicit story IDs (e.g., US-01) from free-form text."""
-    return {m.group(0).upper() for m in re.finditer(r"US-\d+", text or "", flags=re.IGNORECASE)}
 
 
 def _matches_dataset(record: dict, dataset: str | None) -> bool:
@@ -44,7 +43,7 @@ def _matches_dataset(record: dict, dataset: str | None) -> bool:
 
 class _HybridIndex:
     """Hybrid retrieval layer:
-    (a) BM25 over raw text, (b) dense FAISS, (c) graph adjacency over explicit links.
+    (a) BM25 over raw text, (b) dense FAISS, (c) graph store with PPR propagation.
     """
 
     def __init__(self, docs: list[dict]):
@@ -59,32 +58,12 @@ class _HybridIndex:
         df = Counter()
         for toks in self.doc_tokens:
             df.update(set(toks))
-        # BM25 inverse document frequency.
         self.idf = {
             term: math.log(1.0 + (self.N - freq + 0.5) / (freq + 0.5))
             for term, freq in df.items()
         }
 
-        # Graph index over adjacency links derived from shared story references.
-        self.graph = self._build_graph()
-
-    def _build_graph(self) -> dict[int, set[int]]:
-        story_to_doc_indices: dict[str, set[int]] = defaultdict(set)
-        for i, record in enumerate(self.docs):
-            refs = _extract_story_refs(record.get("text", ""))
-            if record.get("type") == "story":
-                refs.add(str(record.get("id", "")).upper())
-            for ref in refs:
-                story_to_doc_indices[ref].add(i)
-
-        adjacency: dict[int, set[int]] = {i: set() for i in range(len(self.docs))}
-        for indices in story_to_doc_indices.values():
-            nodes = list(indices)
-            for i, src in enumerate(nodes):
-                for dst in nodes[i + 1 :]:
-                    adjacency[src].add(dst)
-                    adjacency[dst].add(src)
-        return adjacency
+        self.graph_store = GraphStore(docs, edges_path=_EDGES_FILE)
 
     def bm25_scores(self, query: str) -> list[float]:
         q_tokens = _tokenize(query)
@@ -108,17 +87,6 @@ class _HybridIndex:
             scores[i] = score
         return scores
 
-    def graph_scores(self, seed_indices: set[int]) -> list[float]:
-        """Graph propagation score using 1-hop and 2-hop neighbors from seed docs."""
-        scores = [0.0] * self.N
-        for seed in seed_indices:
-            for n1 in self.graph.get(seed, ()):
-                scores[n1] += 1.0
-                for n2 in self.graph.get(n1, ()):
-                    if n2 != seed:
-                        scores[n2] += 0.35
-        return scores
-
 
 HYBRID_INDEX = _HybridIndex(metadata)
 
@@ -140,7 +108,6 @@ def _build_factorized_explanations(
     merged: list[float],
     top_indices: list[int],
 ) -> list[dict]:
-    """(d) Build factorized explanations from evidence per retrieval signal."""
     dense_norm = _minmax(dense_raw)
     bm25_norm = _minmax(bm25_raw)
     graph_norm = _minmax(graph_raw)
@@ -165,8 +132,9 @@ def _build_factorized_explanations(
                 },
                 "graph_index": {
                     "score": round(float(graph_norm[i]), 4),
-                    "neighbors": len(HYBRID_INDEX.graph.get(i, [])),
-                    "note": "adjacency-based support from linked stories/tests/faults/code",
+                    "neighbors": len(HYBRID_INDEX.graph_store.neighbors(i)),
+                    "method": "personalized_pagerank",
+                    "note": "structural support from graph store propagation",
                 },
             },
             "final_score": round(float(merged[i]), 4),
@@ -179,33 +147,28 @@ def search(query, k=10, dataset: str | None = None):
     q = model.encode([query])
     dense_distances, dense_indices = faiss_index.search(q, min(len(metadata), max(k * 3, k)))
 
-    # (b) Dense index score converted from L2 distance to similarity.
     dense_raw = [0.0] * len(metadata)
     for dist, i in zip(dense_distances[0], dense_indices[0]):
         if i < 0:
             continue
         dense_raw[i] = 1.0 / (1.0 + float(dist))
 
-    # (a) BM25 lexical score over the same metadata text corpus.
     bm25_raw = HYBRID_INDEX.bm25_scores(query)
 
-    # Build graph seeds from best dense+bm25 candidates and diffuse relevance.
     seed_indices = set()
     dense_top = sorted(range(len(dense_raw)), key=lambda idx: dense_raw[idx], reverse=True)[: max(3, k // 2)]
     bm25_top = sorted(range(len(bm25_raw)), key=lambda idx: bm25_raw[idx], reverse=True)[: max(3, k // 2)]
     seed_indices.update(dense_top)
     seed_indices.update(bm25_top)
 
-    # (c) Graph index adjacency score from one/two-hop propagation.
-    graph_raw = HYBRID_INDEX.graph_scores(seed_indices)
+    graph_raw = HYBRID_INDEX.graph_store.personalized_pagerank(seed_indices)
 
     dense_norm = _minmax(dense_raw)
     bm25_norm = _minmax(bm25_raw)
     graph_norm = _minmax(graph_raw)
 
-    # Weighted hybrid score; keep explainability by storing component evidence.
     merged = [
-        0.55 * dense_norm[i] + 0.3 * bm25_norm[i] + 0.15 * graph_norm[i]
+        0.5 * dense_norm[i] + 0.3 * bm25_norm[i] + 0.2 * graph_norm[i]
         for i in range(len(metadata))
     ]
 
