@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traceability.local/schemas/edges.schema.json",
+  "title": "Traceability Edge",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_id",
+    "src_id",
+    "dst_id",
+    "edge_type",
+    "label",
+    "evidence",
+    "split",
+    "provenance"
+  ],
+  "properties": {
+    "edge_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "src_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dst_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edge_type": {
+      "type": "string",
+      "enum": [
+        "implements",
+        "verifies",
+        "fails_on",
+        "fixes",
+        "mentions",
+        "touches",
+        "calls",
+        "imports",
+        "cochanges",
+        "related_to"
+      ]
+    },
+    "label": {
+      "type": "string",
+      "enum": ["pos", "neg", "unknown"]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "payload_ref", "score_component"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "score_component": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "split": {
+      "type": "string",
+      "enum": ["train", "dev", "test"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "annotator", "date"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "annotator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}
