@@ -79,8 +79,14 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     explained: list[dict[str, Any]] = []
     for record in records:
         enriched = dict(record)
-        if enriched.get("type") != "story":
-            enriched["explanation"] = format_explanation(enriched)
+        if enriched.get("type") == "story":
+            story_text = (enriched.get("text") or "").strip()
+            enriched["explanation_reason"] = (
+                f"story changed in commit; text snippet='{story_text[:80]}'"
+                if story_text
+                else "story changed in commit"
+            )
+        enriched["explanation"] = format_explanation(enriched)
         explained.append(enriched)
     return explained
 

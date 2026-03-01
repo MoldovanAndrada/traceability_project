@@ -10,6 +10,10 @@ def format_explanation(result: dict) -> str:
     evidence = result.get("evidence", {})
     factors = evidence.get("factorized_explanation", {})
 
+    if not factors:
+        fallback_reason = result.get("explanation_reason")
+        return fallback_reason or "explanation unavailable (missing retrieval evidence)"
+
     dense = factors.get("dense_index", {})
     bm25 = factors.get("bm25_index", {})
     graph = factors.get("graph_index", {})
@@ -37,4 +41,3 @@ def summarize_results(results: list[dict], max_items: int = 5) -> list[str]:
         rtype = result.get("type", "unknown")
         output.append(f"{rid} ({rtype}) -> {format_explanation(result)}")
     return output
-
