@@ -48,6 +48,27 @@ def _attach_evidence_to_results(results: list[dict[str, Any]], explanations: lis
     return enriched
 
 
+def _trace_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> dict[str, Any]:
+    """Run explanation-aware search with dataset filtering and global fallback."""
+    trace = search_with_explanations(query, dataset=dataset)
+    filtered_results = _filter_artifact_types(trace["results"], allowed_types)
+    if filtered_results or not dataset:
+        return {
+            "results": filtered_results,
+            "factorized_explanations": [
+                item for item in trace["factorized_explanations"] if item.get("type") in allowed_types
+            ],
+        }
+
+    fallback = search_with_explanations(query)
+    return {
+        "results": _filter_artifact_types(fallback["results"], allowed_types),
+        "factorized_explanations": [
+            item for item in fallback["factorized_explanations"] if item.get("type") in allowed_types
+        ],
+    }
+
+
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
     """Extract changed story rows from a git patch in a lightweight way."""
     changed: list[dict[str, str]] = []
