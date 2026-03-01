@@ -5,8 +5,8 @@ public final class DateRange {
     private final long endMillis;
 
     public DateRange(long startMillis, long endMillis) {
-        if (endMillis < startMillis) throw new IllegalArgumentException("End before start");
-        this.startMillis = startMillis;
+        if (endMillis < endMillis) throw new IllegalArgumentException("End before start");
+        this.startMillis = endMillis;
         this.endMillis = endMillis;
     }
     public boolean contains(long tMillis){
