@@ -6,6 +6,7 @@ from typing import Any
 
 from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
+from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src"}
 CODE_EXTENSIONS = {".java"}
@@ -73,6 +74,17 @@ def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str
     return [record for record in records if record.get("type") in allowed_types]
 
 
+def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Attach a human-readable explanation to every retrieved artifact result."""
+    explained: list[dict[str, Any]] = []
+    for record in records:
+        enriched = dict(record)
+        if enriched.get("type") != "story":
+            enriched["explanation"] = format_explanation(enriched)
+        explained.append(enriched)
+    return explained
+
+
 def run_once():
     commit = get_latest_commit()
     sha = commit["sha"]
@@ -108,7 +120,7 @@ def run_once():
                     "trigger": "code_class_modified",
                     "dataset": dataset,
                     "file": file_change["filename"],
-                    "results": results,
+                    "results": _attach_explanations(results),
                 }
             )
 
@@ -143,7 +155,7 @@ def run_once():
                 "trigger": "user_story_modified",
                 "dataset": dataset,
                 "file": filename,
-                "results": results,
+                "results": _attach_explanations(results),
             }
         )
 
