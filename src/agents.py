@@ -1,11 +1,27 @@
+import math
+import re
+from collections import Counter, defaultdict
+
 from src.embedder import model
 from src.indexer import load_index
 
 faiss_index, embeddings, metadata = load_index()
 
+_TOKEN_PATTERN = re.compile(r"\b\w+\b")
+
+
+def _tokenize(text: str) -> list[str]:
+    """Small tokenizer used by BM25 and graph linking."""
+    return _TOKEN_PATTERN.findall((text or "").lower())
+
 
 def _normalize(value: str) -> str:
     return value.replace("\\", "/").lower()
+
+
+def _extract_story_refs(text: str) -> set[str]:
+    """Extract explicit story IDs (e.g., US-01) from free-form text."""
+    return {m.group(0).upper() for m in re.finditer(r"US-\d+", text or "", flags=re.IGNORECASE)}
 
 
 def _matches_dataset(record: dict, dataset: str | None) -> bool:
@@ -26,10 +42,177 @@ def _matches_dataset(record: dict, dataset: str | None) -> bool:
     return False
 
 
+class _HybridIndex:
+    """Hybrid retrieval layer:
+    (a) BM25 over raw text, (b) dense FAISS, (c) graph adjacency over explicit links.
+    """
+
+    def __init__(self, docs: list[dict]):
+        self.docs = docs
+        self.doc_tokens = [_tokenize(d.get("text", "")) for d in docs]
+        self.doc_lens = [len(toks) for toks in self.doc_tokens]
+        self.avgdl = (sum(self.doc_lens) / len(self.doc_lens)) if self.doc_lens else 0.0
+        self.N = len(docs)
+        self.k1 = 1.5
+        self.b = 0.75
+
+        df = Counter()
+        for toks in self.doc_tokens:
+            df.update(set(toks))
+        # BM25 inverse document frequency.
+        self.idf = {
+            term: math.log(1.0 + (self.N - freq + 0.5) / (freq + 0.5))
+            for term, freq in df.items()
+        }
+
+        # Graph index over adjacency links derived from shared story references.
+        self.graph = self._build_graph()
+
+    def _build_graph(self) -> dict[int, set[int]]:
+        story_to_doc_indices: dict[str, set[int]] = defaultdict(set)
+        for i, record in enumerate(self.docs):
+            refs = _extract_story_refs(record.get("text", ""))
+            if record.get("type") == "story":
+                refs.add(str(record.get("id", "")).upper())
+            for ref in refs:
+                story_to_doc_indices[ref].add(i)
+
+        adjacency: dict[int, set[int]] = {i: set() for i in range(len(self.docs))}
+        for indices in story_to_doc_indices.values():
+            nodes = list(indices)
+            for i, src in enumerate(nodes):
+                for dst in nodes[i + 1 :]:
+                    adjacency[src].add(dst)
+                    adjacency[dst].add(src)
+        return adjacency
+
+    def bm25_scores(self, query: str) -> list[float]:
+        q_tokens = _tokenize(query)
+        q_counts = Counter(q_tokens)
+        scores = [0.0] * self.N
+
+        for i, toks in enumerate(self.doc_tokens):
+            if not toks:
+                continue
+            tf = Counter(toks)
+            dl = self.doc_lens[i]
+            score = 0.0
+            for term, qf in q_counts.items():
+                if term not in tf:
+                    continue
+                idf = self.idf.get(term, 0.0)
+                freq = tf[term]
+                numer = freq * (self.k1 + 1.0)
+                denom = freq + self.k1 * (1.0 - self.b + self.b * dl / max(self.avgdl, 1e-9))
+                score += idf * (numer / max(denom, 1e-9)) * qf
+            scores[i] = score
+        return scores
+
+    def graph_scores(self, seed_indices: set[int]) -> list[float]:
+        """Graph propagation score using 1-hop and 2-hop neighbors from seed docs."""
+        scores = [0.0] * self.N
+        for seed in seed_indices:
+            for n1 in self.graph.get(seed, ()):
+                scores[n1] += 1.0
+                for n2 in self.graph.get(n1, ()):
+                    if n2 != seed:
+                        scores[n2] += 0.35
+        return scores
+
+
+HYBRID_INDEX = _HybridIndex(metadata)
+
+
+def _minmax(values: list[float]) -> list[float]:
+    if not values:
+        return values
+    lo, hi = min(values), max(values)
+    if hi - lo < 1e-12:
+        return [0.0 for _ in values]
+    return [(v - lo) / (hi - lo) for v in values]
+
+
+def _build_factorized_explanations(
+    query: str,
+    dense_raw: list[float],
+    bm25_raw: list[float],
+    graph_raw: list[float],
+    merged: list[float],
+    top_indices: list[int],
+) -> list[dict]:
+    """(d) Build factorized explanations from evidence per retrieval signal."""
+    dense_norm = _minmax(dense_raw)
+    bm25_norm = _minmax(bm25_raw)
+    graph_norm = _minmax(graph_raw)
+
+    explained = []
+    for i in top_indices:
+        record = dict(metadata[i])
+        text = record.get("text", "")
+        query_terms = set(_tokenize(query))
+        overlap = sorted(query_terms.intersection(_tokenize(text)))[:10]
+
+        record["evidence"] = {
+            "factorized_explanation": {
+                "dense_index": {
+                    "score": round(float(dense_norm[i]), 4),
+                    "note": "semantic similarity from embedding space",
+                },
+                "bm25_index": {
+                    "score": round(float(bm25_norm[i]), 4),
+                    "matched_terms": overlap,
+                    "note": "lexical relevance from BM25 over document text",
+                },
+                "graph_index": {
+                    "score": round(float(graph_norm[i]), 4),
+                    "neighbors": len(HYBRID_INDEX.graph.get(i, [])),
+                    "note": "adjacency-based support from linked stories/tests/faults/code",
+                },
+            },
+            "final_score": round(float(merged[i]), 4),
+        }
+        explained.append(record)
+    return explained
+
+
 def search(query, k=10, dataset: str | None = None):
     q = model.encode([query])
-    D, I = faiss_index.search(q, k)
-    return [record for i in I[0] if (record := metadata[i]) and _matches_dataset(record, dataset)]
+    dense_distances, dense_indices = faiss_index.search(q, min(len(metadata), max(k * 3, k)))
+
+    # (b) Dense index score converted from L2 distance to similarity.
+    dense_raw = [0.0] * len(metadata)
+    for dist, i in zip(dense_distances[0], dense_indices[0]):
+        if i < 0:
+            continue
+        dense_raw[i] = 1.0 / (1.0 + float(dist))
+
+    # (a) BM25 lexical score over the same metadata text corpus.
+    bm25_raw = HYBRID_INDEX.bm25_scores(query)
+
+    # Build graph seeds from best dense+bm25 candidates and diffuse relevance.
+    seed_indices = set()
+    dense_top = sorted(range(len(dense_raw)), key=lambda idx: dense_raw[idx], reverse=True)[: max(3, k // 2)]
+    bm25_top = sorted(range(len(bm25_raw)), key=lambda idx: bm25_raw[idx], reverse=True)[: max(3, k // 2)]
+    seed_indices.update(dense_top)
+    seed_indices.update(bm25_top)
+
+    # (c) Graph index adjacency score from one/two-hop propagation.
+    graph_raw = HYBRID_INDEX.graph_scores(seed_indices)
+
+    dense_norm = _minmax(dense_raw)
+    bm25_norm = _minmax(bm25_raw)
+    graph_norm = _minmax(graph_raw)
+
+    # Weighted hybrid score; keep explainability by storing component evidence.
+    merged = [
+        0.55 * dense_norm[i] + 0.3 * bm25_norm[i] + 0.15 * graph_norm[i]
+        for i in range(len(metadata))
+    ]
+
+    ranked_indices = sorted(range(len(metadata)), key=lambda idx: merged[idx], reverse=True)
+    filtered = [i for i in ranked_indices if _matches_dataset(metadata[i], dataset)][:k]
+
+    return _build_factorized_explanations(query, dense_raw, bm25_raw, graph_raw, merged, filtered)
 
 
 def get_related_test_cases(story, dataset: str | None = None):
