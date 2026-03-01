@@ -27,3 +27,10 @@ except ModuleNotFoundError:
             return np.asarray(vectors, dtype=np.float32)
 
     model = _FallbackEmbedder()
+
+
+
+def embed_texts(texts: list[str]):
+    """Encode texts into float32 embeddings compatible with FAISS."""
+    vectors = model.encode(texts)
+    return np.asarray(vectors, dtype=np.float32)
