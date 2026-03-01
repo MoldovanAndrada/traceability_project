@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traceability.local/schemas/artifacts.schema.json",
+  "title": "Traceability Artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "type",
+    "dataset_id",
+    "title",
+    "text",
+    "lang",
+    "tokens",
+    "source"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[a-z_]+:.+"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "story",
+        "acceptance_criteria",
+        "test_case",
+        "code_entity",
+        "defect",
+        "commit",
+        "issue",
+        "doc"
+      ]
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lang": {
+      "type": "string",
+      "enum": ["ro", "en"]
+    },
+    "tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source": {
+      "type": "string",
+      "enum": ["CSV", "XLSX", "GitHub", "Defects4J"]
+    },
+    "source_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "commit_sha": {
+          "type": "string",
+          "minLength": 7
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional flexible metadata per artifact."
+    }
+  }
+}
