@@ -1,1 +1,1 @@
-package org.apache.commons.lang3; public class BooleanUtils { }
+package org.apache.commons.lang3; public class BooleanUtils {  }
