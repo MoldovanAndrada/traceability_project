@@ -4,6 +4,7 @@ import re
 from collections import Counter
 
 from src.embedder import model
+from src.explainability import format_explanation
 from src.graph_store import GraphStore
 from src.indexer import load_index
 
@@ -139,6 +140,9 @@ def _build_factorized_explanations(
             },
             "final_score": round(float(merged[i]), 4),
         }
+        # Keep a first-class explanation field for callers that return raw
+        # search results without post-processing (e.g., API/plugin clients).
+        record["explanation"] = format_explanation(record)
         explained.append(record)
     return explained
 
