@@ -1,9 +1,13 @@
 import time
+
 import requests
+
 from src.agents import search
 from src.config import GITHUB_REPO, GITHUB_TOKEN
+from src.explainability import summarize_results
 
 API = "https://api.github.com"
+
 
 def get_latest_commit():
     # Get the latest commit summary
@@ -48,12 +52,12 @@ def watch_code(interval=20):
                 faults = [r for r in results if r["type"] == "fault"]
 
                 print("\nImpact on Test Cases:")
-                for tc in test_cases:
-                    print(" •", tc["id"])
+                for line in summarize_results(test_cases):
+                    print(" •", line)
 
                 print("\nRelated Faults:")
-                for bug in faults:
-                    print(" •", bug["id"])
+                for line in summarize_results(faults):
+                    print(" •", line)
 
             last_sha = sha
 
