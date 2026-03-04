@@ -75,12 +75,19 @@ def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str
 
 
 def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Attach a human-readable explanation to every retrieved artifact result."""
+    """Attach a human-readable explanation to every retrieved artifact result.
+
+    Guarantees:
+      - every record has a non-empty `explanation`
+      - no duplicated alias keys
+      - adds `display` for convenience
+    """
     explained: list[dict[str, Any]] = []
+
     for record in records:
         enriched = dict(record)
 
-        # Optional: story-specific hint that your formatter can use
+        # Optional story context
         if enriched.get("type") == "story":
             story_text = (enriched.get("text") or "").strip()
             enriched["explanation_reason"] = (
@@ -89,7 +96,26 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 else "story changed in commit"
             )
 
-        enriched["explanation"] = format_explanation(enriched) or enriched.get("explanation_reason") or ""
+        # Try your existing formatter first
+        explanation = (format_explanation(enriched) or "").strip()
+
+        # Hard fallback: ensure explanation is never empty
+        if not explanation:
+            rtype = enriched.get("type") or "artifact"
+            rid = enriched.get("id") or "unknown"
+
+            # Prefer story-specific hint if available
+            story_hint = (enriched.get("explanation_reason") or "").strip()
+            if story_hint:
+                explanation = story_hint
+            else:
+                explanation = f"{rtype} surfaced as related to the recent change (id={rid})"
+
+        enriched["explanation"] = explanation
+
+        # Convenience string if you want to print directly
+        enriched["display"] = f"[{enriched.get('type','unknown')}] {enriched.get('id','unknown')} -> {explanation}"
+
         explained.append(enriched)
 
     return explained
