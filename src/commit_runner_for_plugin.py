@@ -90,6 +90,8 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         # Keep explanation in multiple aliases because downstream plugin clients
         # may read different keys ("reason", "why", "explanation").
         enriched["explanation"] = explanation
+        # Common misspelling kept for backward/consumer compatibility.
+        enriched["explaination"] = explanation
         enriched["reason"] = explanation
         enriched["why"] = explanation
         explained.append(enriched)
