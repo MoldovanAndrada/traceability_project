@@ -102,9 +102,7 @@ def _result_line(result: dict[str, Any]) -> str:
     rtype = result.get("type", "unknown")
     rid = result.get("id", "unknown")
     explanation = result.get("explanation") or result.get("reason") or "explanation unavailable"
-    prefix = f"[{rtype}]"
-    if rtype == "fault":
-        prefix = f"{prefix}:"
+    prefix = f"[{rtype}]:"
     return f"{prefix} {rid} -> {explanation}"
 
 
