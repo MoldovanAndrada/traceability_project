@@ -79,6 +79,8 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     explained: list[dict[str, Any]] = []
     for record in records:
         enriched = dict(record)
+
+        # Optional: story-specific hint that your formatter can use
         if enriched.get("type") == "story":
             story_text = (enriched.get("text") or "").strip()
             enriched["explanation_reason"] = (
@@ -86,15 +88,10 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 if story_text
                 else "story changed in commit"
             )
-        explanation = format_explanation(enriched)
-        # Keep explanation in multiple aliases because downstream plugin clients
-        # may read different keys ("reason", "why", "explanation").
-        enriched["explanation"] = explanation
-        # Common misspelling kept for backward/consumer compatibility.
-        enriched["explaination"] = explanation
-        enriched["reason"] = explanation
-        enriched["why"] = explanation
+
+        enriched["explanation"] = format_explanation(enriched) or enriched.get("explanation_reason") or ""
         explained.append(enriched)
+
     return explained
 
 
