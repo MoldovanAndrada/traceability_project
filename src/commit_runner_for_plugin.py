@@ -102,7 +102,10 @@ def _result_line(result: dict[str, Any]) -> str:
     rtype = result.get("type", "unknown")
     rid = result.get("id", "unknown")
     explanation = result.get("explanation") or result.get("reason") or "explanation unavailable"
-    return f"[{rtype}] {rid} -> {explanation}"
+    prefix = f"[{rtype}]"
+    if rtype == "fault":
+        prefix = f"{prefix}:"
+    return f"{prefix} {rid} -> {explanation}"
 
 
 def _impact_block_lines(block: dict[str, Any]) -> list[str]:
