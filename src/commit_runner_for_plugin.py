@@ -86,9 +86,28 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 if story_text
                 else "story changed in commit"
             )
-        enriched["explanation"] = format_explanation(enriched)
+        explanation = format_explanation(enriched)
+        # Keep explanation in multiple aliases because downstream plugin clients
+        # may read different keys ("reason", "why", "explanation").
+        enriched["explanation"] = explanation
+        enriched["reason"] = explanation
+        enriched["why"] = explanation
         explained.append(enriched)
     return explained
+
+
+def _result_line(result: dict[str, Any]) -> str:
+    rtype = result.get("type", "unknown")
+    rid = result.get("id", "unknown")
+    explanation = result.get("explanation") or result.get("reason") or "explanation unavailable"
+    return f"[{rtype}] {rid} -> {explanation}"
+
+
+def _impact_block_lines(block: dict[str, Any]) -> list[str]:
+    lines = [f"Modified File: {block['file']}"]
+    for result in block.get("results", []):
+        lines.append(f" • {_result_line(result)}")
+    return lines
 
 
 def run_once():
@@ -121,14 +140,15 @@ def run_once():
             if not patch_text:
                 continue
             results = _search_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
-            impacted.append(
-                {
-                    "trigger": "code_class_modified",
-                    "dataset": dataset,
-                    "file": file_change["filename"],
-                    "results": _attach_explanations(results),
-                }
-            )
+            explained_results = _attach_explanations(results)
+            block = {
+                "trigger": "code_class_modified",
+                "dataset": dataset,
+                "file": file_change["filename"],
+                "results": explained_results,
+            }
+            block["summary_lines"] = _impact_block_lines(block)
+            impacted.append(block)
 
     # Trigger analysis for user story file modifications.
     for story_change in story_changes:
@@ -156,16 +176,29 @@ def run_once():
                 ]
             results.extend(story_results)
 
-        impacted.append(
+        explained_results = _attach_explanations(results)
+        block = {
+            "trigger": "user_story_modified",
+            "dataset": dataset,
+            "file": filename,
+            "results": explained_results,
+        }
+        block["summary_lines"] = _impact_block_lines(block)
+        impacted.append(block)
+
+    report_lines = [f"Commit: {sha}", "--------------------------------"]
+    for block in impacted:
+        report_lines.extend(block.get("summary_lines", []))
+
+    print(
+        json.dumps(
             {
-                "trigger": "user_story_modified",
-                "dataset": dataset,
-                "file": filename,
-                "results": _attach_explanations(results),
+                "sha": sha,
+                "impact": impacted,
+                "human_readable_report": "\n".join(report_lines),
             }
         )
-
-    print(json.dumps({"sha": sha, "impact": impacted}))
+    )
 
 
 if __name__ == "__main__":
