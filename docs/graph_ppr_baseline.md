@@ -30,33 +30,49 @@ flowchart LR
 - `commit` (opțional)
 - `issue` (opțional)
 
-### Muchii
-- `story -> code_entity`
-- `story -> test_case`
-- `defect -> code_entity`
-- `defect -> test_case`
-- `code_entity -> test_case`
-- `commit -> code_entity`
-- `issue -> commit`
+### Muchii + clase de link-uri
 
-În MVP-ul implementat aici, muchiile sunt:
-1. încărcate din `embeddings/edges.json` dacă fișierul există;
-2. altfel inferate din referințe comune la story-uri (ex: `US-01`) din text/ID.
+În versiunea curentă, graful modelează **două clase de muchii**:
+
+1. **Explicit links** (academically auditable):
+   - muchii din `embeddings/edges.json` (dacă există), plus
+   - muchii construite din referințe explicite: story IDs (`US-*`), test IDs (`TC-*`), issue/bug IDs (`BUG-*`/`ISSUE-*`), file paths, commit mentions.
+2. **Inferred links**:
+   - muchii inferate din similaritate semantică embedding-to-embedding (top-k neighbors),
+   - utilizate în propagare (PPR).
+
+Se expune și un mod **combined** = `explicit ∪ inferred`.
 
 ## Ce s-a introdus în cod
 
 - `src/graph_store.py`: graph store in-memory cu:
-  - încărcare edges JSON;
-  - inferență fallback pentru muchii;
-  - propagare `personalized_pagerank` (PPR).
+  - adiacențe separate: `explicit`, `inferred`, `combined`;
+  - inferență explicită din IDs/paths/mentions;
+  - inferență semantică din embeddings (top-k similaritate);
+  - propagare `personalized_pagerank` cu `link_mode` (`explicit` / `inferred` / `combined`).
 - `src/agents.py` folosește acum:
   - BM25 lexical;
   - dense FAISS;
-  - scor structural PPR din graph store;
-  - fuziune cu explicații factorized care includ metoda `personalized_pagerank`.
+  - scor structural PPR din graph store pe `link_mode` configurabil;
+  - explicații factorized care includ explicit metoda `personalized_pagerank[mode]`.
+- `src/evaluate_link_modes.py`:
+  - benchmark simplu care raportează separat:
+    - `explicit-only performance`
+    - `inferred-only performance`
+    - `combined performance`
+  - metrici: precision@10, recall@10, F1@10.
+
+## Cum rulezi evaluarea pe moduri
+
+```bash
+python -m src.evaluate_link_modes
+```
+
+Output-ul include cele trei rezultate separate (`explicit`, `inferred`, `combined`) pentru comparabilitate academică.
 
 ## Observații baseline
 
 - PPR e folosit ca **baseline structural** (rapid, explicabil).
+- Distincția explicit/inferred crește credibilitatea experimentală, deoarece separă semnalele observabile direct de cele obținute prin generalizare semantică/propagare.
 - Dacă nu există graf explicit, fallback-ul menține pipeline-ul funcțional.
 - Structura pregătește integrarea ulterioară cu reranker LLM/RAG și feedback loops.

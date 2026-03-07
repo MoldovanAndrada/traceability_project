@@ -84,7 +84,7 @@ class _HybridIndex:
             for term, freq in df.items()
         }
 
-        self.graph_store = GraphStore(docs, edges_path=_EDGES_FILE)
+        self.graph_store = GraphStore(docs, edges_path=_EDGES_FILE, embeddings=embeddings)
 
     def bm25_scores(self, query: str) -> list[float]:
         q_tokens = _tokenize(query)
@@ -136,7 +136,12 @@ class _Reranker:
         match = re.search(r"\d+", str(rec.get("id", "")))
         return int(match.group(0)) if match else 0
 
-    def _graph_distance_score(self, i: int, seed_indices: set[int]) -> tuple[float, int | None, bool]:
+    def _graph_distance_score(
+        self,
+        i: int,
+        seed_indices: set[int],
+        link_mode: str = "combined",
+    ) -> tuple[float, int | None, bool]:
         if not seed_indices:
             return 0.0, None, False
         if i in seed_indices:
@@ -149,7 +154,7 @@ class _Reranker:
             depth += 1
             nxt = []
             for node in frontier:
-                neigh = self.graph_store.neighbors(node)
+                neigh = self.graph_store.neighbors(node, link_mode=link_mode)
                 if i in neigh:
                     return 1.0 / (1.0 + depth), depth, True
                 for n in neigh:
@@ -193,6 +198,7 @@ class _Reranker:
         i: int,
         seed_indices: set[int],
         merged_score: float,
+        link_mode: str = "combined",
     ) -> tuple[float, dict]:
         query_tokens = set(_tokenize(query))
         rec_tokens = set(_tokenize(rec.get("text", "")))
@@ -200,7 +206,9 @@ class _Reranker:
 
         type_prior = self.TYPE_PRIOR.get(str(rec.get("type", "")).lower(), 0.5)
 
-        graph_distance_score, distance, edge_exists = self._graph_distance_score(i, seed_indices)
+        graph_distance_score, distance, edge_exists = self._graph_distance_score(
+            i, seed_indices, link_mode=link_mode
+        )
 
         query_stories = _extract_story_refs(query)
         rec_stories = _extract_story_refs(rec.get("id", ""), rec.get("text", ""))
@@ -274,6 +282,7 @@ def _build_factorized_explanations(
     merged: list[float],
     top_indices: list[int],
     rerank_features: dict[int, dict] | None = None,
+    link_mode: str = "combined",
 ) -> list[dict]:
     dense_norm = _minmax(dense_raw)
     bm25_norm = _minmax(bm25_raw)
@@ -299,8 +308,8 @@ def _build_factorized_explanations(
                 },
                 "graph_index": {
                     "score": round(float(graph_norm[i]), 4),
-                    "neighbors": len(HYBRID_INDEX.graph_store.neighbors(i)),
-                    "method": "personalized_pagerank",
+                    "neighbors": len(HYBRID_INDEX.graph_store.neighbors(i, link_mode=link_mode)),
+                    "method": f"personalized_pagerank[{link_mode}]",
                     "note": "structural support from graph store propagation",
                 },
                 "reranker": (rerank_features or {}).get(i, {}),
@@ -314,7 +323,8 @@ def _build_factorized_explanations(
     return explained
 
 
-def search(query, k=10, dataset: str | None = None):
+def search(query, k=10, dataset: str | None = None, link_mode: str = "combined"):
+    link_mode = (link_mode or "combined").lower()
     q = model.encode([query])
     dense_distances, dense_indices = faiss_index.search(q, min(len(metadata), max(k * 3, k)))
 
@@ -332,7 +342,7 @@ def search(query, k=10, dataset: str | None = None):
     seed_indices.update(dense_top)
     seed_indices.update(bm25_top)
 
-    graph_raw = HYBRID_INDEX.graph_store.personalized_pagerank(seed_indices)
+    graph_raw = HYBRID_INDEX.graph_store.personalized_pagerank(seed_indices, link_mode=link_mode)
 
     dense_norm = _minmax(dense_raw)
     bm25_norm = _minmax(bm25_raw)
@@ -346,7 +356,7 @@ def search(query, k=10, dataset: str | None = None):
     rerank_scores = {}
     rerank_features = {}
     for i in range(len(metadata)):
-        score, features = RERANKER.score(query, metadata[i], i, seed_indices, merged[i])
+        score, features = RERANKER.score(query, metadata[i], i, seed_indices, merged[i], link_mode=link_mode)
         rerank_scores[i] = score
         rerank_features[i] = features
 
@@ -361,16 +371,17 @@ def search(query, k=10, dataset: str | None = None):
         [rerank_scores[i] for i in range(len(metadata))],
         filtered,
         rerank_features=rerank_features,
+        link_mode=link_mode,
     )
 
 
-def get_related_test_cases(story, dataset: str | None = None):
-    return [r for r in search(story, dataset=dataset) if r["type"] == "test_case"]
+def get_related_test_cases(story, dataset: str | None = None, link_mode: str = "combined"):
+    return [r for r in search(story, dataset=dataset, link_mode=link_mode) if r["type"] == "test_case"]
 
 
-def get_related_faults(story, dataset: str | None = None):
-    return [r for r in search(story, dataset=dataset) if r["type"] == "fault"]
+def get_related_faults(story, dataset: str | None = None, link_mode: str = "combined"):
+    return [r for r in search(story, dataset=dataset, link_mode=link_mode) if r["type"] == "fault"]
 
 
-def get_impacted_code(story, dataset: str | None = None):
-    return [r for r in search(story, dataset=dataset) if r["type"] == "code"]
+def get_impacted_code(story, dataset: str | None = None, link_mode: str = "combined"):
+    return [r for r in search(story, dataset=dataset, link_mode=link_mode) if r["type"] == "code"]
