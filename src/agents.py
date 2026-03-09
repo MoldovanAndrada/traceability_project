@@ -305,7 +305,16 @@ def _build_confidence_layer(
     agreement = 1.0 - spread
     strong_count = sum(1 for v in vals if v >= 0.4)
     weak_count = sum(1 for v in vals if v < 0.25)
-    contradiction = spread > 0.45 or (strong_count <= 1 and top_score >= 0.55) or (strong_count >= 2 and weak_count >= 1)
+    # Flag contradiction only for clear disagreement. A single weak auxiliary
+    # signal (for example sparse historical fault data) should not mark an
+    # otherwise consistent result as contradictory.
+    very_strong_count = sum(1 for v in vals if v >= 0.6)
+    very_weak_count = sum(1 for v in vals if v <= 0.15)
+    contradiction = (
+        spread > 0.55
+        or (strong_count <= 1 and top_score >= 0.6 and weak_count >= 2)
+        or (very_strong_count >= 2 and very_weak_count >= 2)
+    )
 
     top2_mean = (ranked[0][1] + ranked[1][1]) / 2.0
     confidence = _clamp01(0.55 * _clamp01(final_score) + 0.25 * top2_mean + 0.20 * agreement)
