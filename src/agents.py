@@ -274,6 +274,62 @@ def _minmax(values: list[float]) -> list[float]:
     return [(v - lo) / (hi - lo) for v in values]
 
 
+def _clamp01(value: float) -> float:
+    return max(0.0, min(1.0, float(value)))
+
+
+def _build_confidence_layer(
+    dense_score: float,
+    lexical_score: float,
+    graph_score: float,
+    final_score: float,
+    reranker: dict,
+) -> dict:
+    historical = _clamp01(max(reranker.get("fault_frequency", 0.0), reranker.get("changed_lines_overlap", 0.0)))
+    signals = {
+        "semantic": _clamp01(dense_score),
+        "lexical": _clamp01(lexical_score),
+        "graph": _clamp01(graph_score),
+        "historical_fault_co_location": historical,
+    }
+
+    ranked = sorted(signals.items(), key=lambda kv: kv[1], reverse=True)
+    support = [name for name, score in ranked if score >= 0.45][:3]
+    if not support:
+        support = [ranked[0][0]]
+
+    vals = list(signals.values())
+    agreement = 1.0 - (max(vals) - min(vals))
+    strong_count = sum(1 for v in vals if v >= 0.4)
+    contradiction = agreement < 0.35 or strong_count <= 1
+
+    top2_mean = (ranked[0][1] + ranked[1][1]) / 2.0
+    confidence = _clamp01(0.55 * _clamp01(final_score) + 0.25 * top2_mean + 0.20 * agreement)
+
+    abstain = confidence < 0.35 and max(vals) < 0.4
+    reason = "insufficient evidence" if abstain else ""
+
+    if confidence >= 0.75:
+        label = "high"
+    elif confidence >= 0.5:
+        label = "medium"
+    elif confidence >= 0.35:
+        label = "low"
+    else:
+        label = "very_low"
+
+    return {
+        "score": round(confidence, 4),
+        "label": label,
+        "source_of_support": support,
+        "contradiction_signal": contradiction,
+        "signal_agreement": round(_clamp01(agreement), 4),
+        "abstain": abstain,
+        "reason": reason,
+        "signal_scores": {k: round(v, 4) for k, v in signals.items()},
+    }
+
+
 def _build_factorized_explanations(
     query: str,
     dense_raw: list[float],
@@ -316,6 +372,18 @@ def _build_factorized_explanations(
             },
             "final_score": round(float(merged[i]), 4),
         }
+
+        confidence = _build_confidence_layer(
+            dense_score=dense_norm[i],
+            lexical_score=bm25_norm[i],
+            graph_score=graph_norm[i],
+            final_score=merged[i],
+            reranker=(rerank_features or {}).get(i, {}),
+        )
+        record["evidence"]["confidence"] = confidence
+        record["confidence_score"] = confidence["score"]
+        record["abstain"] = confidence["abstain"]
+
         # Keep a first-class explanation field for callers that return raw
         # search results without post-processing (e.g., API/plugin clients).
         record["explanation"] = format_explanation(record)
