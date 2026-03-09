@@ -4,5 +4,12 @@ public class LinearAlgebraService {
         int[][] mul = MatrixMul.mul(a, b);
         return MatrixAdd.add(mul, c);
     }
-
+    public static double frobeniusNorm(int[][] m){
+        if(m==null) throw new IllegalArgumentException("null matrix");
+        double sum = 0;
+        for(int i=0;i<m.length;i++)
+            for(int j=0;j<m[0].length;j++)
+                sum += (double)m[i][j] * (double)m[i][j];
+        return RootFinder.sqrt(sum);
+    }
 }
