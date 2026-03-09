@@ -294,19 +294,23 @@ def _build_confidence_layer(
     }
 
     ranked = sorted(signals.items(), key=lambda kv: kv[1], reverse=True)
-    support = [name for name, score in ranked if score >= 0.45][:3]
+    top_score = ranked[0][1]
+    support_floor = max(0.35, top_score - 0.15)
+    support = [name for name, score in ranked if score >= support_floor][:3]
     if not support:
         support = [ranked[0][0]]
 
     vals = list(signals.values())
-    agreement = 1.0 - (max(vals) - min(vals))
+    spread = max(vals) - min(vals)
+    agreement = 1.0 - spread
     strong_count = sum(1 for v in vals if v >= 0.4)
-    contradiction = agreement < 0.35 or strong_count <= 1
+    weak_count = sum(1 for v in vals if v < 0.25)
+    contradiction = spread > 0.45 or (strong_count <= 1 and top_score >= 0.55) or (strong_count >= 2 and weak_count >= 1)
 
     top2_mean = (ranked[0][1] + ranked[1][1]) / 2.0
     confidence = _clamp01(0.55 * _clamp01(final_score) + 0.25 * top2_mean + 0.20 * agreement)
 
-    abstain = confidence < 0.35 and max(vals) < 0.4
+    abstain = confidence < 0.5 and (top_score < 0.55 or len(support) <= 1)
     reason = "insufficient evidence" if abstain else ""
 
     if confidence >= 0.75:
