@@ -4,12 +4,15 @@ from collections import defaultdict
 from pathlib import PurePosixPath
 from typing import Any
 
+import requests
+
 from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
+from src.config import GITHUB_REPO
 from src.explainability import format_explanation
 
-CODE_DIR_NAMES = {"code", "src"}
-CODE_EXTENSIONS = {".java", ".go"}
+CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
+CODE_EXTENSIONS = {".java", ".go", ".ts", ".tsx", ".css"}
 STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 
 
@@ -54,7 +57,7 @@ def _dataset_from_path(filename: str) -> str | None:
     if not parts:
         return None
     first = parts[0]
-    if first.startswith("traceability_"):
+    if first.startswith("traceability_") or first.startswith("dataset-"):
         return first
     return None
 
@@ -121,6 +124,45 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return explained
 
 
+def _record_key(record: dict[str, Any]) -> tuple[str, str]:
+    return str(record.get("type", "unknown")), str(record.get("id", "unknown"))
+
+
+def _dedupe_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    deduped: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for record in records:
+        key = _record_key(record)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(record)
+    return deduped
+
+
+def _fetch_file_content_at_commit(sha: str, filename: str) -> str:
+    url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{sha}/{filename}"
+    response = requests.get(url, timeout=20)
+    if response.status_code != 200:
+        return ""
+    return response.text
+
+
+def _extract_story_changes(file_change: dict[str, Any], sha: str) -> list[dict[str, str]]:
+    patch_text = file_change.get("patch", "")
+    changed_stories = _extract_story_changes_from_patch(patch_text)
+    if changed_stories:
+        return changed_stories
+
+    # GitHub can omit the patch for large files. Fall back to current file content
+    # so story updates still produce impact output instead of an empty result.
+    filename = file_change.get("filename", "")
+    if not filename:
+        return []
+    file_content = _fetch_file_content_at_commit(sha, filename)
+    return _extract_story_changes_from_patch("\n".join(f"+{line}" for line in file_content.splitlines()))
+
+
 def _result_line(result: dict[str, Any]) -> str:
     rtype = result.get("type", "unknown")
     rid = result.get("id", "unknown")
@@ -177,11 +219,11 @@ def run_once():
     for story_change in story_changes:
         dataset = story_change["dataset"]
         filename = story_change["filename"]
-        patch_text = next(
-            (f.get("patch", "") for f in files if f.get("filename") == filename),
-            "",
+        file_change = next(
+            (f for f in files if f.get("filename") == filename),
+            {},
         )
-        changed_stories = _extract_story_changes_from_patch(patch_text)
+        changed_stories = _extract_story_changes(file_change, sha)
 
         results: list[dict[str, Any]] = []
         for story in changed_stories:
@@ -199,15 +241,35 @@ def run_once():
                 ]
             results.extend(story_results)
 
-        explained_results = _attach_explanations(results)
+        explained_results = _dedupe_records(_attach_explanations(results))
         block = {
             "trigger": "user_story_modified",
             "dataset": dataset,
             "file": filename,
-            "results": explained_results,
+            "results": _dedupe_records(explained_results),
         }
         block["summary_lines"] = _impact_block_lines(block)
         impacted.append(block)
+
+    # De-duplicate globally so the same artifact is returned once per commit,
+    # even when multiple modified sources point to it.
+    global_seen: set[tuple[str, str]] = set()
+    deduped_impacted: list[dict[str, Any]] = []
+    for block in impacted:
+        unique_results: list[dict[str, Any]] = []
+        for result in block.get("results", []):
+            key = _record_key(result)
+            if key in global_seen:
+                continue
+            global_seen.add(key)
+            unique_results.append(result)
+        if not unique_results:
+            continue
+        block["results"] = unique_results
+        block["summary_lines"] = _impact_block_lines(block)
+        deduped_impacted.append(block)
+
+    impacted = deduped_impacted
 
     report_lines = [f"Commit: {sha}", "--------------------------------"]
     for block in impacted:
