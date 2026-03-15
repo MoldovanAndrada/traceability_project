@@ -163,6 +163,24 @@ func convertPluginComponentCommandFrom_v1alpha2(src *v1alpha2.CommandPluginOverr
 }
 
 func convertPluginComponentSubComponentFrom_v1alpha2(src *v1alpha2.ComponentPluginOverride, dest *PluginComponentsOverride) error {
-
+	srcName := src.Key()
+	jsonComponent, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(jsonComponent, &dest)
+	if err != nil {
+		return err
+	}
+	switch {
+	case src.Container != nil:
+		dest.Container.Name = srcName
+	case src.Volume != nil:
+		dest.Volume.Name = srcName
+	case src.Openshift != nil:
+		dest.Openshift.Name = srcName
+	case src.Kubernetes != nil:
+		dest.Kubernetes.Name = srcName
+	}
 	return nil
 }
