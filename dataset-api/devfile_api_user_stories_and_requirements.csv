@@ -41,33 +41,6 @@ Description:
 /area ci
 /area registry
 
-
-### User Story
-
-As a devfile registry maintainer I want fewer points of failure when reviewing, so that PRs coming from contributors are addressed in a timely manner.
-
-The current state of the devfile registry PRs check is that we rely on both OpenShift testing that is provisioned by the OpenShift CI Operator and checks from Konflux that required to pass for deployments to trigger (image build & enterprise contract).
-
-Whenever any of these checks are failing due to the infrastructure having issues or making changes we need to address this in two different places that results in PRs taking longer in the review process. One approach we can take to reduce this overhead on infrastructure maintenance is to use Konflux for OpenShift testing instead.
-
-In this issue, we want to investigate our Konflux infrastructure to determine if it is possible for our needs to onboard our devfile registry integration tests to use the Konflux infrastructure.
-
-One aspect to consider in this investigation is our Konflux environment is more time limited than the current OpenShift CI provisioned environment (see https://konflux.pages.redhat.com/docs/users/testing/cluster-provisioning.html#limitations for details), from this we identified a few questions listed below that should be addressed but this investigation is not limited to:
-1. Given our current testing timeline, can the Konflux provisioned environment work for our testing or not?
-2. How much faster is the Konflux provisioning process versus the OpenShift CI provisioning process? 
-   - Currently OpenShift CI takes on average 45-60 minutes to provision and setup before the testing runs
-3. Is the maximum timeline that Konflux provisioned clusters are up for flexible or a strict permanent limitation?
-
-Any information that is not present in the Konflux documentation should be brought up in a thread with the support teams.
-
-### Acceptance Criteria
-
-- [ ] Investigate the [Konflux documentation](https://konflux.pages.redhat.com/docs/users/testing/cluster-provisioning.html) to determine how to setup cluster provisioning for devfile registry integration testing on Konflux and determine if this is feasible for us
-   - If infeasible we should document why this is infeasible then close this issue as **completed** and close the parent epic as **not planned**
-- [ ] Investigate the [Konflux documentation](https://konflux.pages.redhat.com/docs/users/testing/integration/index.html) to determine how to setup devfile registry integration testing on Konflux
-- [ ] All findings are documented so that we can create follow up issues under the parent epic if we decide to proceed"
-US-003,"As a user, I want deprecate old stacks.","Source: https://github.com/devfile/api/issues/1754
-
 State: OPEN
 
 Labels: area/registry, kind/user-story, lifecycle/stale
