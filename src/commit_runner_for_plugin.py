@@ -9,7 +9,7 @@ from src.code_watcher import get_latest_commit
 from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src"}
-CODE_EXTENSIONS = {".java"}
+CODE_EXTENSIONS = {".java", ".go"}
 STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 
 
@@ -141,15 +141,12 @@ def run_once():
     sha = commit["sha"]
     files = commit.get("files", [])
 
-    code_changes_by_dataset: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    story_changes: list[dict[str, str]] = []
+    code_changes_by_dataset: dict[str | None, list[dict[str, Any]]] = defaultdict(list)
+    story_changes: list[dict[str, str | None]] = []
 
     for file_change in files:
         filename = file_change["filename"]
         dataset = _dataset_from_path(filename)
-        if not dataset:
-            continue
-
         if _is_code_class_file(filename):
             code_changes_by_dataset[dataset].append(file_change)
             continue
