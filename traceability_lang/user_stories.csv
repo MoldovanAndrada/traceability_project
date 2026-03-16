@@ -1,5 +1,5 @@
 user_story_id,feature_sentence,documentation_text
-US-01,"As a user, I want to NOT normalize text and NOT capitalize it safely."," and capitalize the first character via LangFacade.normalizeAndCapitalize without crashing on nulls."
+US-01,"As a user, I want to normalize text and capitalize it safely.","Remove accents, normalize whitespace, and capitalize the first character via LangFacade.normalizeAndCapitalize without crashing on nulls."
 US-02,"As a user, I want to convert sentences to Title Case.",Convert every word to title case using StringFormatter.toTitleCaseWords and ensure blank inputs are handled consistently.
 US-03,"As a user, I want to detect blank strings reliably.","Treat null, empty, and whitespace-only (including tabs/newlines) as blank via StringValidator.checkBlank and CharUtils.isWhitespace."
 US-04,"As a user, I want to wrap text to a maximum width.","Wrap normalized text at a given width using TextWrapper.wrap, preserving content and avoiding crashes for null input."
