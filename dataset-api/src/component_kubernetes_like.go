@@ -23,7 +23,7 @@ package v1alpha2
 type K8sLikeComponentLocationType string
 
 const (
-	UriK8sLikeComponentLocationType     K8sLikeComponentLocationType = "Inlined"
+	UriK8sLikeComponentLocationType     K8sLikeComponentLocationType = "Uri"
 	InlinedK8sLikeComponentLocationType K8sLikeComponentLocationType = "Inlined"
 )
 
