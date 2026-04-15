@@ -5,7 +5,6 @@ import { GenerateImportedSymbol } from 'src/codegen/dataTypes/GenerateImportedSy
 import { GenerateObject } from 'src/codegen/dataTypes/GenerateObject';
 import { GenerateRaw } from 'src/codegen/dataTypes/GenerateRaw';
 import { GenerateUnion } from 'src/codegen/dataTypes/GenerateUnion';
-import { ExprVal } from 'src/features/expressions/types';
 import { ValidationPlugin } from 'src/features/validation/ValidationPlugin';
 import { CompCategory } from 'src/layout/common';
 import { NodeDefPlugin } from 'src/utils/layout/plugins/NodeDefPlugin';
