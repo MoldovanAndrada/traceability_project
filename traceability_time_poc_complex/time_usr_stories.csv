@@ -8,7 +8,7 @@ US-06,"As a user, I want to compute day-of-year directly from an ISO date string
 US-07,"As a user, I want to add days to epoch timestamps safely.",DateMath must add days using exact arithmetic and reject overflow conditions.
 US-08,"As a user, I want to compute the number of days between two timestamps consistently.",DateMath must floor timestamps to day boundaries and compute whole-day differences.
 US-09,"As a user, I want time-of-day inputs validated before use.",TimeValidator must enforce valid hour/minute/second ranges and provide HMS validation.
-US-10,"As a user, I want to convert time units with overflow safety.",TimeUnitConverter must convert seconds/minutes/days to millis/seconds using exact arithmetic.
+US-10,"As a user, I want to convert time units without overflow safety.",TimeUnitConverter must convert seconds/minutes/days to millis/seconds using exact arithmetic.
 US-11,"As a user, I want to add seconds to an epoch time using safe conversions.",TimeService must convert seconds to millis and add safely without silent overflow.
 US-12,"As a user, I want epoch times normalized to seconds-within-day.",TimeService must normalize epoch values into 0..86399 seconds within the current day.
 US-13,"As a user, I want consistent ordering and range checks for timestamps.",TimeComparator must compare times and support inclusive range checks with validation.
