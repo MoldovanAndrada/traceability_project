@@ -10,7 +10,7 @@ US-08,"As a user, I want variance calculations with clear preconditions.",StatsV
 US-09,"As a user, I want z-score normalization for datasets.","StatisticalService must compute z-scores using mean, variance, and RootFinder and handle invalid inputs predictably."
 US-10,"As a user, I want matrix addition with dimension validation.",MatrixAdd must validate shapes and reject null/empty matrices to prevent silent corruption.
 US-11,"As a user, I want matrix multiplication with dimension validation.",MatrixMul must validate shape compatibility and be reusable by LinearAlgebraService operations.
-US-12,"As a user, I want low-level matrix workflows.",LinearAlgebraService must support multiply-and-add composition and Frobenius norm computation.
+US-12,"As a user, I want higher-level matrix workflows.",LinearAlgebraService must support multiply-and-add composition and Frobenius norm computation.
 US-13,"As a user, I want number theory utilities for GCD/LCM and coprime checks.",NumberTheoryService must provide coprime checks and safe LCM built on NumberTheory and LcmCore.
 US-14,"As a user, I want reproducible random integer generation with validation.",RandomGen must reject non-positive bounds and produce bounded values for downstream workflows.
 US-15,"As a user, I want a single facade to access common math workflows.","MathFacade must expose stable APIs that orchestrate statistics, linear algebra, number theory, and advanced expressions."
