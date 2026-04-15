@@ -8,7 +8,7 @@ US-06,"As a user, I want to reverse strings reliably.","Reverse a string using S
 US-07,"As a user, I want to search strings for overlapping matches.",Count overlapping occurrences of a substring using StringSearcher.countOccurrences and handle blank inputs safely.
 US-08,"As a user, I want case-insensitive searching and word containment checks.",Find substrings ignoring case and detect whole-word containment using StringSearcher.indexOfIgnoreCase and containsWord.
 US-09,"As a user, I want to validate and parse numeric inputs safely.",Determine whether text is numeric and parse integers with defaults using NumberUtils.isParsable and parseIntOrDefault.
-US-10,"As a user, I want bounded numeric parsing for configuration inputs.","Parse an integer and clamp it to [min,max] using LangFacade.safeParseBoundedInt and Clamp.clamp."
+US-10,"As a user, I want parsing for configuration inputs.","Parse an integer and clamp it to [min,max] using LangFacade.safeParseBoundedInt and Clamp.clamp."
 US-11,"As a user, I want to validate ASCII-safe identifiers.","Check whether an identifier is non-blank, ASCII printable, and composed of letters/digits/underscore via LangFacade.isSafeIdentifier."
 US-12,"As a user, I want to compute text analytics like word/line counts.","Compute word count, line count, and numeric-likeness using TextAnalytics with shared normalization and searching utilities."
 US-13,"As a user, I want to detect palindromes robustly.","Detect palindromes while ignoring accents, whitespace differences, and case via StringValidator.isPalindrome and StringUtils.reverse."
