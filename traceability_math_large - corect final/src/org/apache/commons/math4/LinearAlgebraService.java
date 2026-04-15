@@ -9,7 +9,7 @@ public class LinearAlgebraService {
         double sum = 0;
         for(int i=0;i<m.length;i++)
             for(int j=0;j<m[0].length;j++)
-                sum += (double)m[i][j] * (double)m[i][j];
+                sum += (double)m[j][i] * (double)m[j][i];
         return RootFinder.sqrt(sum);
     }
 }
