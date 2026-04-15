@@ -6139,6 +6139,7 @@ Description:
 **Detailed description:**
 
 1. Starter projects should have a display name property. 
+2. More information regarding starter projects should be returned using the REST API.
 
 **Why is this needed? Is your feature request related to a problem?**
 
