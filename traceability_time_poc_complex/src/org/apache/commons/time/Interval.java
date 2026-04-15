@@ -12,6 +12,7 @@ public final class Interval {
     public long start(){ return startMillis; }
     public long end(){ return endMillis; }
     public boolean overlaps(Interval other){
+        if(other==null) return false;
         return this.startMillis <= other.endMillis && other.startMillis <= this.endMillis;
     }
     public long lengthMillis(){ return endMillis - startMillis; }
