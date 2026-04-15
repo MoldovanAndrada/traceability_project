@@ -7,7 +7,7 @@ public final class CalendarUtils {
         return month >= 1 && month <= 12;
     }
 
-    public static int daysInMonth(int month, int year) {
+    public static int daysInMonth(int year, int month) {
         if (!isValidMonth(month)) throw new IllegalArgumentException("Invalid month: " + month);
         switch (month) {
             case 2: return DateUtils.isLeapYear(year) ? 29 : 28;
