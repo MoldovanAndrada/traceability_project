@@ -2877,7 +2877,7 @@ The cells should as default have flexible witdh, and there should be a way to se
 
 
 # Table Guidelines"
-US-079,As an app developer I would like to style an input label as a header.,"Source: https://github.com/Altinn/app-frontend-react/issues/189
+US-079,As an app developer I would like to style an input label as a footer.,"Source: https://github.com/Altinn/app-frontend-react/issues/189
 
 State: CLOSED
 
