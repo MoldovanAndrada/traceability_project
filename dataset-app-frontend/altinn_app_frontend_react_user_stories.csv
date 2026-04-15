@@ -2921,7 +2921,8 @@ Description:
 ## Description
 Extracted from Altinn/altinn-studio#6196.
 
-Support for instantiation from a stateless view to a stateful view within the same app was supported in Altinn/altinn-studio#6196. 
+Support for instantiation from a stateless view to a stateful view within the same app was supported in Altinn/altinn-studio#6196. This covers the need to instantiate a different app.
+
 ## Screenshots
 <!--  Screenshots or links to Figma (make sure your sketch is public) -->
 
