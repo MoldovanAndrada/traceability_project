@@ -5,7 +5,7 @@ US-03,"As a user, I want to parse ISO dates reliably.","ISO date parsing must ex
 US-04,"As a user, I want to normalize ISO dates into a canonical format.","DateService must parse, validate, and reformat dates into YYYY-MM-DD consistently."
 US-05,"As a user, I want to format dates in ISO and compact forms.",Date formatting must produce zero-padded ISO strings and compact YYYYMMDD strings.
 US-06,"As a user, I want to compute day-of-year directly from an ISO date string.",DateService must compute day-of-year from ISO input using CalendarUtils validation logic.
-US-07,"I want to add days to epoch timestamps safely.",DateMath must add days using exact arithmetic and reject overflow conditions.
+US-07,"As a user, I want to add days to epoch timestamps safely.",DateMath must add days using exact arithmetic and reject overflow conditions.
 US-08,"As a user, I want to compute the number of days between two timestamps consistently.",DateMath must floor timestamps to day boundaries and compute whole-day differences.
 US-09,"As a user, I want time-of-day inputs validated before use.",TimeValidator must enforce valid hour/minute/second ranges and provide HMS validation.
 US-10,"As a user, I want to convert time units with overflow safety.",TimeUnitConverter must convert seconds/minutes/days to millis/seconds using exact arithmetic.
