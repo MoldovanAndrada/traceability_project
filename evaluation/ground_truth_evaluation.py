@@ -154,36 +154,17 @@ def _scenario_rows() -> list[dict[str, str]]:
     return rows
 
 
-def _sanitize_query(raw_query: str) -> str:
-    query = raw_query or ""
-    if "→" in query:
-        query = query.rsplit("→", 1)[-1]
-    elif "->" in query:
-        query = query.rsplit("->", 1)[-1]
-    elif re.search(r"\bV2\s*:", query, flags=re.IGNORECASE):
-        query = re.split(r"\bV2\s*:", query, flags=re.IGNORECASE, maxsplit=1)[-1]
-
-    query = re.sub(r"\bUS-\d+\b", " ", query, flags=re.IGNORECASE)
-    query = re.sub(r"\bTC-\d+\b", " ", query, flags=re.IGNORECASE)
-    query = re.sub(r"\bBug-\d+\b", " ", query, flags=re.IGNORECASE)
-    query = re.sub(r"^\s*\([^)]*\)\s*:?", " ", query)
-    query = re.sub(r"\bV[12]\s*:", " ", query, flags=re.IGNORECASE)
-    query = re.sub(r"[()\[\]{}:;,.!?→+/_\\-]+", " ", query)
-    query = re.sub(r"\s+", " ", query).strip(" .:-")
-    return query
-
-
-def _build_query(row: dict[str, str], stories: dict[str, dict[str, str]]) -> tuple[str, str, str, bool]:
+def _build_query(row: dict[str, str], stories: dict[str, dict[str, str]]) -> tuple[str, str, bool]:
     scenario_text = row.get("Change Trigger (User Story V1 → V2)", "").strip()
     scenario_id = row.get("Scenario ID", "").strip()
     story_match = US_TOKEN.search(scenario_text)
     story_id = story_match.group(0).upper() if story_match else ""
     story_text = stories.get(row["dataset"], {}).get(story_id, "")
     if scenario_text:
-        return scenario_text, _sanitize_query(scenario_text), story_id or scenario_id, not bool(story_text)
+        return scenario_text, story_id or scenario_id, not bool(story_text)
     if story_text:
-        return story_text, _sanitize_query(story_text), story_id, False
-    return "", "", story_id or scenario_id, True
+        return story_text, story_id, False
+    return "", story_id or scenario_id, True
 
 
 def _ranked_by_type(results: list[dict[str, Any]]) -> dict[str, list[str]]:
@@ -200,15 +181,6 @@ def _ranked_by_type(results: list[dict[str, Any]]) -> dict[str, list[str]]:
     return ranked
 
 
-def _set_at_k_metrics(gold_set: set[str], ranked: list[str], k: int) -> tuple[float, float, float, float]:
-    topk_hits = len(set(ranked[:k]).intersection(gold_set))
-    hit = 1.0 if topk_hits else 0.0
-    precision = topk_hits / k
-    recall = topk_hits / len(gold_set) if gold_set else 0.0
-    f1 = (2 * precision * recall / (precision + recall)) if precision + recall else 0.0
-    return hit, precision, recall, f1
-
-
 def _metrics(gold: list[str], ranked: list[str]) -> dict[str, Any]:
     gold_set = set(gold)
     first_relevant_rank = ""
@@ -220,20 +192,19 @@ def _metrics(gold: list[str], ranked: list[str]) -> dict[str, Any]:
             precision_sum += relevant_seen / rank
             if first_relevant_rank == "":
                 first_relevant_rank = rank
-    hit5, precision5, recall5, f15 = _set_at_k_metrics(gold_set, ranked, 5)
-    hit10, precision10, recall10, f110 = _set_at_k_metrics(gold_set, ranked, 10)
+    top10 = ranked[:10]
+    top10_hits = len(set(top10).intersection(gold_set))
+    precision10 = top10_hits / 10
+    recall10 = top10_hits / len(gold_set) if gold_set else 0.0
+    f1 = (2 * precision10 * recall10 / (precision10 + recall10)) if precision10 + recall10 else 0.0
     return {
         "first_relevant_rank": first_relevant_rank,
-        "hit@5": hit5,
-        "hit@10": hit10,
+        "hit@10": 1.0 if top10_hits else 0.0,
         "mrr": 1.0 / first_relevant_rank if first_relevant_rank else 0.0,
         "ap": precision_sum / len(gold_set) if gold_set else 0.0,
-        "precision@5": precision5,
-        "recall@5_top5_set": recall5,
-        "f1@5_top5_set": f15,
         "precision@10": precision10,
         "recall@10_top10_set": recall10,
-        "f1@10_top10_set": f110,
+        "f1@10_top10_set": f1,
     }
 
 
@@ -244,7 +215,6 @@ def _mean(rows: list[dict[str, Any]], field: str) -> float:
 def _main_block(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "query_count": len(rows),
-        "hit@5": _mean(rows, "hit@5"),
         "hit@10": _mean(rows, "hit@10"),
         "mrr": _mean(rows, "mrr"),
         "map": _mean(rows, "ap"),
@@ -253,9 +223,6 @@ def _main_block(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _diagnostic_block(rows: list[dict[str, Any]]) -> dict[str, float]:
     return {
-        "top5_precision": _mean(rows, "precision@5"),
-        "top5_recall": _mean(rows, "recall@5_top5_set"),
-        "top5_f1": _mean(rows, "f1@5_top5_set"),
         "top10_precision": _mean(rows, "precision@10"),
         "top10_recall": _mean(rows, "recall@10_top10_set"),
         "top10_f1": _mean(rows, "f1@10_top10_set"),
@@ -266,62 +233,14 @@ def _group(rows: list[dict[str, Any]], key: str, values: tuple[str, ...]) -> dic
     return {value: [row for row in rows if row[key] == value] for value in values}
 
 
-def _tokenize_for_fallback(text: str) -> list[str]:
-    return re.findall(r"\b\w+\b", (text or "").lower())
-
-
-def _local_dataset_search(query: str, records: list[dict[str, str]], dataset: str, k: int) -> list[dict[str, Any]]:
-    """Deterministic self-contained search for evaluation-only dataset-local retrieval."""
-    query_terms = Counter(_tokenize_for_fallback(query))
-    if not query_terms:
-        return []
-
-    scored: list[tuple[float, int, dict[str, str]]] = []
-    for index, record in enumerate(records):
-        if record.get("dataset") != dataset:
-            continue
-        text_terms = Counter(_tokenize_for_fallback(record.get("text", "")))
-        if not text_terms:
-            continue
-        overlap = sum(min(count, text_terms.get(term, 0)) for term, count in query_terms.items())
-        id_bonus = 2.0 if str(record.get("id", "")).lower() in (query or "").lower() else 0.0
-        type_bonus = {"story": 0.1, "test_case": 0.08, "fault": 0.06, "code": 0.04}.get(record.get("type", ""), 0.0)
-        score = overlap + id_bonus + type_bonus
-        if score > 0:
-            scored.append((score, -index, record))
-
-    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
-    return [dict(record) for _, _, record in scored[:k]]
-
-
-def _load_agent_search():
-    try:
-        from src.agents import search
-    except Exception:
-        return None
-    return search
-
-
-def _dataset_search(query: str, dataset: str, records: list[dict[str, str]], agent_search, k: int) -> list[dict[str, Any]]:
-    if not query:
-        return []
-    if agent_search is not None:
-        try:
-            return agent_search(query, k=k, dataset=dataset)
-        except ValueError as exc:
-            if "truth value" not in str(exc) and "ambiguous" not in str(exc):
-                raise
-    return _local_dataset_search(query, records, dataset, k)
-
-
-def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def evaluate() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     records = ingest_all()
     validate_records(records)
     sanity = corpus_sanity(records)
     stories = _load_stories()
     code_inventory = _load_code_inventory(records)
 
-    agent_search = _load_agent_search() if use_agent_search else None
+    from src.agents import search
 
     result_rows: list[dict[str, Any]] = []
     debug_samples: list[dict[str, Any]] = []
@@ -329,14 +248,14 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
     for scenario in _scenario_rows():
         dataset = scenario["dataset"]
         scenario_id = scenario.get("Scenario ID", "")
-        raw_query, sanitized_query, story_or_scenario_id, missing_story = _build_query(scenario, stories)
+        query, story_or_scenario_id, missing_story = _build_query(scenario, stories)
         tests, tests_failed = _parse_test_ids(scenario.get("Affected TCs (Ground Truth)", ""))
         faults, faults_failed = _parse_fault_ids(scenario.get("Relevant Faults (Ground Truth)", ""))
         code, code_failed = _parse_code_ids(scenario.get("Impacted Code Artifacts", ""), dataset, code_inventory)
         expected_by_type = {"code": code, "test_cases": tests, "faults": faults}
         parse_failed_by_type = {"code": code_failed, "test_cases": tests_failed, "faults": faults_failed}
 
-        dataset_results = _dataset_search(sanitized_query, dataset, records, agent_search, RETRIEVAL_DEPTH)
+        dataset_results = search(query, k=RETRIEVAL_DEPTH, dataset=dataset) if query else []
         dataset_filter_empty = not dataset_results
         ranked = _ranked_by_type(dataset_results)
 
@@ -344,8 +263,7 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
             debug_samples.append({
                 "dataset": dataset,
                 "story/scenario id": story_or_scenario_id or scenario_id,
-                "raw_query": raw_query,
-                "sanitized_query": sanitized_query,
+                "query text": query,
                 "expected IDs by type": expected_by_type,
                 "ranked IDs by type": {key: value[:10] for key, value in ranked.items()},
                 "first relevant rank by type": {
@@ -360,7 +278,7 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
             skip_reason = ""
             if parse_failed_by_type[artifact_type]:
                 skip_reason = "parse_failure"
-            elif missing_story and not sanitized_query:
+            elif missing_story and not query:
                 skip_reason = "missing_story_match"
             elif not gold:
                 skip_reason = "empty_gold"
@@ -370,13 +288,9 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
             scored = not skip_reason
             metric_values = _metrics(gold, ranked[artifact_type]) if scored else {
                 "first_relevant_rank": "",
-                "hit@5": "",
                 "hit@10": "",
                 "mrr": "",
                 "ap": "",
-                "precision@5": "",
-                "recall@5_top5_set": "",
-                "f1@5_top5_set": "",
                 "precision@10": "",
                 "recall@10_top10_set": "",
                 "f1@10_top10_set": "",
@@ -389,13 +303,9 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
                 "expected_ids": ";".join(gold),
                 "ranked_ids_top10": ";".join(ranked[artifact_type][:10]),
                 "first_relevant_rank": metric_values["first_relevant_rank"],
-                "hit@5": metric_values["hit@5"],
                 "hit@10": metric_values["hit@10"],
                 "mrr": metric_values["mrr"],
                 "ap": metric_values["ap"],
-                "precision@5": metric_values["precision@5"],
-                "recall@5_top5_set": metric_values["recall@5_top5_set"],
-                "f1@5_top5_set": metric_values["f1@5_top5_set"],
                 "precision@10": metric_values["precision@10"],
                 "recall@10_top10_set": metric_values["recall@10_top10_set"],
                 "f1@10_top10_set": metric_values["f1@10_top10_set"],
@@ -413,7 +323,7 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
         "main_quantitative_results": {"overall": _main_block(scored_rows)},
         "per_dataset": {dataset: _main_block(rows) for dataset, rows in per_dataset_rows.items()},
         "per_artifact_type": {artifact_type: _main_block(rows) for artifact_type, rows in per_type_rows.items()},
-        "secondary_diagnostics": {
+        "secondary_top10_diagnostics": {
             "overall": _diagnostic_block(scored_rows),
             "per_dataset": {dataset: _diagnostic_block(rows) for dataset, rows in per_dataset_rows.items()},
             "per_artifact_type": {artifact_type: _diagnostic_block(rows) for artifact_type, rows in per_type_rows.items()},
@@ -422,7 +332,6 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
         "skipped_query_count": len(skipped_rows),
         "skipped_by_reason": {reason: int(skipped_by_reason.get(reason, 0)) for reason in SKIP_REASONS},
         "retrieval_depth": RETRIEVAL_DEPTH,
-        "retrieval_backend": "src.agents.search" if use_agent_search and agent_search is not None else "self_contained_dataset_local",
         "corpus_sanity_summary": {
             "total_records": sanity["total_records"],
             "counts_per_dataset": sanity["counts_per_dataset"],
@@ -444,13 +353,9 @@ def write_outputs(rows: list[dict[str, Any]], summary: dict[str, Any]) -> None:
         "expected_ids",
         "ranked_ids_top10",
         "first_relevant_rank",
-        "hit@5",
         "hit@10",
         "mrr",
         "ap",
-        "precision@5",
-        "recall@5_top5_set",
-        "f1@5_top5_set",
         "precision@10",
         "recall@10_top10_set",
         "f1@10_top10_set",
@@ -467,13 +372,8 @@ def write_outputs(rows: list[dict[str, Any]], summary: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run dataset-local ground-truth retrieval evaluation for the 3 compact benchmark datasets.")
     parser.add_argument("--no-write", action="store_true", help="Run evaluation without writing CSV/JSON outputs.")
-    parser.add_argument(
-        "--use-agent-search",
-        action="store_true",
-        help="Use src.agents.search when available; default uses the self-contained dataset-local search path.",
-    )
     args = parser.parse_args()
-    rows, summary = evaluate(use_agent_search=args.use_agent_search)
+    rows, summary = evaluate()
     if not args.no_write:
         write_outputs(rows, summary)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
