@@ -1,0 +1,135 @@
+{
+  "total_records": 355,
+  "counts_per_dataset": {
+    "traceability_lang": 125,
+    "traceability_math_large - corect final": 127,
+    "traceability_time_poc_complex": 103
+  },
+  "counts_per_artifact_type": {
+    "code": 70,
+    "fault": 60,
+    "story": 50,
+    "test_case": 175
+  },
+  "counts_per_dataset_and_type": {
+    "traceability_lang": {
+      "code": 23,
+      "fault": 20,
+      "story": 15,
+      "test_case": 67
+    },
+    "traceability_math_large - corect final": {
+      "code": 25,
+      "fault": 20,
+      "story": 15,
+      "test_case": 67
+    },
+    "traceability_time_poc_complex": {
+      "code": 22,
+      "fault": 20,
+      "story": 20,
+      "test_case": 41
+    }
+  },
+  "sample_records": {
+    "traceability_lang": [
+      {
+        "dataset": "traceability_lang",
+        "type": "story",
+        "id": "US-01",
+        "text_preview": "US-01 | As a user, I want to NOT normalize text and NOT capitalize it safely. | and capitalize the first character via LangFacade.normalizeAndCapitalize without"
+      },
+      {
+        "dataset": "traceability_lang",
+        "type": "story",
+        "id": "US-02",
+        "text_preview": "US-02 | As a user, I want to convert sentences to Title Case. | Convert every word to title case using StringFormatter.toTitleCaseWords and ensure blank inputs "
+      },
+      {
+        "dataset": "traceability_lang",
+        "type": "story",
+        "id": "US-03",
+        "text_preview": "US-03 | As a user, I want to detect blank strings reliably. | Treat null, empty, and whitespace-only (including tabs/newlines) as blank via StringValidator.chec"
+      },
+      {
+        "dataset": "traceability_lang",
+        "type": "story",
+        "id": "US-04",
+        "text_preview": "US-04 | As a user, I want to wrap text to a maximum width. | Wrap normalized text at a given width using TextWrapper.wrap, preserving content and avoiding crash"
+      },
+      {
+        "dataset": "traceability_lang",
+        "type": "story",
+        "id": "US-05",
+        "text_preview": "US-05 | As a user, I want smart wrapping that avoids breaking words. | Use TextWrapper.smartWrap to break at a word boundary when possible and avoid producing e"
+      }
+    ],
+    "traceability_math_large - corect final": [
+      {
+        "dataset": "traceability_math_large - corect final",
+        "type": "story",
+        "id": "US-01",
+        "text_preview": "US-01 | As a user, I want safe integer addition and multiplication with overflow protection. | Addition must clamp to integer limits and be reusable via Arithme"
+      },
+      {
+        "dataset": "traceability_math_large - corect final",
+        "type": "story",
+        "id": "US-02",
+        "text_preview": "US-02 | As a user, I want safe integer subtraction operations. | Arithmetic operations must behave consistently and be accessible through ArithmeticUtils."
+      },
+      {
+        "dataset": "traceability_math_large - corect final",
+        "type": "story",
+        "id": "US-03",
+        "text_preview": "US-03 | As a user, I want safe division that rejects division by zero. | Division must throw a clear ArithmeticException and be used by AdvancedMathService comp"
+      },
+      {
+        "dataset": "traceability_math_large - corect final",
+        "type": "story",
+        "id": "US-04",
+        "text_preview": "US-04 | As a user, I want to compute logarithms with domain validation. | Log computations must reject non-positive inputs and support AdvancedMathService expre"
+      },
+      {
+        "dataset": "traceability_math_large - corect final",
+        "type": "story",
+        "id": "US-05",
+        "text_preview": "US-05 | As a user, I want square-root computations that reject negative inputs. | RootFinder must validate inputs and be reused by VectorNorm, StatisticalServic"
+      }
+    ],
+    "traceability_time_poc_complex": [
+      {
+        "dataset": "traceability_time_poc_complex",
+        "type": "story",
+        "id": "US-01",
+        "text_preview": "US-01 | As a user, I want leap years computed using full Gregorian rules. | Leap-year detection must follow century and 400-year exceptions and be used in month"
+      },
+      {
+        "dataset": "traceability_time_poc_complex",
+        "type": "story",
+        "id": "US-02",
+        "text_preview": "US-02 | As a user, I want accurate month length and day-of-year calculations. | Month length and day-of-year must validate inputs and use leap-year rules for Fe"
+      },
+      {
+        "dataset": "traceability_time_poc_complex",
+        "type": "story",
+        "id": "US-03",
+        "text_preview": "US-03 | As a user, I want to parse ISO dates reliably. | ISO date parsing must extract year, month, and day and reject malformed or non-ISO inputs."
+      },
+      {
+        "dataset": "traceability_time_poc_complex",
+        "type": "story",
+        "id": "US-04",
+        "text_preview": "US-04 | As a user, I want to normalize ISO dates into a canonical format. | DateService must parse, validate, and reformat dates into YYYY-MM-DD consistently."
+      },
+      {
+        "dataset": "traceability_time_poc_complex",
+        "type": "story",
+        "id": "US-05",
+        "text_preview": "US-05 | As a user, I want to format dates in ISO and compact forms. | Date formatting must produce zero-padded ISO strings and compact YYYYMMDD strings."
+      }
+    ]
+  },
+  "target_datasets_only": true,
+  "required_fields_populated": true,
+  "dataset_filter_ready": true
+}

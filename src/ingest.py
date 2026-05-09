@@ -1,11 +1,21 @@
 import csv
+import json
 import re
 import xml.etree.ElementTree as ET
 import zipfile
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Iterable
 
 BASE = Path(__file__).resolve().parent.parent
+EMBEDDINGS_DIR = BASE / "embeddings"
+SANITY_SUMMARY_PATH = EMBEDDINGS_DIR / "corpus_sanity_summary.json"
+
+SMALL_BENCHMARK_DATASETS = (
+    "traceability_lang",
+    "traceability_math_large - corect final",
+    "traceability_time_poc_complex",
+)
 
 DATASET_CONFIG = {
     "traceability_lang": {
@@ -14,31 +24,17 @@ DATASET_CONFIG = {
         "faults": "faults.csv",
         "code_dir": "code",
     },
-    "traceability_time_poc_complex": {
-        "stories": "time_usr_stories.csv",
-        "tests": "test_cases_time.csv",
-        "faults": "faults_time.csv",
-        "code_dir": "src",
-    },
     "traceability_math_large - corect final": {
         "stories": "user_stories.csv",
         "tests": "test_cases.csv",
         "faults": "faults.csv",
         "code_dir": "src",
     },
-    "dataset-api": {
-        "stories": "devfile_api_user_stories_and_requirements.xlsx",
-        "tests": "devfile_api_test_cases.xlsx",
-        "faults": "devfile_api_faults_remapped.xlsx",
+    "traceability_time_poc_complex": {
+        "stories": "time_usr_stories.csv",
+        "tests": "test_cases_time.csv",
+        "faults": "faults_time.csv",
         "code_dir": "src",
-        "code_globs": ["*.go"],
-    },
-    "dataset-app-frontend": {
-        "stories": "altinn_app_frontend_react_user_stories.csv",
-        "tests": "altinn_app_frontend_react_test_cases.csv",
-        "faults": "altinn_app_frontend_react_faults_populated.xlsx",
-        "code_dirs": ["app-react-frontend", "app-react-frontend/src", "app-react-content/src"],
-        "code_globs": ["*.ts", "*.tsx", "*.css"],
     },
 }
 
@@ -48,12 +44,12 @@ def _iter_rows(csv_path: Path) -> Iterable[dict[str, str]]:
         yield from _iter_rows_xlsx(csv_path)
         return
 
-    with csv_path.open("r", encoding="utf-8", newline="") as handle:
-        sample = handle.read(4096)
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+        first_line = handle.readline()
+        rest_sample = handle.read(4096)
         handle.seek(0)
-
-        delimiter = ","
-        if "\t" in sample and sample.count("\t") > sample.count(","):
+        delimiter = "\t" if "\t" in first_line else ","
+        if delimiter == "," and "\t" in rest_sample and rest_sample.count("\t") > rest_sample.count(","):
             delimiter = "\t"
 
         reader = csv.DictReader(handle, delimiter=delimiter)
@@ -99,8 +95,7 @@ def _iter_rows_xlsx(xlsx_path: Path) -> Iterable[dict[str, str]]:
             if rid not in relmap:
                 continue
 
-            target = relmap[rid]
-            target_name = target.split("/worksheets/")[-1].split("/")[-1]
+            target_name = relmap[rid].split("/worksheets/")[-1].split("/")[-1]
             xml_path = f"xl/worksheets/{target_name}"
             if xml_path not in archive.namelist():
                 continue
@@ -125,21 +120,14 @@ def _iter_rows_xlsx(xlsx_path: Path) -> Iterable[dict[str, str]]:
                     yield row
 
 
-def _xlsx_row_values(
-    row_xml: ET.Element,
-    ns: dict[str, str],
-    shared_strings: list[str],
-) -> list[str]:
+def _xlsx_row_values(row_xml: ET.Element, ns: dict[str, str], shared_strings: list[str]) -> list[str]:
     values_by_index: dict[int, str] = {}
     max_index = -1
 
     for cell in row_xml.findall("a:c", ns):
         cell_ref = cell.attrib.get("r", "")
         match = _CELL_REF.match(cell_ref)
-        if match:
-            cell_index = _excel_col_to_index(match.group(1))
-        else:
-            cell_index = max_index + 1
+        cell_index = _excel_col_to_index(match.group(1)) if match else max_index + 1
 
         inline = cell.find("a:is/a:t", ns)
         if inline is not None:
@@ -155,53 +143,39 @@ def _xlsx_row_values(
                 value = raw.text or ""
 
         values_by_index[cell_index] = value
-        if cell_index > max_index:
-            max_index = cell_index
+        max_index = max(max_index, cell_index)
 
     if max_index < 0:
         return []
-
     return [values_by_index.get(i, "") for i in range(max_index + 1)]
 
 
+def _join_parts(*parts: str) -> str:
+    return " | ".join(part for part in parts if part)
+
+
 def _build_story_text(row: dict[str, str]) -> str:
-    return " | ".join(
-        part
-        for part in [
-            row.get("user_story_id", ""),
-            row.get("feature_sentence", ""),
-            row.get("documentation_text", ""),
-        ]
-        if part
-    )
+    return _join_parts(row.get("user_story_id", ""), row.get("feature_sentence", ""), row.get("documentation_text", ""))
 
 
 def _build_test_text(row: dict[str, str]) -> str:
-    return " | ".join(
-        part
-        for part in [
-            row.get("test_case_id", ""),
-            row.get("test_case_title", ""),
-            row.get("user_story_id", ""),
-            row.get("test_case_steps", ""),
-            row.get("expected_behavior", ""),
-        ]
-        if part
+    return _join_parts(
+        row.get("test_case_id", ""),
+        row.get("test_case_title", ""),
+        row.get("user_story_id", ""),
+        row.get("test_case_steps", ""),
+        row.get("expected_behavior", ""),
     )
 
 
 def _build_fault_text(row: dict[str, str]) -> str:
-    return " | ".join(
-        part
-        for part in [
-            row.get("bug_id", ""),
-            row.get("related_story", ""),
-            row.get("file_path", ""),
-            row.get("description", ""),
-            row.get("buggy_code", ""),
-            row.get("fixed_code", ""),
-        ]
-        if part
+    return _join_parts(
+        row.get("bug_id", ""),
+        row.get("related_story", ""),
+        row.get("file_path", ""),
+        row.get("description", ""),
+        row.get("buggy_code", ""),
+        row.get("fixed_code", ""),
     )
 
 
@@ -213,44 +187,44 @@ def _ingest_dataset(dataset_name: str, cfg: dict[str, str]) -> list[dict[str, st
     if story_path.exists():
         for row in _iter_rows(story_path):
             sid = row.get("user_story_id") or f"story-{len(records)}"
-            records.append(
-                {
-                    "dataset": dataset_name,
-                    "type": "story",
-                    "id": sid,
-                    "source": str(story_path.relative_to(BASE)),
-                    "text": _build_story_text(row),
-                }
-            )
+            records.append({
+                "dataset": dataset_name,
+                "type": "story",
+                "artifact_subtype": "user_story",
+                "id": sid,
+                "source": str(story_path.relative_to(BASE)),
+                "file_name": story_path.name,
+                "text": _build_story_text(row),
+            })
 
     tests_path = root / cfg["tests"]
     if tests_path.exists():
         for row in _iter_rows(tests_path):
             tid = row.get("test_case_id") or f"test-{len(records)}"
-            records.append(
-                {
-                    "dataset": dataset_name,
-                    "type": "test_case",
-                    "id": tid,
-                    "source": str(tests_path.relative_to(BASE)),
-                    "text": _build_test_text(row),
-                }
-            )
+            records.append({
+                "dataset": dataset_name,
+                "type": "test_case",
+                "artifact_subtype": "test_case",
+                "id": tid,
+                "source": str(tests_path.relative_to(BASE)),
+                "file_name": tests_path.name,
+                "text": _build_test_text(row),
+            })
 
     faults_path = root / cfg["faults"]
     if faults_path.exists():
         for row in _iter_rows(faults_path):
             bid = row.get("bug_id") or f"fault-{len(records)}"
-            records.append(
-                {
-                    "dataset": dataset_name,
-                    "type": "fault",
-                    "id": bid,
-                    "source": str(faults_path.relative_to(BASE)),
-                    "path": row.get("file_path", ""),
-                    "text": _build_fault_text(row),
-                }
-            )
+            records.append({
+                "dataset": dataset_name,
+                "type": "fault",
+                "artifact_subtype": "fault",
+                "id": bid,
+                "source": str(faults_path.relative_to(BASE)),
+                "file_name": faults_path.name,
+                "path": row.get("file_path", ""),
+                "text": _build_fault_text(row),
+            })
 
     code_dirs = cfg.get("code_dirs") or [cfg["code_dir"]]
     code_globs = cfg.get("code_globs", ["*.java"])
@@ -260,35 +234,110 @@ def _ingest_dataset(dataset_name: str, cfg: dict[str, str]) -> list[dict[str, st
         code_dir = root / code_dir_name
         if not code_dir.exists():
             continue
-
         for pattern in code_globs:
             for file_path in sorted(code_dir.rglob(pattern)):
                 if file_path in seen:
                     continue
                 seen.add(file_path)
-
                 try:
                     content = file_path.read_text(encoding="utf-8")
                 except UnicodeDecodeError:
                     content = file_path.read_text(encoding="latin-1", errors="ignore")
-
                 rel_path = str(file_path.relative_to(BASE))
-                records.append(
-                    {
-                        "dataset": dataset_name,
-                        "type": "code",
-                        "id": rel_path,
-                        "path": rel_path,
-                        "source": rel_path,
-                        "text": f"{rel_path}\n{content}",
-                    }
-                )
+                records.append({
+                    "dataset": dataset_name,
+                    "type": "code",
+                    "artifact_subtype": file_path.suffix.lstrip(".") or "source",
+                    "id": rel_path,
+                    "path": rel_path,
+                    "source": rel_path,
+                    "file_name": file_path.name,
+                    "text": f"{rel_path}\n{content}",
+                })
 
     return records
 
 
 def ingest_all() -> list[dict[str, str]]:
     records: list[dict[str, str]] = []
-    for dataset_name, cfg in DATASET_CONFIG.items():
-        records.extend(_ingest_dataset(dataset_name, cfg))
+    for dataset_name in SMALL_BENCHMARK_DATASETS:
+        records.extend(_ingest_dataset(dataset_name, DATASET_CONFIG[dataset_name]))
     return records
+
+
+def validate_records(records: list[dict[str, str]]) -> None:
+    invalid = [record for record in records if not all(str(record.get(k, "")).strip() for k in ("dataset", "type", "id", "text"))]
+    if invalid:
+        raise ValueError(f"Found {len(invalid)} records missing dataset/type/id/text")
+    datasets = {record["dataset"] for record in records}
+    unexpected = datasets.difference(SMALL_BENCHMARK_DATASETS)
+    if unexpected:
+        raise ValueError(f"Unexpected datasets in small benchmark corpus: {sorted(unexpected)}")
+
+
+def corpus_sanity(records: list[dict[str, str]], samples_per_dataset: int = 5) -> dict[str, object]:
+    by_dataset = Counter(record.get("dataset", "<missing>") for record in records)
+    by_type = Counter(record.get("type", "<missing>") for record in records)
+    by_dataset_type: dict[str, Counter[str]] = defaultdict(Counter)
+    samples: dict[str, list[dict[str, str]]] = {dataset: [] for dataset in SMALL_BENCHMARK_DATASETS}
+
+    for record in records:
+        dataset = record.get("dataset", "<missing>")
+        artifact_type = record.get("type", "<missing>")
+        by_dataset_type[dataset][artifact_type] += 1
+        if dataset in samples and len(samples[dataset]) < samples_per_dataset:
+            preview = " ".join(str(record.get("text", "")).split())[:160]
+            samples[dataset].append({
+                "dataset": dataset,
+                "type": artifact_type,
+                "id": str(record.get("id", "")),
+                "text_preview": preview,
+            })
+
+    summary = {
+        "total_records": len(records),
+        "counts_per_dataset": {dataset: int(by_dataset.get(dataset, 0)) for dataset in SMALL_BENCHMARK_DATASETS},
+        "counts_per_artifact_type": {artifact_type: int(count) for artifact_type, count in sorted(by_type.items())},
+        "counts_per_dataset_and_type": {
+            dataset: {artifact_type: int(by_dataset_type[dataset].get(artifact_type, 0)) for artifact_type in sorted(by_type)}
+            for dataset in SMALL_BENCHMARK_DATASETS
+        },
+        "sample_records": samples,
+        "target_datasets_only": sorted(by_dataset) == sorted(SMALL_BENCHMARK_DATASETS),
+        "required_fields_populated": all(
+            all(str(record.get(k, "")).strip() for k in ("dataset", "type", "id", "text")) for record in records
+        ),
+        "dataset_filter_ready": all(int(by_dataset.get(dataset, 0)) > 0 for dataset in SMALL_BENCHMARK_DATASETS),
+    }
+    return summary
+
+
+def print_corpus_sanity(records: list[dict[str, str]]) -> dict[str, object]:
+    summary = corpus_sanity(records)
+    print("Corpus sanity summary")
+    print(f"Total records: {summary['total_records']}")
+    print("Counts per dataset:")
+    for dataset, count in summary["counts_per_dataset"].items():
+        print(f"  {dataset}: {count}")
+    print("Counts per artifact type:")
+    for artifact_type, count in summary["counts_per_artifact_type"].items():
+        print(f"  {artifact_type}: {count}")
+    print("Counts per dataset × artifact type:")
+    for dataset, type_counts in summary["counts_per_dataset_and_type"].items():
+        print(f"  {dataset}: {type_counts}")
+    print("Sample records:")
+    for dataset, samples in summary["sample_records"].items():
+        print(f"  {dataset}:")
+        for sample in samples:
+            print(f"    [{sample['type']}] {sample['id']}: {sample['text_preview']}")
+    print(f"Target datasets only: {summary['target_datasets_only']}")
+    print(f"Required fields populated: {summary['required_fields_populated']}")
+    print(f"Dataset filter ready: {summary['dataset_filter_ready']}")
+    return summary
+
+
+def save_corpus_sanity(records: list[dict[str, str]], output_path: Path = SANITY_SUMMARY_PATH) -> dict[str, object]:
+    summary = corpus_sanity(records)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    return summary
