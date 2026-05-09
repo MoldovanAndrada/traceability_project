@@ -1,0 +1,214 @@
+{
+  "selected_scenarios": [
+    {
+      "dataset_family": "small",
+      "dataset_id": "traceability_lang",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Requirement-change row with an explicit scenario trigger; selected to cover requirement-to-artifact behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "small",
+      "dataset_id": "traceability_math_large - corect final",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Requirement-change row with an explicit scenario trigger; selected to cover requirement-to-artifact behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "small",
+      "dataset_id": "traceability_time_poc_complex",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Requirement-change row with an explicit scenario trigger; selected to cover requirement-to-artifact behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "small",
+      "dataset_id": "traceability_lang",
+      "scenario_id": "CODE-Bug-01",
+      "trigger_type": "code_change",
+      "selection_reason": "Fault/code-change record with non-empty descriptive fields; selected to cover change-from-code behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "small",
+      "dataset_id": "traceability_math_large - corect final",
+      "scenario_id": "CODE-Bug-01",
+      "trigger_type": "code_change",
+      "selection_reason": "Fault/code-change record with non-empty descriptive fields; selected to cover change-from-code behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "small",
+      "dataset_id": "traceability_time_poc_complex",
+      "scenario_id": "CODE-Bug-01",
+      "trigger_type": "code_change",
+      "selection_reason": "Fault/code-change record with non-empty descriptive fields; selected to cover change-from-code behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "large",
+      "dataset_id": "dataset-api",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Requirement-change row with an explicit scenario trigger; selected to cover requirement-to-artifact behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "large",
+      "dataset_id": "dataset-app-frontend",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Requirement-change row with an explicit scenario trigger; selected to cover requirement-to-artifact behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "large",
+      "dataset_id": "dataset-api",
+      "scenario_id": "REQ-2",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Requirement-change row with an explicit scenario trigger; selected to cover requirement-to-artifact behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "large",
+      "dataset_id": "dataset-api",
+      "scenario_id": "CODE-Bug-001",
+      "trigger_type": "code_change",
+      "selection_reason": "Fault/code-change record with non-empty descriptive fields; selected to cover change-from-code behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "large",
+      "dataset_id": "dataset-app-frontend",
+      "scenario_id": "CODE-Bug-001",
+      "trigger_type": "code_change",
+      "selection_reason": "Fault/code-change record with non-empty descriptive fields; selected to cover change-from-code behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    },
+    {
+      "dataset_family": "large",
+      "dataset_id": "dataset-api",
+      "scenario_id": "CODE-Bug-002",
+      "trigger_type": "code_change",
+      "selection_reason": "Fault/code-change record with non-empty descriptive fields; selected to cover change-from-code behavior. Balanced round-robin sampling across datasets and early rows were preferred for reproducibility."
+    }
+  ],
+  "average_scores_by_dataset_family": {
+    "small": {
+      "retrieval_concentration_score": 1.667,
+      "cross_artifact_coverage_score": 1.833,
+      "explanation_usefulness_score": 2.0,
+      "plausibility_score": 2.0
+    },
+    "large": {
+      "retrieval_concentration_score": 1.5,
+      "cross_artifact_coverage_score": 0.667,
+      "explanation_usefulness_score": 2.0,
+      "plausibility_score": 1.833
+    }
+  },
+  "average_scores_by_trigger_type": {
+    "requirement_change": {
+      "retrieval_concentration_score": 1.667,
+      "cross_artifact_coverage_score": 1.667,
+      "explanation_usefulness_score": 2.0,
+      "plausibility_score": 1.833
+    },
+    "code_change": {
+      "retrieval_concentration_score": 1.5,
+      "cross_artifact_coverage_score": 0.833,
+      "explanation_usefulness_score": 2.0,
+      "plausibility_score": 2.0
+    }
+  },
+  "average_scores_overall": {
+    "retrieval_concentration_score": 1.583,
+    "cross_artifact_coverage_score": 1.25,
+    "explanation_usefulness_score": 2.0,
+    "plausibility_score": 1.917
+  },
+  "representative_examples": {
+    "small": [
+      {
+        "dataset_id": "traceability_lang",
+        "scenario_id": "REQ-1",
+        "trigger_type": "requirement_change",
+        "top_results_short": "US-01 (story score=0.7361) | TC-001 (test_case score=0.5316) | TC-003 (test_case score=0.5289) | TC-004 (test_case score=0.4991) | TC-002 (test_case score=0.4986) | TC-061 (test_case score=0.4152)",
+        "scores": {
+          "retrieval_concentration_score": 2,
+          "cross_artifact_coverage_score": 2,
+          "explanation_usefulness_score": 2,
+          "plausibility_score": 2
+        },
+        "notes": "focused top ranking; artifact coverage: story, test_case, code, fault; top confidence label: medium."
+      },
+      {
+        "dataset_id": "traceability_math_large - corect final",
+        "scenario_id": "REQ-1",
+        "trigger_type": "requirement_change",
+        "top_results_short": "US-01 (story score=0.7518) | TC-004 (test_case score=0.5443) | TC-061 (test_case score=0.4854) | TC-001 (test_case score=0.4541) | TC-002 (test_case score=0.4541) | traceability_math_large - corect final/src/org/apache/commons/math4/Clamp.java (code score=0.4314)",
+        "scores": {
+          "retrieval_concentration_score": 1,
+          "cross_artifact_coverage_score": 2,
+          "explanation_usefulness_score": 2,
+          "plausibility_score": 2
+        },
+        "notes": "mixed top ranking; artifact coverage: story, test_case, code, fault; top confidence label: medium."
+      },
+      {
+        "dataset_id": "traceability_time_poc_complex",
+        "scenario_id": "REQ-1",
+        "trigger_type": "requirement_change",
+        "top_results_short": "Bug-01 (fault score=0.758) | US-01 (story score=0.755) | TC-002 (test_case score=0.3871) | traceability_time_poc_complex/src/org/apache/commons/time/DateUtils.java (code score=0.3643) | US-02 (story score=0.3284) | Bug-02 (fault score=0.1969)",
+        "scores": {
+          "retrieval_concentration_score": 1,
+          "cross_artifact_coverage_score": 2,
+          "explanation_usefulness_score": 2,
+          "plausibility_score": 2
+        },
+        "notes": "mixed top ranking; artifact coverage: fault, story, test_case, code; top confidence label: high."
+      }
+    ],
+    "large": [
+      {
+        "dataset_id": "dataset-api",
+        "scenario_id": "REQ-1",
+        "trigger_type": "requirement_change",
+        "top_results_short": "Bug-045 (fault score=0.5768) | Bug-021 (fault score=0.5134) | TC-183 (test_case score=0.4625) | TC-184 (test_case score=0.4625) | TC-185 (test_case score=0.4625) | TC-186 (test_case score=0.4625)",
+        "scores": {
+          "retrieval_concentration_score": 2,
+          "cross_artifact_coverage_score": 1,
+          "explanation_usefulness_score": 2,
+          "plausibility_score": 2
+        },
+        "notes": "focused top ranking; artifact coverage: fault, test_case; top confidence label: medium."
+      },
+      {
+        "dataset_id": "dataset-app-frontend",
+        "scenario_id": "REQ-1",
+        "trigger_type": "requirement_change",
+        "top_results_short": "US-107 (story score=0.5607) | US-112 (story score=0.5196) | US-123 (story score=0.5188) | dataset-app-frontend/app-react-frontend/features/datamodel/lookupErrorAsText.ts (code score=0.515) | US-065 (story score=0.5148) | US-115 (story score=0.4889)",
+        "scores": {
+          "retrieval_concentration_score": 2,
+          "cross_artifact_coverage_score": 2,
+          "explanation_usefulness_score": 2,
+          "plausibility_score": 1
+        },
+        "notes": "focused top ranking; artifact coverage: story, code, fault; top confidence label: medium."
+      },
+      {
+        "dataset_id": "dataset-api",
+        "scenario_id": "REQ-2",
+        "trigger_type": "requirement_change",
+        "top_results_short": "Bug-045 (fault score=0.5817) | Bug-204 (fault score=0.522) | Bug-021 (fault score=0.5144) | TC-187 (test_case score=0.4625) | TC-188 (test_case score=0.4625) | TC-189 (test_case score=0.4625)",
+        "scores": {
+          "retrieval_concentration_score": 2,
+          "cross_artifact_coverage_score": 1,
+          "explanation_usefulness_score": 2,
+          "plausibility_score": 2
+        },
+        "notes": "focused top ranking; artifact coverage: fault, test_case; top confidence label: medium."
+      }
+    ]
+  },
+  "qualitative_observations": [
+    "Small controlled datasets produced rankings that were at least as concentrated as the repository-backed datasets.",
+    "Cross-artifact coverage was harder to maintain on larger repositories, where code artifacts can dominate the top ranks.",
+    "Explanation terms/support were easier to interpret on small datasets because identifiers and vocabulary are more controlled.",
+    "This Step 2 analysis is descriptive: it compares behavior patterns and does not reuse Step 1 as a strict ground-truth benchmark for the large datasets."
+  ],
+  "paper_ready_summary": "In the Step 2 comparative scenario study, the controlled Defects4J-derived datasets and the larger repository-backed datasets were evaluated with the same retrieval pipeline but with a lightweight 0–2 rubric rather than a strict ground-truth protocol. Across the selected scenarios, the small datasets averaged 1.67 for retrieval concentration, 1.83 for cross-artifact coverage, 2 for explanation usefulness, and 2 for plausibility; the large datasets averaged 1.5, 0.667, 2, and 1.83 on the same dimensions. The small datasets generally yielded more compact and easier-to-interpret rankings, reflecting their narrower vocabulary and controlled artifact sets. The larger repositories produced useful but broader outputs: recommendations often spanned more implementation files and the explanation fields required more manual interpretation. These observations support using Step 1 for strict benchmarking and Step 2 as a complementary behavioral comparison across dataset scale and provenance.",
+  "paper_table_suggestion": "Use one compact table with rows grouped by dataset family and trigger type. Suggested columns: Family, Trigger, N, Retrieval concentration (mean), Cross-artifact coverage (mean), Explanation usefulness (mean), Plausibility (mean), Typical artifact types, Representative note."
+}
