@@ -1,0 +1,3695 @@
+{
+  "step": "Step 3 qualitative case analysis",
+  "purpose": "Small scenario-level dissection of representative retrieval outputs; separate from Step 1 and Step 2 metrics.",
+  "retrieval_configuration": {
+    "pipeline": "src.agents.search",
+    "k": 20,
+    "link_mode": "inferred",
+    "dataset_filter": "per selected dataset_id",
+    "corpus": "temporary in-memory corpus over small and repository-backed datasets; no Step 1 or Step 2 outputs are modified"
+  },
+  "paper_ready_intro": "Step 3 complements the quantitative benchmark and comparative analysis with a qualitative case analysis of a small set of representative scenarios. Rather than computing another family-level score, it inspects individual requirement- and code-driven changes end to end: the trigger text, returned artifact types, explanation signals, and whether the resulting trace is plausible and interpretable.",
+  "cases": [
+    {
+      "case_id": "C1",
+      "dataset_family": "small",
+      "dataset_id": "traceability_lang",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Controlled requirement-change case with explicit normalization/capitalization vocabulary; selected as a clean success-oriented example.",
+      "trigger_text": "US-01 (Normalize+Capitalize): V1: Capitalize only. → V2: Normalize whitespace + remove accents + capitalize via facade.",
+      "sanitized_query": "US-01 (Normalize+Capitalize): V1: Capitalize only. → V2: Normalize whitespace + remove accents + capitalize via facade.",
+      "query_note": "The sanitized query is for display only; the raw trigger_text was passed to the existing retrieval pipeline.",
+      "source_row": {
+        "Scenario ID": "1",
+        "Change Trigger (User Story V1 → V2)": "US-01 (Normalize+Capitalize): V1: Capitalize only. → V2: Normalize whitespace + remove accents + capitalize via facade.",
+        "Impact Category": "Functional Expansion"
+      },
+      "returned_artifact_types": [
+        "story",
+        "test_case",
+        "code",
+        "fault"
+      ],
+      "top_results_overall": [
+        {
+          "rank": 1,
+          "id": "US-01",
+          "type": "story",
+          "artifact_subtype": "user_story",
+          "path": "traceability_lang/user_stories.csv",
+          "score": 0.7361,
+          "confidence_score": 0.6549,
+          "confidence_label": "medium",
+          "support": [
+            "lexical",
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "01",
+            "capitalize",
+            "normalize",
+            "us",
+            "via"
+          ],
+          "dense_score": 0.9903,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "US-01 | As a user, I want to NOT normalize text and NOT capitalize it safely. | and capitalize the first character via LangFacade.normalizeAndCapitalize without crashing on nulls."
+        },
+        {
+          "rank": 2,
+          "id": "TC-001",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_lang/test_cases.csv",
+          "score": 0.5316,
+          "confidence_score": 0.5407,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "lexical"
+          ],
+          "matched_terms": [
+            "01",
+            "accents",
+            "capitalize",
+            "normalize",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.9868,
+          "graph_score": 1.0,
+          "text_preview": "TC-001 | Normalize+capitalize accents | US-01 | 1. Input: \" café au lait \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Output is \"Cafe au lait\" with single spaces and first char uppercased."
+        },
+        {
+          "rank": 3,
+          "id": "TC-003",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_lang/test_cases.csv",
+          "score": 0.5289,
+          "confidence_score": 0.5368,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "lexical"
+          ],
+          "matched_terms": [
+            "01",
+            "capitalize",
+            "normalize",
+            "us",
+            "whitespace"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.9671,
+          "graph_score": 1.0,
+          "text_preview": "TC-003 | Normalize+capitalize tabs/newlines | US-01 | 1. Input: \"\\t hello\\nworld \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Whitespace normalized to single spaces and result starts with 'H'."
+        },
+        {
+          "rank": 4,
+          "id": "TC-004",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_lang/test_cases.csv",
+          "score": 0.4991,
+          "confidence_score": 0.5082,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "lexical"
+          ],
+          "matched_terms": [
+            "01",
+            "capitalize",
+            "normalize",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.8697,
+          "graph_score": 1.0,
+          "text_preview": "TC-004 | Normalize+capitalize already capitalized | US-01 | 1. Input: \"Hello\". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Returns \"Hello\"."
+        },
+        {
+          "rank": 5,
+          "id": "TC-002",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_lang/test_cases.csv",
+          "score": 0.4986,
+          "confidence_score": 0.5074,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "lexical"
+          ],
+          "matched_terms": [
+            "01",
+            "capitalize",
+            "normalize",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.8659,
+          "graph_score": 1.0,
+          "text_preview": "TC-002 | Normalize+capitalize null | US-01 | 1. Input: null. 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Returns null (no exception)."
+        },
+        {
+          "rank": 6,
+          "id": "TC-061",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_lang/test_cases.csv",
+          "score": 0.4152,
+          "confidence_score": 0.3998,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "01",
+            "normalize",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.3715,
+          "graph_score": 1.0,
+          "text_preview": "TC-061 | Integration normalize then smartWrap | US-01 | 1. Input: \" café au lait \" width=6. 2. Call TextAnalytics.titleAndWrap. 3. Verify output. Expected: Output is title-cased and wrapped without breaking words mid-token when possible."
+        },
+        {
+          "rank": 7,
+          "id": "traceability_lang/code/TextAnalytics.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_lang/code/TextAnalytics.java",
+          "score": 0.3975,
+          "confidence_score": 0.3969,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "accents",
+            "normalize",
+            "whitespace"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.426,
+          "graph_score": 1.0,
+          "text_preview": "traceability_lang/code/TextAnalytics.java package org.apache.commons.lang3; public class TextAnalytics { public static int wordCount(String s) { if (StringValidator.checkBlank(s)) return 0; String normalized = StringFormatter.normalizeWhit…"
+        },
+        {
+          "rank": 8,
+          "id": "Bug-04",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "TextWrapper.java",
+          "score": 0.3736,
+          "confidence_score": 0.4305,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "normalize",
+            "us",
+            "whitespace"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.445,
+          "graph_score": 1.0,
+          "text_preview": "Bug-04 | US-04 | TextWrapper.java | wrap fails to normalize whitespace before wrapping | String s = str; | String s = StringFormatter.normalizeWhitespace(str);"
+        }
+      ],
+      "top_results_by_type": {
+        "story": [
+          {
+            "rank": 1,
+            "id": "US-01",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_lang/user_stories.csv",
+            "score": 0.7361,
+            "confidence_score": 0.6549,
+            "confidence_label": "medium",
+            "support": [
+              "lexical",
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us",
+              "via"
+            ],
+            "dense_score": 0.9903,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "US-01 | As a user, I want to NOT normalize text and NOT capitalize it safely. | and capitalize the first character via LangFacade.normalizeAndCapitalize without crashing on nulls."
+          },
+          {
+            "rank": 10,
+            "id": "US-13",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_lang/user_stories.csv",
+            "score": 0.3654,
+            "confidence_score": 0.3758,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "accents",
+              "us",
+              "via",
+              "whitespace"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.3982,
+            "graph_score": 1.0,
+            "text_preview": "US-13 | As a user, I want to detect palindromes robustly. | Detect palindromes while ignoring accents, whitespace differences, and case via StringValidator.isPalindrome and StringUtils.reverse."
+          },
+          {
+            "rank": 17,
+            "id": "US-03",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_lang/user_stories.csv",
+            "score": 0.161,
+            "confidence_score": 0.2667,
+            "confidence_label": "very_low",
+            "support": [
+              "lexical"
+            ],
+            "matched_terms": [
+              "only",
+              "us",
+              "via",
+              "whitespace"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2916,
+            "graph_score": 0.0,
+            "text_preview": "US-03 | As a user, I want to detect blank strings reliably. | Treat null, empty, and whitespace-only (including tabs/newlines) as blank via StringValidator.checkBlank and CharUtils.isWhitespace."
+          }
+        ],
+        "test_case": [
+          {
+            "rank": 2,
+            "id": "TC-001",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_lang/test_cases.csv",
+            "score": 0.5316,
+            "confidence_score": 0.5407,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "lexical"
+            ],
+            "matched_terms": [
+              "01",
+              "accents",
+              "capitalize",
+              "normalize",
+              "us"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.9868,
+            "graph_score": 1.0,
+            "text_preview": "TC-001 | Normalize+capitalize accents | US-01 | 1. Input: \" café au lait \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Output is \"Cafe au lait\" with single spaces and first char uppercased."
+          },
+          {
+            "rank": 3,
+            "id": "TC-003",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_lang/test_cases.csv",
+            "score": 0.5289,
+            "confidence_score": 0.5368,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "lexical"
+            ],
+            "matched_terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us",
+              "whitespace"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.9671,
+            "graph_score": 1.0,
+            "text_preview": "TC-003 | Normalize+capitalize tabs/newlines | US-01 | 1. Input: \"\\t hello\\nworld \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Whitespace normalized to single spaces and result starts with 'H'."
+          },
+          {
+            "rank": 4,
+            "id": "TC-004",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_lang/test_cases.csv",
+            "score": 0.4991,
+            "confidence_score": 0.5082,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "lexical"
+            ],
+            "matched_terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.8697,
+            "graph_score": 1.0,
+            "text_preview": "TC-004 | Normalize+capitalize already capitalized | US-01 | 1. Input: \"Hello\". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Returns \"Hello\"."
+          }
+        ],
+        "code": [
+          {
+            "rank": 7,
+            "id": "traceability_lang/code/TextAnalytics.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_lang/code/TextAnalytics.java",
+            "score": 0.3975,
+            "confidence_score": 0.3969,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "accents",
+              "normalize",
+              "whitespace"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.426,
+            "graph_score": 1.0,
+            "text_preview": "traceability_lang/code/TextAnalytics.java package org.apache.commons.lang3; public class TextAnalytics { public static int wordCount(String s) { if (StringValidator.checkBlank(s)) return 0; String normalized = StringFormatter.normalizeWhit…"
+          },
+          {
+            "rank": 12,
+            "id": "traceability_lang/code/TextWrapper.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_lang/code/TextWrapper.java",
+            "score": 0.3168,
+            "confidence_score": 0.302,
+            "confidence_label": "very_low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [],
+            "dense_score": 0.9636,
+            "bm25_score": 0.0,
+            "graph_score": 0.0,
+            "text_preview": "traceability_lang/code/TextWrapper.java package org.apache.commons.lang3; public class TextWrapper { public static String wrap(String str, int w) { if (str == null) return null; if (w < 1) return str; String s = StringFormatter.normalizeWh…"
+          },
+          {
+            "rank": 18,
+            "id": "traceability_lang/code/StringUtils.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_lang/code/StringUtils.java",
+            "score": 0.158,
+            "confidence_score": 0.2639,
+            "confidence_label": "very_low",
+            "support": [
+              "lexical"
+            ],
+            "matched_terms": [
+              "capitalize"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.3059,
+            "graph_score": 0.0,
+            "text_preview": "traceability_lang/code/StringUtils.java package org.apache.commons.lang3; public class StringUtils { public static String capitalize(String s) { return StringFormatter.toFirstUpper(s); } public static String titleCase(String s) { return St…"
+          }
+        ],
+        "fault": [
+          {
+            "rank": 8,
+            "id": "Bug-04",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "TextWrapper.java",
+            "score": 0.3736,
+            "confidence_score": 0.4305,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "normalize",
+              "us",
+              "whitespace"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.445,
+            "graph_score": 1.0,
+            "text_preview": "Bug-04 | US-04 | TextWrapper.java | wrap fails to normalize whitespace before wrapping | String s = str; | String s = StringFormatter.normalizeWhitespace(str);"
+          },
+          {
+            "rank": 9,
+            "id": "Bug-19",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "WordUtils.java",
+            "score": 0.3732,
+            "confidence_score": 0.4053,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "normalize",
+              "us",
+              "whitespace"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.4391,
+            "graph_score": 1.0,
+            "text_preview": "Bug-19 | US-15 | WordUtils.java | initials fails to normalize whitespace causing empty tokens | String[] parts = s.split(\" \"); | String[] parts = StringFormatter.normalizeWhitespace(s).split(\" \");"
+          },
+          {
+            "rank": 13,
+            "id": "Bug-05",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "TextWrapper.java",
+            "score": 0.314,
+            "confidence_score": 0.4176,
+            "confidence_label": "low",
+            "support": [
+              "historical_fault_co_location",
+              "semantic"
+            ],
+            "matched_terms": [
+              "us"
+            ],
+            "dense_score": 0.9592,
+            "bm25_score": 0.0434,
+            "graph_score": 0.0,
+            "text_preview": "Bug-05 | US-05 | TextWrapper.java | smartWrap breaks words even when space exists | int breakAt = w; | int breakAt = s.lastIndexOf(' ', w);"
+          }
+        ]
+      },
+      "explanation_signals": {
+        "top_confidence_labels": [
+          "medium",
+          "medium",
+          "medium",
+          "medium",
+          "medium"
+        ],
+        "matched_terms_by_rank": [
+          {
+            "rank": 1,
+            "id": "US-01",
+            "terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us",
+              "via"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "TC-001",
+            "terms": [
+              "01",
+              "accents",
+              "capitalize",
+              "normalize",
+              "us"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "TC-003",
+            "terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us",
+              "whitespace"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "TC-004",
+            "terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "TC-002",
+            "terms": [
+              "01",
+              "capitalize",
+              "normalize",
+              "us"
+            ]
+          }
+        ],
+        "support_by_rank": [
+          {
+            "rank": 1,
+            "id": "US-01",
+            "support": [
+              "lexical",
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "TC-001",
+            "support": [
+              "graph",
+              "lexical"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "TC-003",
+            "support": [
+              "graph",
+              "lexical"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "TC-004",
+            "support": [
+              "graph",
+              "lexical"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "TC-002",
+            "support": [
+              "graph",
+              "lexical"
+            ]
+          }
+        ],
+        "graph_or_structural_support_by_rank": [
+          {
+            "rank": 1,
+            "id": "US-01",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 2,
+            "id": "TC-001",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 3,
+            "id": "TC-003",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 4,
+            "id": "TC-004",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 5,
+            "id": "TC-002",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          }
+        ]
+      },
+      "interpretation": "The ranking is focused: the first results stay in the selected dataset and expose story, test_case, code, fault. The top identifiers (US-01; TC-001; TC-003) and lexical cues (capitalize, normalize, via, accents, whitespace) are semantically aligned with the trigger, so the result is plausible and easy to interpret.",
+      "takeaway": "This case illustrates a clean scenario-level trace where lexical, semantic, and confidence signals point to the same concern."
+    },
+    {
+      "case_id": "C2",
+      "dataset_family": "small",
+      "dataset_id": "traceability_time_poc_complex",
+      "scenario_id": "REQ-2",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Controlled requirement-change case about overflow and 24h wrap; selected because it tends to mix relevant time artifacts with broader temporal utilities.",
+      "trigger_text": "US-02 (Time Addition): V1: Simple addition. → V2: Proper overflow handling (sec→min→hour, 24h wrap).",
+      "sanitized_query": "US-02 (Time Addition): V1: Simple addition. → V2: Proper overflow handling (sec→min→hour, 24h wrap).",
+      "query_note": "The sanitized query is for display only; the raw trigger_text was passed to the existing retrieval pipeline.",
+      "source_row": {
+        "Scenario ID": "2",
+        "Change Trigger (User Story V1 → V2)": "US-02 (Time Addition): V1: Simple addition. → V2: Proper overflow handling (sec→min→hour, 24h wrap).",
+        "Impact Category": "Logic Refinement"
+      },
+      "returned_artifact_types": [
+        "test_case",
+        "fault"
+      ],
+      "top_results_overall": [
+        {
+          "rank": 1,
+          "id": "TC-003",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_time_poc_complex/test_cases_time.csv",
+          "score": 0.6584,
+          "confidence_score": 0.6085,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "02",
+            "overflow",
+            "time",
+            "us"
+          ],
+          "dense_score": 0.9708,
+          "bm25_score": 0.5303,
+          "graph_score": 1.0,
+          "text_preview": "TC-003 | Add seconds without overflow | US-02 | Create Time 10:00:00; add 30 seconds; inspect result. | Resulting time is 10:00:30."
+        },
+        {
+          "rank": 2,
+          "id": "TC-018",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_time_poc_complex/test_cases_time.csv",
+          "score": 0.5383,
+          "confidence_score": 0.5445,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "time",
+            "us"
+          ],
+          "dense_score": 0.9876,
+          "bm25_score": 0.1812,
+          "graph_score": 1.0,
+          "text_preview": "TC-018 | Reject leap second | US-10 | Attempt to create Time 23:59:60. | System rejects unsupported leap second values."
+        },
+        {
+          "rank": 3,
+          "id": "Bug-03",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "TimeArithmetic.java",
+          "score": 0.5171,
+          "confidence_score": 0.5344,
+          "confidence_label": "medium",
+          "support": [
+            "lexical",
+            "graph",
+            "historical_fault_co_location"
+          ],
+          "matched_terms": [
+            "02",
+            "addition",
+            "hour",
+            "us",
+            "wrap"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "Bug-03 | US-02 | TimeArithmetic.java | Hour addition does not wrap at 24 | hour = (hour + addHours) % 24;"
+        },
+        {
+          "rank": 4,
+          "id": "Bug-04",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "TimeArithmetic.java",
+          "score": 0.4523,
+          "confidence_score": 0.4988,
+          "confidence_label": "low",
+          "support": [
+            "graph",
+            "historical_fault_co_location"
+          ],
+          "matched_terms": [
+            "02",
+            "hour",
+            "overflow",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.618,
+          "graph_score": 1.0,
+          "text_preview": "Bug-04 | US-02 | TimeArithmetic.java | Minute overflow not converted to hour | hour += minute / 60; minute %= 60;"
+        },
+        {
+          "rank": 5,
+          "id": "TC-022",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_time_poc_complex/test_cases_time.csv",
+          "score": 0.446,
+          "confidence_score": 0.4422,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "02",
+            "hour",
+            "time",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.5753,
+          "graph_score": 1.0,
+          "text_preview": "TC-022 | Add minutes with hour rollover | US-02 | Create Time 10:50:00; add 15 minutes. | Resulting time is 11:05:00 with hour incremented."
+        },
+        {
+          "rank": 6,
+          "id": "TC-021",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_time_poc_complex/test_cases_time.csv",
+          "score": 0.4455,
+          "confidence_score": 0.4414,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "02",
+            "hour",
+            "time",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.5715,
+          "graph_score": 1.0,
+          "text_preview": "TC-021 | Add minutes without hour change | US-02 | Create Time 10:15:00; add 20 minutes; inspect result. | Resulting time is 10:35:00 with hour unchanged."
+        },
+        {
+          "rank": 7,
+          "id": "TC-005",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_time_poc_complex/test_cases_time.csv",
+          "score": 0.4407,
+          "confidence_score": 0.4344,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "02",
+            "hour",
+            "time",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.5361,
+          "graph_score": 1.0,
+          "text_preview": "TC-005 | Add seconds with hour rollover | US-02 | Create Time 23:59:50; add 20 seconds. | Resulting time is 00:00:10 on the next day."
+        },
+        {
+          "rank": 8,
+          "id": "TC-019",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_time_poc_complex/test_cases_time.csv",
+          "score": 0.3819,
+          "confidence_score": 0.4063,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "addition",
+            "time",
+            "us"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.5698,
+          "graph_score": 1.0,
+          "text_preview": "TC-019 | Immutability after addition | US-11 | Add seconds to a Time instance; inspect original object. | Original Time instance remains unchanged."
+        }
+      ],
+      "top_results_by_type": {
+        "test_case": [
+          {
+            "rank": 1,
+            "id": "TC-003",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_time_poc_complex/test_cases_time.csv",
+            "score": 0.6584,
+            "confidence_score": 0.6085,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "02",
+              "overflow",
+              "time",
+              "us"
+            ],
+            "dense_score": 0.9708,
+            "bm25_score": 0.5303,
+            "graph_score": 1.0,
+            "text_preview": "TC-003 | Add seconds without overflow | US-02 | Create Time 10:00:00; add 30 seconds; inspect result. | Resulting time is 10:00:30."
+          },
+          {
+            "rank": 2,
+            "id": "TC-018",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_time_poc_complex/test_cases_time.csv",
+            "score": 0.5383,
+            "confidence_score": 0.5445,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "time",
+              "us"
+            ],
+            "dense_score": 0.9876,
+            "bm25_score": 0.1812,
+            "graph_score": 1.0,
+            "text_preview": "TC-018 | Reject leap second | US-10 | Attempt to create Time 23:59:60. | System rejects unsupported leap second values."
+          },
+          {
+            "rank": 5,
+            "id": "TC-022",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_time_poc_complex/test_cases_time.csv",
+            "score": 0.446,
+            "confidence_score": 0.4422,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "02",
+              "hour",
+              "time",
+              "us"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.5753,
+            "graph_score": 1.0,
+            "text_preview": "TC-022 | Add minutes with hour rollover | US-02 | Create Time 10:50:00; add 15 minutes. | Resulting time is 11:05:00 with hour incremented."
+          }
+        ],
+        "fault": [
+          {
+            "rank": 3,
+            "id": "Bug-03",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "TimeArithmetic.java",
+            "score": 0.5171,
+            "confidence_score": 0.5344,
+            "confidence_label": "medium",
+            "support": [
+              "lexical",
+              "graph",
+              "historical_fault_co_location"
+            ],
+            "matched_terms": [
+              "02",
+              "addition",
+              "hour",
+              "us",
+              "wrap"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "Bug-03 | US-02 | TimeArithmetic.java | Hour addition does not wrap at 24 | hour = (hour + addHours) % 24;"
+          },
+          {
+            "rank": 4,
+            "id": "Bug-04",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "TimeArithmetic.java",
+            "score": 0.4523,
+            "confidence_score": 0.4988,
+            "confidence_label": "low",
+            "support": [
+              "graph",
+              "historical_fault_co_location"
+            ],
+            "matched_terms": [
+              "02",
+              "hour",
+              "overflow",
+              "us"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.618,
+            "graph_score": 1.0,
+            "text_preview": "Bug-04 | US-02 | TimeArithmetic.java | Minute overflow not converted to hour | hour += minute / 60; minute %= 60;"
+          },
+          {
+            "rank": 9,
+            "id": "Bug-09\tTimeFormatter.java\tUS-04\tSingle digit hour not zero padded\tString.format(\"%02d\", hour)",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "Integer.toString(hour),,,,,,,",
+            "score": 0.3606,
+            "confidence_score": 0.425,
+            "confidence_label": "low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [
+              "hour",
+              "us"
+            ],
+            "dense_score": 0.9777,
+            "bm25_score": 0.293,
+            "graph_score": 0.0,
+            "text_preview": "Bug-09 TimeFormatter.java US-04 Single digit hour not zero padded String.format(\"%02d\", hour) | Integer.toString(hour),,,,,,,"
+          }
+        ],
+        "story": [
+          {
+            "rank": 11,
+            "id": "US-03",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_time_poc_complex/time_usr_stories.csv",
+            "score": 0.2957,
+            "confidence_score": 0.2975,
+            "confidence_label": "very_low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [
+              "us"
+            ],
+            "dense_score": 0.973,
+            "bm25_score": 0.0624,
+            "graph_score": 0.0,
+            "text_preview": "US-03 | As a user, I want to parse ISO dates reliably. | ISO date parsing must extract year, month, and day and reject malformed or non-ISO inputs."
+          }
+        ]
+      },
+      "explanation_signals": {
+        "top_confidence_labels": [
+          "medium",
+          "medium",
+          "medium",
+          "low",
+          "low"
+        ],
+        "matched_terms_by_rank": [
+          {
+            "rank": 1,
+            "id": "TC-003",
+            "terms": [
+              "02",
+              "overflow",
+              "time",
+              "us"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "TC-018",
+            "terms": [
+              "time",
+              "us"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "Bug-03",
+            "terms": [
+              "02",
+              "addition",
+              "hour",
+              "us",
+              "wrap"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "Bug-04",
+            "terms": [
+              "02",
+              "hour",
+              "overflow",
+              "us"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "TC-022",
+            "terms": [
+              "02",
+              "hour",
+              "time",
+              "us"
+            ]
+          }
+        ],
+        "support_by_rank": [
+          {
+            "rank": 1,
+            "id": "TC-003",
+            "support": [
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "TC-018",
+            "support": [
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "Bug-03",
+            "support": [
+              "lexical",
+              "graph",
+              "historical_fault_co_location"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "Bug-04",
+            "support": [
+              "graph",
+              "historical_fault_co_location"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "TC-022",
+            "support": [
+              "graph"
+            ]
+          }
+        ],
+        "graph_or_structural_support_by_rank": [
+          {
+            "rank": 1,
+            "id": "TC-003",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 2,
+            "id": "TC-018",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 3,
+            "id": "Bug-03",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 4,
+            "id": "Bug-04",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 5,
+            "id": "TC-022",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          }
+        ]
+      },
+      "interpretation": "The output is plausible but broader: the top ranks include test_case, fault, and the leading artifacts (TC-003; TC-018; Bug-03) share useful terms such as overflow, time, addition, hour, wrap. Some lower-ranked results widen to neighboring concepts, making the case partially successful rather than perfectly focused.",
+      "takeaway": "This case illustrates useful cross-artifact coverage with some ranking breadth that requires analyst judgment."
+    },
+    {
+      "case_id": "C3",
+      "dataset_family": "small",
+      "dataset_id": "traceability_math_large - corect final",
+      "scenario_id": "CODE-Bug-05",
+      "trigger_type": "code_change",
+      "selection_reason": "Code/fault-triggered division-by-zero case; selected to inspect whether code-side evidence leads back to code, tests, and related faults.",
+      "trigger_text": "Bug-05\nPrimeChecker.java\n1 treated as prime\nn==1 true\nn<=1 false",
+      "sanitized_query": "Bug-05 PrimeChecker.java 1 treated as prime n==1 true n<=1 false",
+      "query_note": "The sanitized query is for display only; the raw trigger_text was passed to the existing retrieval pipeline.",
+      "source_row": {
+        "bug_id": "Bug-05",
+        "file_path": "PrimeChecker.java",
+        "related_story": "US-05"
+      },
+      "returned_artifact_types": [
+        "fault",
+        "code",
+        "test_case",
+        "story"
+      ],
+      "top_results_overall": [
+        {
+          "rank": 1,
+          "id": "Bug-05",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "PrimeChecker.java",
+          "score": 0.8557,
+          "confidence_score": 0.9206,
+          "confidence_label": "high",
+          "support": [
+            "semantic",
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "05",
+            "1",
+            "as",
+            "bug",
+            "false",
+            "java",
+            "n",
+            "prime",
+            "primechecker",
+            "treated"
+          ],
+          "dense_score": 1.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "Bug-05 | US-05 | PrimeChecker.java | 1 treated as prime | n==1 true | n<=1 false"
+        },
+        {
+          "rank": 2,
+          "id": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+          "score": 0.4702,
+          "confidence_score": 0.4494,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "false",
+            "java",
+            "n",
+            "primechecker",
+            "true"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.5266,
+          "graph_score": 1.0,
+          "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java package org.apache.commons.math4; public class PrimeChecker{ public static boolean isPrime(int n){ if(n<=1) return false; if(n==2) return true; if(n%2==0…"
+        },
+        {
+          "rank": 3,
+          "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+          "score": 0.3809,
+          "confidence_score": 0.3682,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "java",
+            "n"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.2693,
+          "graph_score": 1.0,
+          "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java package org.apache.commons.math4; public class Fibonacci{ public static int fib(int n){ if(n<0) throw new IllegalArgumentException(\"negative n\"); if(n<=1) r…"
+        },
+        {
+          "rank": 4,
+          "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+          "score": 0.3792,
+          "confidence_score": 0.3657,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "java",
+            "n"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.2569,
+          "graph_score": 1.0,
+          "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java package org.apache.commons.math4; public class Factorial{ public static long fact(int n){ if(n<0) throw new IllegalArgumentException(\"negative n\"); long r=1…"
+        },
+        {
+          "rank": 5,
+          "id": "Bug-07",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "Fibonacci.java",
+          "score": 0.3712,
+          "confidence_score": 0.4041,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "bug",
+            "java",
+            "n"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.2699,
+          "graph_score": 1.0,
+          "text_preview": "Bug-07 | US-07 | Fibonacci.java | Wrong base case | return 1 | return n"
+        },
+        {
+          "rank": 6,
+          "id": "TC-031",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_math_large - corect final/test_cases.csv",
+          "score": 0.2927,
+          "confidence_score": 0.3027,
+          "confidence_label": "very_low",
+          "support": [
+            "semantic"
+          ],
+          "matched_terms": [
+            "1"
+          ],
+          "dense_score": 0.8579,
+          "bm25_score": 0.0483,
+          "graph_score": 0.0,
+          "text_preview": "TC-031 | Variance rejects length 1 | US-08 | Input: {7}; Call StatsVariance.var(v). | IllegalArgumentException is thrown for length < 2."
+        },
+        {
+          "rank": 7,
+          "id": "US-02",
+          "type": "story",
+          "artifact_subtype": "user_story",
+          "path": "traceability_math_large - corect final/user_stories.csv",
+          "score": 0.2712,
+          "confidence_score": 0.2876,
+          "confidence_label": "very_low",
+          "support": [
+            "semantic"
+          ],
+          "matched_terms": [
+            "as"
+          ],
+          "dense_score": 0.8647,
+          "bm25_score": 0.0259,
+          "graph_score": 0.0,
+          "text_preview": "US-02 | As a user, I want safe integer subtraction operations. | Arithmetic operations must behave consistently and be accessible through ArithmeticUtils."
+        },
+        {
+          "rank": 8,
+          "id": "traceability_math_large - corect final/src/org/apache/commons/math4/NumberTheoryService.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_math_large - corect final/src/org/apache/commons/math4/NumberTheoryService.java",
+          "score": 0.1844,
+          "confidence_score": 0.2848,
+          "confidence_label": "very_low",
+          "support": [
+            "lexical"
+          ],
+          "matched_terms": [
+            "1",
+            "java",
+            "n"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.2215,
+          "graph_score": 0.0,
+          "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/NumberTheoryService.java package org.apache.commons.math4; public class NumberTheoryService { public static boolean areCoprime(int a, int b) { return NumberTheory.gcd(a, b…"
+        }
+      ],
+      "top_results_by_type": {
+        "fault": [
+          {
+            "rank": 1,
+            "id": "Bug-05",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "PrimeChecker.java",
+            "score": 0.8557,
+            "confidence_score": 0.9206,
+            "confidence_label": "high",
+            "support": [
+              "semantic",
+              "lexical",
+              "graph"
+            ],
+            "matched_terms": [
+              "05",
+              "1",
+              "as",
+              "bug",
+              "false",
+              "java",
+              "n",
+              "prime",
+              "primechecker",
+              "treated"
+            ],
+            "dense_score": 1.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "Bug-05 | US-05 | PrimeChecker.java | 1 treated as prime | n==1 true | n<=1 false"
+          },
+          {
+            "rank": 5,
+            "id": "Bug-07",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "Fibonacci.java",
+            "score": 0.3712,
+            "confidence_score": 0.4041,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "bug",
+              "java",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2699,
+            "graph_score": 1.0,
+            "text_preview": "Bug-07 | US-07 | Fibonacci.java | Wrong base case | return 1 | return n"
+          },
+          {
+            "rank": 11,
+            "id": "Bug-06",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "Factorial.java",
+            "score": 0.1602,
+            "confidence_score": 0.2408,
+            "confidence_label": "very_low",
+            "support": [
+              "historical_fault_co_location"
+            ],
+            "matched_terms": [
+              "bug",
+              "java",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.221,
+            "graph_score": 0.0,
+            "text_preview": "Bug-06 | US-06 | Factorial.java | Negative allowed | loop anyway | guard n"
+          }
+        ],
+        "code": [
+          {
+            "rank": 2,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+            "score": 0.4702,
+            "confidence_score": 0.4494,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "false",
+              "java",
+              "n",
+              "primechecker",
+              "true"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.5266,
+            "graph_score": 1.0,
+            "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java package org.apache.commons.math4; public class PrimeChecker{ public static boolean isPrime(int n){ if(n<=1) return false; if(n==2) return true; if(n%2==0…"
+          },
+          {
+            "rank": 3,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+            "score": 0.3809,
+            "confidence_score": 0.3682,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "java",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2693,
+            "graph_score": 1.0,
+            "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java package org.apache.commons.math4; public class Fibonacci{ public static int fib(int n){ if(n<0) throw new IllegalArgumentException(\"negative n\"); if(n<=1) r…"
+          },
+          {
+            "rank": 4,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+            "score": 0.3792,
+            "confidence_score": 0.3657,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "java",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2569,
+            "graph_score": 1.0,
+            "text_preview": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java package org.apache.commons.math4; public class Factorial{ public static long fact(int n){ if(n<0) throw new IllegalArgumentException(\"negative n\"); long r=1…"
+          }
+        ],
+        "test_case": [
+          {
+            "rank": 6,
+            "id": "TC-031",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_math_large - corect final/test_cases.csv",
+            "score": 0.2927,
+            "confidence_score": 0.3027,
+            "confidence_label": "very_low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [
+              "1"
+            ],
+            "dense_score": 0.8579,
+            "bm25_score": 0.0483,
+            "graph_score": 0.0,
+            "text_preview": "TC-031 | Variance rejects length 1 | US-08 | Input: {7}; Call StatsVariance.var(v). | IllegalArgumentException is thrown for length < 2."
+          },
+          {
+            "rank": 15,
+            "id": "TC-052",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_math_large - corect final/test_cases.csv",
+            "score": 0.134,
+            "confidence_score": 0.2611,
+            "confidence_label": "very_low",
+            "support": [
+              "lexical"
+            ],
+            "matched_terms": [
+              "as",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.168,
+            "graph_score": 0.0,
+            "text_preview": "TC-052 | Fib-GCD computation | US-13 | Inputs: n=10, m=15; Call NumberTheoryService.fibGcd(n,m). | Returns gcd(F(10), F(15)) as a non-negative integer."
+          },
+          {
+            "rank": 16,
+            "id": "TC-030",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_math_large - corect final/test_cases.csv",
+            "score": 0.1339,
+            "confidence_score": 0.2611,
+            "confidence_label": "very_low",
+            "support": [
+              "lexical"
+            ],
+            "matched_terms": [
+              "1",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.1667,
+            "graph_score": 0.0,
+            "text_preview": "TC-030 | Sample variance two values | US-08 | Input: {2,4}; Call StatsVariance.var(v). | Result equals 2.0 (sample variance with n-1)."
+          }
+        ],
+        "story": [
+          {
+            "rank": 7,
+            "id": "US-02",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_math_large - corect final/user_stories.csv",
+            "score": 0.2712,
+            "confidence_score": 0.2876,
+            "confidence_label": "very_low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [
+              "as"
+            ],
+            "dense_score": 0.8647,
+            "bm25_score": 0.0259,
+            "graph_score": 0.0,
+            "text_preview": "US-02 | As a user, I want safe integer subtraction operations. | Arithmetic operations must behave consistently and be accessible through ArithmeticUtils."
+          },
+          {
+            "rank": 14,
+            "id": "US-08",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_math_large - corect final/user_stories.csv",
+            "score": 0.1353,
+            "confidence_score": 0.2601,
+            "confidence_label": "very_low",
+            "support": [
+              "lexical"
+            ],
+            "matched_terms": [
+              "1",
+              "as",
+              "n"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.1905,
+            "graph_score": 0.0,
+            "text_preview": "US-08 | As a user, I want variance calculations with clear preconditions. | StatsVariance must require at least two values and compute sample variance (n-1 denominator)."
+          }
+        ]
+      },
+      "explanation_signals": {
+        "top_confidence_labels": [
+          "high",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "matched_terms_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-05",
+            "terms": [
+              "05",
+              "1",
+              "as",
+              "bug",
+              "false",
+              "java",
+              "n",
+              "prime",
+              "primechecker",
+              "treated"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+            "terms": [
+              "1",
+              "false",
+              "java",
+              "n",
+              "primechecker",
+              "true"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+            "terms": [
+              "1",
+              "java",
+              "n"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+            "terms": [
+              "1",
+              "java",
+              "n"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "Bug-07",
+            "terms": [
+              "1",
+              "bug",
+              "java",
+              "n"
+            ]
+          }
+        ],
+        "support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-05",
+            "support": [
+              "semantic",
+              "lexical",
+              "graph"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "Bug-07",
+            "support": [
+              "graph"
+            ]
+          }
+        ],
+        "graph_or_structural_support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-05",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 2,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 3,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 4,
+            "id": "traceability_math_large - corect final/src/org/apache/commons/math4/Factorial.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 5,
+            "id": "Bug-07",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          }
+        ]
+      },
+      "interpretation": "The ranking is focused: the first results stay in the selected dataset and expose fault, code, test_case, story. The top identifiers (Bug-05; traceability_math_large - corect final/src/org/apache/commons/math4/PrimeChecker.java; traceability_math_large - corect final/src/org/apache/commons/math4/Fibonacci.java) and lexical cues (false, prime, primechecker, treated, true) are semantically aligned with the trigger, so the result is plausible and easy to interpret.",
+      "takeaway": "This case illustrates a clean scenario-level trace where lexical, semantic, and confidence signals point to the same concern."
+    },
+    {
+      "case_id": "C4",
+      "dataset_family": "small",
+      "dataset_id": "traceability_lang",
+      "scenario_id": "CODE-Bug-20",
+      "trigger_type": "code_change",
+      "selection_reason": "Code/fault-triggered language-normalization case; selected as a partially successful case where related string artifacts can broaden the ranking.",
+      "trigger_text": "Bug-20\nStringUtils.java\nnormalizeAndCapitalize bypasses LangFacade and misses accent removal\nreturn StringFormatter.toFirstUpper(s);\nreturn LangFacade.normalizeAndCapitalize(s);",
+      "sanitized_query": "Bug-20 StringUtils.java normalizeAndCapitalize bypasses LangFacade and misses accent removal return StringFormatter.toFirstUpper(s); return LangFacade.normalizeAndCapitalize(s);",
+      "query_note": "The sanitized query is for display only; the raw trigger_text was passed to the existing retrieval pipeline.",
+      "source_row": {
+        "bug_id": "Bug-20",
+        "file_path": "StringUtils.java",
+        "related_story": "US-01"
+      },
+      "returned_artifact_types": [
+        "fault",
+        "code",
+        "test_case"
+      ],
+      "top_results_overall": [
+        {
+          "rank": 1,
+          "id": "Bug-20",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "StringUtils.java",
+          "score": 0.8581,
+          "confidence_score": 0.922,
+          "confidence_label": "high",
+          "support": [
+            "semantic",
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "20",
+            "accent",
+            "and",
+            "bug",
+            "bypasses",
+            "java",
+            "langfacade",
+            "misses",
+            "normalizeandcapitalize",
+            "removal"
+          ],
+          "dense_score": 1.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "Bug-20 | US-01 | StringUtils.java | normalizeAndCapitalize bypasses LangFacade and misses accent removal | return StringFormatter.toFirstUpper(s); | return LangFacade.normalizeAndCapitalize(s);"
+        },
+        {
+          "rank": 2,
+          "id": "traceability_lang/code/StringUtils.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_lang/code/StringUtils.java",
+          "score": 0.6517,
+          "confidence_score": 0.5888,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "java",
+            "langfacade",
+            "normalizeandcapitalize",
+            "return",
+            "s",
+            "stringformatter",
+            "stringutils",
+            "tofirstupper"
+          ],
+          "dense_score": 0.843,
+          "bm25_score": 0.4841,
+          "graph_score": 1.0,
+          "text_preview": "traceability_lang/code/StringUtils.java package org.apache.commons.lang3; public class StringUtils { public static String capitalize(String s) { return StringFormatter.toFirstUpper(s); } public static String titleCase(String s) { return St…"
+        },
+        {
+          "rank": 3,
+          "id": "traceability_lang/code/LangFacade.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_lang/code/LangFacade.java",
+          "score": 0.6499,
+          "confidence_score": 0.5904,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "and",
+            "java",
+            "langfacade",
+            "normalizeandcapitalize",
+            "return",
+            "s",
+            "stringformatter",
+            "tofirstupper"
+          ],
+          "dense_score": 0.8634,
+          "bm25_score": 0.4368,
+          "graph_score": 1.0,
+          "text_preview": "traceability_lang/code/LangFacade.java package org.apache.commons.lang3; public class LangFacade { public static String normalizeAndCapitalize(String s) { if (s == null) return null; String normalized = StringFormatter.normalizeWhitespace(…"
+        },
+        {
+          "rank": 4,
+          "id": "traceability_lang/code/StringValidator.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_lang/code/StringValidator.java",
+          "score": 0.5788,
+          "confidence_score": 0.5507,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "java",
+            "return",
+            "s",
+            "stringformatter",
+            "stringutils"
+          ],
+          "dense_score": 0.8587,
+          "bm25_score": 0.2146,
+          "graph_score": 1.0,
+          "text_preview": "traceability_lang/code/StringValidator.java package org.apache.commons.lang3; public class StringValidator { public static boolean checkBlank(CharSequence cs) { if (cs == null) return true; for (int i = 0; i < cs.length(); i++) { if (!Char…"
+        },
+        {
+          "rank": 5,
+          "id": "traceability_lang/code/StringFormatter.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_lang/code/StringFormatter.java",
+          "score": 0.5778,
+          "confidence_score": 0.5483,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "java",
+            "return",
+            "s",
+            "stringformatter",
+            "tofirstupper"
+          ],
+          "dense_score": 0.8441,
+          "bm25_score": 0.2312,
+          "graph_score": 1.0,
+          "text_preview": "traceability_lang/code/StringFormatter.java package org.apache.commons.lang3; import java.text.Normalizer; public class StringFormatter { public static String toFirstUpper(String in) { if (in == null) return null; if (in.isEmpty()) return…"
+        },
+        {
+          "rank": 6,
+          "id": "Bug-13",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "LangFacade.java",
+          "score": 0.3616,
+          "confidence_score": 0.3989,
+          "confidence_label": "low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "bug",
+            "java",
+            "langfacade",
+            "return",
+            "s"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.2366,
+          "graph_score": 1.0,
+          "text_preview": "Bug-13 | US-11 | LangFacade.java | Identifier check forgets ASCII printable validation | // missing ASCII check | if (!StringValidator.isAsciiPrintable(s)) return false;"
+        },
+        {
+          "rank": 7,
+          "id": "traceability_lang/code/NumberUtils.java",
+          "type": "code",
+          "artifact_subtype": "java",
+          "path": "traceability_lang/code/NumberUtils.java",
+          "score": 0.3436,
+          "confidence_score": 0.3403,
+          "confidence_label": "very_low",
+          "support": [
+            "semantic"
+          ],
+          "matched_terms": [
+            "java",
+            "return",
+            "s"
+          ],
+          "dense_score": 0.8373,
+          "bm25_score": 0.1129,
+          "graph_score": 0.0,
+          "text_preview": "traceability_lang/code/NumberUtils.java package org.apache.commons.lang3; public class NumberUtils { public static boolean isParsable(String s) { if (StringValidator.checkBlank(s)) return false; try { Double.parseDouble(s.trim()); return t…"
+        },
+        {
+          "rank": 8,
+          "id": "TC-003",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "traceability_lang/test_cases.csv",
+          "score": 0.3395,
+          "confidence_score": 0.3437,
+          "confidence_label": "very_low",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "and",
+            "langfacade",
+            "normalizeandcapitalize"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.2555,
+          "graph_score": 1.0,
+          "text_preview": "TC-003 | Normalize+capitalize tabs/newlines | US-01 | 1. Input: \"\\t hello\\nworld \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Whitespace normalized to single spaces and result starts with 'H'."
+        }
+      ],
+      "top_results_by_type": {
+        "fault": [
+          {
+            "rank": 1,
+            "id": "Bug-20",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "StringUtils.java",
+            "score": 0.8581,
+            "confidence_score": 0.922,
+            "confidence_label": "high",
+            "support": [
+              "semantic",
+              "lexical",
+              "graph"
+            ],
+            "matched_terms": [
+              "20",
+              "accent",
+              "and",
+              "bug",
+              "bypasses",
+              "java",
+              "langfacade",
+              "misses",
+              "normalizeandcapitalize",
+              "removal"
+            ],
+            "dense_score": 1.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "Bug-20 | US-01 | StringUtils.java | normalizeAndCapitalize bypasses LangFacade and misses accent removal | return StringFormatter.toFirstUpper(s); | return LangFacade.normalizeAndCapitalize(s);"
+          },
+          {
+            "rank": 6,
+            "id": "Bug-13",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "LangFacade.java",
+            "score": 0.3616,
+            "confidence_score": 0.3989,
+            "confidence_label": "low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "bug",
+              "java",
+              "langfacade",
+              "return",
+              "s"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2366,
+            "graph_score": 1.0,
+            "text_preview": "Bug-13 | US-11 | LangFacade.java | Identifier check forgets ASCII printable validation | // missing ASCII check | if (!StringValidator.isAsciiPrintable(s)) return false;"
+          },
+          {
+            "rank": 16,
+            "id": "Bug-03",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "StringValidator.java",
+            "score": 0.3146,
+            "confidence_score": 0.4097,
+            "confidence_label": "low",
+            "support": [
+              "semantic",
+              "historical_fault_co_location"
+            ],
+            "matched_terms": [
+              "bug",
+              "java",
+              "return"
+            ],
+            "dense_score": 0.8448,
+            "bm25_score": 0.083,
+            "graph_score": 0.0,
+            "text_preview": "Bug-03 | US-03 | StringValidator.java | Blank check ignores tabs/newlines | if(cs.charAt(i)!=' ') return false; | if(!CharUtils.isWhitespace(cs.charAt(i))) return false;"
+          }
+        ],
+        "code": [
+          {
+            "rank": 2,
+            "id": "traceability_lang/code/StringUtils.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_lang/code/StringUtils.java",
+            "score": 0.6517,
+            "confidence_score": 0.5888,
+            "confidence_label": "medium",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "java",
+              "langfacade",
+              "normalizeandcapitalize",
+              "return",
+              "s",
+              "stringformatter",
+              "stringutils",
+              "tofirstupper"
+            ],
+            "dense_score": 0.843,
+            "bm25_score": 0.4841,
+            "graph_score": 1.0,
+            "text_preview": "traceability_lang/code/StringUtils.java package org.apache.commons.lang3; public class StringUtils { public static String capitalize(String s) { return StringFormatter.toFirstUpper(s); } public static String titleCase(String s) { return St…"
+          },
+          {
+            "rank": 3,
+            "id": "traceability_lang/code/LangFacade.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_lang/code/LangFacade.java",
+            "score": 0.6499,
+            "confidence_score": 0.5904,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "and",
+              "java",
+              "langfacade",
+              "normalizeandcapitalize",
+              "return",
+              "s",
+              "stringformatter",
+              "tofirstupper"
+            ],
+            "dense_score": 0.8634,
+            "bm25_score": 0.4368,
+            "graph_score": 1.0,
+            "text_preview": "traceability_lang/code/LangFacade.java package org.apache.commons.lang3; public class LangFacade { public static String normalizeAndCapitalize(String s) { if (s == null) return null; String normalized = StringFormatter.normalizeWhitespace(…"
+          },
+          {
+            "rank": 4,
+            "id": "traceability_lang/code/StringValidator.java",
+            "type": "code",
+            "artifact_subtype": "java",
+            "path": "traceability_lang/code/StringValidator.java",
+            "score": 0.5788,
+            "confidence_score": 0.5507,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "java",
+              "return",
+              "s",
+              "stringformatter",
+              "stringutils"
+            ],
+            "dense_score": 0.8587,
+            "bm25_score": 0.2146,
+            "graph_score": 1.0,
+            "text_preview": "traceability_lang/code/StringValidator.java package org.apache.commons.lang3; public class StringValidator { public static boolean checkBlank(CharSequence cs) { if (cs == null) return true; for (int i = 0; i < cs.length(); i++) { if (!Char…"
+          }
+        ],
+        "test_case": [
+          {
+            "rank": 8,
+            "id": "TC-003",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_lang/test_cases.csv",
+            "score": 0.3395,
+            "confidence_score": 0.3437,
+            "confidence_label": "very_low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "and",
+              "langfacade",
+              "normalizeandcapitalize"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2555,
+            "graph_score": 1.0,
+            "text_preview": "TC-003 | Normalize+capitalize tabs/newlines | US-01 | 1. Input: \"\\t hello\\nworld \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Whitespace normalized to single spaces and result starts with 'H'."
+          },
+          {
+            "rank": 9,
+            "id": "TC-001",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_lang/test_cases.csv",
+            "score": 0.3393,
+            "confidence_score": 0.3434,
+            "confidence_label": "very_low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "and",
+              "langfacade",
+              "normalizeandcapitalize"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2544,
+            "graph_score": 1.0,
+            "text_preview": "TC-001 | Normalize+capitalize accents | US-01 | 1. Input: \" café au lait \". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Output is \"Cafe au lait\" with single spaces and first char uppercased."
+          },
+          {
+            "rank": 11,
+            "id": "TC-004",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "traceability_lang/test_cases.csv",
+            "score": 0.3264,
+            "confidence_score": 0.3367,
+            "confidence_label": "very_low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "langfacade",
+              "normalizeandcapitalize"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2576,
+            "graph_score": 1.0,
+            "text_preview": "TC-004 | Normalize+capitalize already capitalized | US-01 | 1. Input: \"Hello\". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Returns \"Hello\"."
+          }
+        ],
+        "story": [
+          {
+            "rank": 15,
+            "id": "US-01",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_lang/user_stories.csv",
+            "score": 0.3202,
+            "confidence_score": 0.3337,
+            "confidence_label": "very_low",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "and",
+              "langfacade",
+              "normalizeandcapitalize"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 0.2608,
+            "graph_score": 1.0,
+            "text_preview": "US-01 | As a user, I want to NOT normalize text and NOT capitalize it safely. | and capitalize the first character via LangFacade.normalizeAndCapitalize without crashing on nulls."
+          },
+          {
+            "rank": 17,
+            "id": "US-12",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "traceability_lang/user_stories.csv",
+            "score": 0.2581,
+            "confidence_score": 0.2806,
+            "confidence_label": "very_low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [
+              "and"
+            ],
+            "dense_score": 0.8368,
+            "bm25_score": 0.011,
+            "graph_score": 0.0,
+            "text_preview": "US-12 | As a user, I want to compute text analytics like word/line counts. | Compute word count, line count, and numeric-likeness using TextAnalytics with shared normalization and searching utilities."
+          }
+        ]
+      },
+      "explanation_signals": {
+        "top_confidence_labels": [
+          "high",
+          "medium",
+          "medium",
+          "medium",
+          "medium"
+        ],
+        "matched_terms_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-20",
+            "terms": [
+              "20",
+              "accent",
+              "and",
+              "bug",
+              "bypasses",
+              "java",
+              "langfacade",
+              "misses",
+              "normalizeandcapitalize",
+              "removal"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "traceability_lang/code/StringUtils.java",
+            "terms": [
+              "java",
+              "langfacade",
+              "normalizeandcapitalize",
+              "return",
+              "s",
+              "stringformatter",
+              "stringutils",
+              "tofirstupper"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "traceability_lang/code/LangFacade.java",
+            "terms": [
+              "and",
+              "java",
+              "langfacade",
+              "normalizeandcapitalize",
+              "return",
+              "s",
+              "stringformatter",
+              "tofirstupper"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "traceability_lang/code/StringValidator.java",
+            "terms": [
+              "java",
+              "return",
+              "s",
+              "stringformatter",
+              "stringutils"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "traceability_lang/code/StringFormatter.java",
+            "terms": [
+              "java",
+              "return",
+              "s",
+              "stringformatter",
+              "tofirstupper"
+            ]
+          }
+        ],
+        "support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-20",
+            "support": [
+              "semantic",
+              "lexical",
+              "graph"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "traceability_lang/code/StringUtils.java",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "traceability_lang/code/LangFacade.java",
+            "support": [
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "traceability_lang/code/StringValidator.java",
+            "support": [
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "traceability_lang/code/StringFormatter.java",
+            "support": [
+              "graph"
+            ]
+          }
+        ],
+        "graph_or_structural_support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-20",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 2,
+            "id": "traceability_lang/code/StringUtils.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 3,
+            "id": "traceability_lang/code/LangFacade.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 4,
+            "id": "traceability_lang/code/StringValidator.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 5,
+            "id": "traceability_lang/code/StringFormatter.java",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          }
+        ]
+      },
+      "interpretation": "The output is plausible but broader: the top ranks include fault, code, test_case, and the leading artifacts (Bug-20; traceability_lang/code/StringUtils.java; traceability_lang/code/LangFacade.java) share useful terms such as accent, bypasses, langfacade, misses, normalizeandcapitalize, removal, return, stringformatter. Some lower-ranked results widen to neighboring concepts, making the case partially successful rather than perfectly focused.",
+      "takeaway": "This case illustrates useful cross-artifact coverage with some ranking breadth that requires analyst judgment."
+    },
+    {
+      "case_id": "C5",
+      "dataset_family": "large",
+      "dataset_id": "dataset-api",
+      "scenario_id": "REQ-1",
+      "trigger_type": "requirement_change",
+      "selection_reason": "Repository-backed requirement-change case with broad command-schema validation scope; selected to illustrate scale-driven ambiguity and noisy but interpretable links.",
+      "trigger_text": "US-177 (Command schema validation): V1 baseline behavior. → V2 refined behavior (stricter validation + clearer errors + edge-case handling).",
+      "sanitized_query": "US-177 (Command schema validation): V1 baseline behavior. → V2 refined behavior (stricter validation + clearer errors + edge-case handling).",
+      "query_note": "The sanitized query is for display only; the raw trigger_text was passed to the existing retrieval pipeline.",
+      "source_row": {
+        "Scenario ID": "1",
+        "Change Trigger (User Story V1 → V2)": "US-177 (Command schema validation): V1 baseline behavior. → V2 refined behavior (stricter validation + clearer errors + edge-case handling).",
+        "Impact Category": "Validation / Correctness"
+      },
+      "returned_artifact_types": [
+        "fault",
+        "test_case"
+      ],
+      "top_results_overall": [
+        {
+          "rank": 1,
+          "id": "Bug-045",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "slack.com/archives/C02SX9E5B55, k8s.io/., N/A",
+          "score": 0.5768,
+          "confidence_score": 0.5661,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "behavior",
+            "v1",
+            "v2"
+          ],
+          "dense_score": 0.9907,
+          "bm25_score": 0.4191,
+          "graph_score": 1.0,
+          "text_preview": "Bug-045 | NONE | slack.com/archives/C02SX9E5B55, k8s.io/., N/A | Source: https://github.com/devfile/api/issues/1514 State: CLOSED Labels: kind/bug, area/registry, lifecycle/stale, lifecycle/rotten Title: odo v2 check failing with `java-qua…"
+        },
+        {
+          "rank": 2,
+          "id": "Bug-021",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "slack.com/archives/C02SX9E5B55, k8s.io/., N/A",
+          "score": 0.5134,
+          "confidence_score": 0.5318,
+          "confidence_label": "medium",
+          "support": [
+            "graph",
+            "semantic"
+          ],
+          "matched_terms": [
+            "behavior"
+          ],
+          "dense_score": 0.9952,
+          "bm25_score": 0.1382,
+          "graph_score": 1.0,
+          "text_preview": "Bug-021 | NONE | slack.com/archives/C02SX9E5B55, k8s.io/., N/A | Source: https://github.com/devfile/api/issues/1663 State: CLOSED Labels: kind/bug, area/registry, area/ci Title: OpenShift CI testing fails due to unexpected status codes Des…"
+        },
+        {
+          "rank": 3,
+          "id": "TC-183",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "dataset-api/devfile_api_test_cases.csv",
+          "score": 0.4625,
+          "confidence_score": 0.5044,
+          "confidence_label": "medium",
+          "support": [
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "behavior",
+            "command",
+            "handling",
+            "schema",
+            "validation"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "TC-183 | Go test: Exec Command | NONE | 1. Run Go test 'Test_ExecCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output. | Go test…"
+        },
+        {
+          "rank": 4,
+          "id": "TC-184",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "dataset-api/devfile_api_test_cases.csv",
+          "score": 0.4625,
+          "confidence_score": 0.5044,
+          "confidence_label": "medium",
+          "support": [
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "behavior",
+            "command",
+            "handling",
+            "schema",
+            "validation"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "TC-184 | Go test: Apply Command | NONE | 1. Run Go test 'Test_ApplyCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output. | Go te…"
+        },
+        {
+          "rank": 5,
+          "id": "TC-185",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "dataset-api/devfile_api_test_cases.csv",
+          "score": 0.4625,
+          "confidence_score": 0.5044,
+          "confidence_label": "medium",
+          "support": [
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "behavior",
+            "command",
+            "handling",
+            "schema",
+            "validation"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "TC-185 | Go test: Composite Command | NONE | 1. Run Go test 'Test_CompositeCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output.…"
+        },
+        {
+          "rank": 6,
+          "id": "TC-186",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "dataset-api/devfile_api_test_cases.csv",
+          "score": 0.4625,
+          "confidence_score": 0.5044,
+          "confidence_label": "medium",
+          "support": [
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "behavior",
+            "command",
+            "handling",
+            "schema",
+            "validation"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "TC-186 | Go test: Multi Command | NONE | 1. Run Go test 'Test_MultiCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output. | Go te…"
+        },
+        {
+          "rank": 7,
+          "id": "Bug-254",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "build.sh, generator/build/generator, ./pkg/apis/workspaces/v1alpha2",
+          "score": 0.4432,
+          "confidence_score": 0.4641,
+          "confidence_label": "low",
+          "support": [
+            "semantic"
+          ],
+          "matched_terms": [
+            "behavior",
+            "v1",
+            "v2"
+          ],
+          "dense_score": 0.9814,
+          "bm25_score": 0.7512,
+          "graph_score": 0.0,
+          "text_preview": "Bug-254 | NONE | build.sh, generator/build/generator, ./pkg/apis/workspaces/v1alpha2 | Source: https://github.com/devfile/api/issues/247 State: CLOSED Labels: kind/bug, area/api Title: Seperate v1 and v2 generated files (eg. generated crd…"
+        },
+        {
+          "rank": 8,
+          "id": "TC-198",
+          "type": "test_case",
+          "artifact_subtype": "test_case",
+          "path": "dataset-api/devfile_api_test_cases.csv",
+          "score": 0.4302,
+          "confidence_score": 0.4682,
+          "confidence_label": "low",
+          "support": [
+            "graph",
+            "lexical"
+          ],
+          "matched_terms": [
+            "behavior",
+            "handling",
+            "schema",
+            "validation"
+          ],
+          "dense_score": 0.0,
+          "bm25_score": 0.8532,
+          "graph_score": 1.0,
+          "text_preview": "TC-198 | Go test: Schema | NONE | 1. Run Go test 'Test_Schema' in 'schema_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output. | Go test passes:…"
+        }
+      ],
+      "top_results_by_type": {
+        "fault": [
+          {
+            "rank": 1,
+            "id": "Bug-045",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "slack.com/archives/C02SX9E5B55, k8s.io/., N/A",
+            "score": 0.5768,
+            "confidence_score": 0.5661,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "behavior",
+              "v1",
+              "v2"
+            ],
+            "dense_score": 0.9907,
+            "bm25_score": 0.4191,
+            "graph_score": 1.0,
+            "text_preview": "Bug-045 | NONE | slack.com/archives/C02SX9E5B55, k8s.io/., N/A | Source: https://github.com/devfile/api/issues/1514 State: CLOSED Labels: kind/bug, area/registry, lifecycle/stale, lifecycle/rotten Title: odo v2 check failing with `java-qua…"
+          },
+          {
+            "rank": 2,
+            "id": "Bug-021",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "slack.com/archives/C02SX9E5B55, k8s.io/., N/A",
+            "score": 0.5134,
+            "confidence_score": 0.5318,
+            "confidence_label": "medium",
+            "support": [
+              "graph",
+              "semantic"
+            ],
+            "matched_terms": [
+              "behavior"
+            ],
+            "dense_score": 0.9952,
+            "bm25_score": 0.1382,
+            "graph_score": 1.0,
+            "text_preview": "Bug-021 | NONE | slack.com/archives/C02SX9E5B55, k8s.io/., N/A | Source: https://github.com/devfile/api/issues/1663 State: CLOSED Labels: kind/bug, area/registry, area/ci Title: OpenShift CI testing fails due to unexpected status codes Des…"
+          },
+          {
+            "rank": 7,
+            "id": "Bug-254",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "build.sh, generator/build/generator, ./pkg/apis/workspaces/v1alpha2",
+            "score": 0.4432,
+            "confidence_score": 0.4641,
+            "confidence_label": "low",
+            "support": [
+              "semantic"
+            ],
+            "matched_terms": [
+              "behavior",
+              "v1",
+              "v2"
+            ],
+            "dense_score": 0.9814,
+            "bm25_score": 0.7512,
+            "graph_score": 0.0,
+            "text_preview": "Bug-254 | NONE | build.sh, generator/build/generator, ./pkg/apis/workspaces/v1alpha2 | Source: https://github.com/devfile/api/issues/247 State: CLOSED Labels: kind/bug, area/api Title: Seperate v1 and v2 generated files (eg. generated crd…"
+          }
+        ],
+        "test_case": [
+          {
+            "rank": 3,
+            "id": "TC-183",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "dataset-api/devfile_api_test_cases.csv",
+            "score": 0.4625,
+            "confidence_score": 0.5044,
+            "confidence_label": "medium",
+            "support": [
+              "lexical",
+              "graph"
+            ],
+            "matched_terms": [
+              "behavior",
+              "command",
+              "handling",
+              "schema",
+              "validation"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "TC-183 | Go test: Exec Command | NONE | 1. Run Go test 'Test_ExecCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output. | Go test…"
+          },
+          {
+            "rank": 4,
+            "id": "TC-184",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "dataset-api/devfile_api_test_cases.csv",
+            "score": 0.4625,
+            "confidence_score": 0.5044,
+            "confidence_label": "medium",
+            "support": [
+              "lexical",
+              "graph"
+            ],
+            "matched_terms": [
+              "behavior",
+              "command",
+              "handling",
+              "schema",
+              "validation"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "TC-184 | Go test: Apply Command | NONE | 1. Run Go test 'Test_ApplyCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output. | Go te…"
+          },
+          {
+            "rank": 5,
+            "id": "TC-185",
+            "type": "test_case",
+            "artifact_subtype": "test_case",
+            "path": "dataset-api/devfile_api_test_cases.csv",
+            "score": 0.4625,
+            "confidence_score": 0.5044,
+            "confidence_label": "medium",
+            "support": [
+              "lexical",
+              "graph"
+            ],
+            "matched_terms": [
+              "behavior",
+              "command",
+              "handling",
+              "schema",
+              "validation"
+            ],
+            "dense_score": 0.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "TC-185 | Go test: Composite Command | NONE | 1. Run Go test 'Test_CompositeCommand' in 'api_test.go'. 2. Execute the test harness against the v200 devfile schema inputs. 3. Observe assertions and error handling behavior in the test output.…"
+          }
+        ]
+      },
+      "explanation_signals": {
+        "top_confidence_labels": [
+          "medium",
+          "medium",
+          "medium",
+          "medium",
+          "medium"
+        ],
+        "matched_terms_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-045",
+            "terms": [
+              "behavior",
+              "v1",
+              "v2"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "Bug-021",
+            "terms": [
+              "behavior"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "TC-183",
+            "terms": [
+              "behavior",
+              "command",
+              "handling",
+              "schema",
+              "validation"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "TC-184",
+            "terms": [
+              "behavior",
+              "command",
+              "handling",
+              "schema",
+              "validation"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "TC-185",
+            "terms": [
+              "behavior",
+              "command",
+              "handling",
+              "schema",
+              "validation"
+            ]
+          }
+        ],
+        "support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-045",
+            "support": [
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "Bug-021",
+            "support": [
+              "graph",
+              "semantic"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "TC-183",
+            "support": [
+              "lexical",
+              "graph"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "TC-184",
+            "support": [
+              "lexical",
+              "graph"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "TC-185",
+            "support": [
+              "lexical",
+              "graph"
+            ]
+          }
+        ],
+        "graph_or_structural_support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-045",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 2,
+            "id": "Bug-021",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 3,
+            "id": "TC-183",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 4,
+            "id": "TC-184",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 5,
+            "id": "TC-185",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          }
+        ]
+      },
+      "interpretation": "The retrieval is interpretable but noisy: the top ranks include fault, test_case, yet broad repository vocabulary and generic validation terms spread attention across artifacts such as Bug-045; Bug-021; TC-183; TC-184. The explanation fields help identify why these artifacts surfaced, but the ranking is less decisive.",
+      "takeaway": "This case illustrates the ambiguity that appears when a broad repository-backed trigger maps to many plausible artifacts."
+    },
+    {
+      "case_id": "C6",
+      "dataset_family": "large",
+      "dataset_id": "dataset-app-frontend",
+      "scenario_id": "CODE-Bug-015",
+      "trigger_type": "code_change",
+      "selection_reason": "Repository-backed code/fault trigger about option-fetch failures blocking PDF generation; selected to show mixed fault/story retrieval on a realistic UI workflow.",
+      "trigger_text": "Bug-015\ncom/Altinn/app-frontend-react/pull/3840\nSource: https://github.com/Altinn/app-frontend-react/issues/3842\n\nState: OPEN\n\nLabels: kind/bug, status/triage\n\nTitle: Options failing to fetch should block PDF generation\n\nDescription:\n### Description of the bug\n\nIf an option query fails, the PDF will just show the option value. Instead it should fail and let the user retry. Options are usually simple json files that rarely fail to fetch, however, apps can also implement option lists through code with any kind of external dependency which may fail for unkown reasons. In the browser normally this is not a huge issue, the layout will look a bit weird but the user can always refresh the page. But a PDF generated successfully is permanent, so we should not accept potentially saving incorrect data there.\n\nhttps://github.com/Altinn/app-frontend-react/pull/3840#issuecomment-3502246948\n\n### Steps To Reproduce\n\n1. Instantiate an app with options and fill it out\n2. Go to `?pdf=1`\n3. Block the options request in browser dev tools\n4. Summary should show the option value (not label) and readyForPrint is present\n\n### Additional Information\n\n_No response_",
+      "sanitized_query": "Bug-015 com/Altinn/app-frontend-react/pull/3840 Source: https://github.com/Altinn/app-frontend-react/issues/3842 State: OPEN Labels: kind/bug, status/triage Title: Options failing to fetch should block PDF generation Description: ### Description of the bug If an option query fails, the PDF will just show the option value. Instead it should fail and let the user retry. Options are usually simple json files that rarely fail to fetch, however, apps can also implement option lists through code with any kind of external dependency which may fail for unkown reasons. In the browser normally this is not a huge issue, the layout will look a bit weird but the user can always refresh the page. But a PDF generated successfully is permanent, so we should not accept potentially saving incorrect data there. https://github.com/Altinn/app-frontend-react/pull/3840#issuecomment-3502246948 ### Steps To Reproduce 1. Instantiate an app with options and fill it out 2. Go to `?pdf=1` 3. Block the options request in browser dev tools 4. Summary should show the option value (not label) and readyForPrint is present ### Additional Information _No response_",
+      "query_note": "The sanitized query is for display only; the raw trigger_text was passed to the existing retrieval pipeline.",
+      "source_row": {
+        "bug_id": "Bug-015",
+        "file_path": "com/Altinn/app-frontend-react/pull/3840",
+        "related_story": "NONE"
+      },
+      "returned_artifact_types": [
+        "fault",
+        "story"
+      ],
+      "top_results_overall": [
+        {
+          "rank": 1,
+          "id": "Bug-015",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "com/Altinn/app-frontend-react/pull/3840",
+          "score": 0.8674,
+          "confidence_score": 0.7271,
+          "confidence_label": "medium",
+          "support": [
+            "semantic",
+            "lexical",
+            "graph"
+          ],
+          "matched_terms": [
+            "015",
+            "1",
+            "2",
+            "3",
+            "3502246948",
+            "3840",
+            "3842",
+            "4",
+            "_no",
+            "a"
+          ],
+          "dense_score": 1.0,
+          "bm25_score": 1.0,
+          "graph_score": 1.0,
+          "text_preview": "Bug-015 | NONE | com/Altinn/app-frontend-react/pull/3840 | Source: https://github.com/Altinn/app-frontend-react/issues/3842 State: OPEN Labels: kind/bug, status/triage Title: Options failing to fetch should block PDF generation Description…"
+        },
+        {
+          "rank": 2,
+          "id": "Bug-342",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "loaded/fetched, com/Altinn/app-frontend-react/assets/74791975/8e2e1598-e3ba-437f-861c-6653fd355d39, 200kb/s",
+          "score": 0.6248,
+          "confidence_score": 0.5555,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "_no",
+            "a",
+            "additional",
+            "altinn",
+            "an",
+            "and"
+          ],
+          "dense_score": 0.6953,
+          "bm25_score": 0.3506,
+          "graph_score": 1.0,
+          "text_preview": "Bug-342 | NONE | loaded/fetched, com/Altinn/app-frontend-react/assets/74791975/8e2e1598-e3ba-437f-861c-6653fd355d39, 200kb/s | Source: https://github.com/Altinn/app-frontend-react/issues/1556 State: CLOSED Labels: kind/bug, fe-v4 Title: Su…"
+        },
+        {
+          "rank": 3,
+          "id": "Bug-520",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "list/group, and/or, images.githubusercontent.com/22012997/177298584-15b6dbda-3d8e-4238-bb8f-e2351c570a60.png",
+          "score": 0.6185,
+          "confidence_score": 0.553,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "a",
+            "additional",
+            "altinn",
+            "an",
+            "and",
+            "app"
+          ],
+          "dense_score": 0.7026,
+          "bm25_score": 0.2608,
+          "graph_score": 1.0,
+          "text_preview": "Bug-520 | NONE | list/group, and/or, images.githubusercontent.com/22012997/177298584-15b6dbda-3d8e-4238-bb8f-e2351c570a60.png | Source: https://github.com/Altinn/app-frontend-react/issues/319 State: CLOSED Labels: org/okokrim, kind/bug Tit…"
+        },
+        {
+          "rank": 4,
+          "id": "Bug-323",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "UNMAPPED_FROM_ISSUE",
+          "score": 0.6151,
+          "confidence_score": 0.5495,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "_no",
+            "a",
+            "additional",
+            "altinn",
+            "an",
+            "and"
+          ],
+          "dense_score": 0.6898,
+          "bm25_score": 0.3049,
+          "graph_score": 1.0,
+          "text_preview": "Bug-323 | NONE | UNMAPPED_FROM_ISSUE | Source: https://github.com/Altinn/app-frontend-react/issues/1685 State: CLOSED Labels: kind/bug, org/brg Title: IAppOptionsProvider does not provide options if \"mapping\" field is never set Description…"
+        },
+        {
+          "rank": 5,
+          "id": "Bug-376",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "applicationmetadata.js, ui/layouts",
+          "score": 0.6126,
+          "confidence_score": 0.5512,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "_no",
+            "a",
+            "additional",
+            "altinn",
+            "an",
+            "and"
+          ],
+          "dense_score": 0.714,
+          "bm25_score": 0.3176,
+          "graph_score": 1.0,
+          "text_preview": "Bug-376 | NONE | applicationmetadata.js, ui/layouts | Source: https://github.com/Altinn/app-frontend-react/issues/1302 State: OPEN Labels: kind/bug Title: AttachmentList option \"includePDF\" removes other attachments from AttachmentList.dat…"
+        },
+        {
+          "rank": 6,
+          "id": "Bug-246",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "com/Altinn/app-frontend-react/assets/47412359/fc636db5-fd10-412b-a175-8ae7fe467677",
+          "score": 0.6068,
+          "confidence_score": 0.5463,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "3",
+            "_no",
+            "a",
+            "additional",
+            "also",
+            "altinn",
+            "an",
+            "and"
+          ],
+          "dense_score": 0.7001,
+          "bm25_score": 0.2968,
+          "graph_score": 1.0,
+          "text_preview": "Bug-246 | NONE | com/Altinn/app-frontend-react/assets/47412359/fc636db5-fd10-412b-a175-8ae7fe467677 | Source: https://github.com/Altinn/app-frontend-react/issues/2071 State: CLOSED Labels: kind/bug Title: ListComponent fails to identify se…"
+        },
+        {
+          "rank": 7,
+          "id": "Bug-125",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "com/user-attachments/assets/750532ca-47ff-4ec3-9389-a6addff95212, com/user-attachments/assets/f0c0e65b-1b5c-45a5-b83c-77f4bf457da3, apps.tt02.altinn.no/mat/mattilsynet-dyrepleier",
+          "score": 0.5996,
+          "confidence_score": 0.5423,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "_no",
+            "a",
+            "additional",
+            "also",
+            "altinn",
+            "and"
+          ],
+          "dense_score": 0.7001,
+          "bm25_score": 0.3022,
+          "graph_score": 1.0,
+          "text_preview": "Bug-125 | NONE | com/user-attachments/assets/750532ca-47ff-4ec3-9389-a6addff95212, com/user-attachments/assets/f0c0e65b-1b5c-45a5-b83c-77f4bf457da3, apps.tt02.altinn.no/mat/mattilsynet-dyrepleier | Source: https://github.com/Altinn/app-fro…"
+        },
+        {
+          "rank": 8,
+          "id": "Bug-090",
+          "type": "fault",
+          "artifact_subtype": "fault",
+          "path": "slack.com/archives/C02EJ9HKQA3/p1744023729225749, com/user-attachments/assets/313b750f-5df2-4c55-b1fa-eeeacb34f033, com/Altinn/app-frontend-react/issues/3126",
+          "score": 0.5935,
+          "confidence_score": 0.5377,
+          "confidence_label": "medium",
+          "support": [
+            "graph"
+          ],
+          "matched_terms": [
+            "1",
+            "2",
+            "_no",
+            "a",
+            "additional",
+            "altinn",
+            "and",
+            "app",
+            "are",
+            "browser"
+          ],
+          "dense_score": 0.6903,
+          "bm25_score": 0.302,
+          "graph_score": 1.0,
+          "text_preview": "Bug-090 | NONE | slack.com/archives/C02EJ9HKQA3/p1744023729225749, com/user-attachments/assets/313b750f-5df2-4c55-b1fa-eeeacb34f033, com/Altinn/app-frontend-react/issues/3126 | Source: https://github.com/Altinn/app-frontend-react/issues/32…"
+        }
+      ],
+      "top_results_by_type": {
+        "fault": [
+          {
+            "rank": 1,
+            "id": "Bug-015",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "com/Altinn/app-frontend-react/pull/3840",
+            "score": 0.8674,
+            "confidence_score": 0.7271,
+            "confidence_label": "medium",
+            "support": [
+              "semantic",
+              "lexical",
+              "graph"
+            ],
+            "matched_terms": [
+              "015",
+              "1",
+              "2",
+              "3",
+              "3502246948",
+              "3840",
+              "3842",
+              "4",
+              "_no",
+              "a"
+            ],
+            "dense_score": 1.0,
+            "bm25_score": 1.0,
+            "graph_score": 1.0,
+            "text_preview": "Bug-015 | NONE | com/Altinn/app-frontend-react/pull/3840 | Source: https://github.com/Altinn/app-frontend-react/issues/3842 State: OPEN Labels: kind/bug, status/triage Title: Options failing to fetch should block PDF generation Description…"
+          },
+          {
+            "rank": 2,
+            "id": "Bug-342",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "loaded/fetched, com/Altinn/app-frontend-react/assets/74791975/8e2e1598-e3ba-437f-861c-6653fd355d39, 200kb/s",
+            "score": 0.6248,
+            "confidence_score": 0.5555,
+            "confidence_label": "medium",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "_no",
+              "a",
+              "additional",
+              "altinn",
+              "an",
+              "and"
+            ],
+            "dense_score": 0.6953,
+            "bm25_score": 0.3506,
+            "graph_score": 1.0,
+            "text_preview": "Bug-342 | NONE | loaded/fetched, com/Altinn/app-frontend-react/assets/74791975/8e2e1598-e3ba-437f-861c-6653fd355d39, 200kb/s | Source: https://github.com/Altinn/app-frontend-react/issues/1556 State: CLOSED Labels: kind/bug, fe-v4 Title: Su…"
+          },
+          {
+            "rank": 3,
+            "id": "Bug-520",
+            "type": "fault",
+            "artifact_subtype": "fault",
+            "path": "list/group, and/or, images.githubusercontent.com/22012997/177298584-15b6dbda-3d8e-4238-bb8f-e2351c570a60.png",
+            "score": 0.6185,
+            "confidence_score": 0.553,
+            "confidence_label": "medium",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "a",
+              "additional",
+              "altinn",
+              "an",
+              "and",
+              "app"
+            ],
+            "dense_score": 0.7026,
+            "bm25_score": 0.2608,
+            "graph_score": 1.0,
+            "text_preview": "Bug-520 | NONE | list/group, and/or, images.githubusercontent.com/22012997/177298584-15b6dbda-3d8e-4238-bb8f-e2351c570a60.png | Source: https://github.com/Altinn/app-frontend-react/issues/319 State: CLOSED Labels: org/okokrim, kind/bug Tit…"
+          }
+        ],
+        "story": [
+          {
+            "rank": 9,
+            "id": "US-077",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "dataset-app-frontend/altinn_app_frontend_react_user_stories.csv",
+            "score": 0.5804,
+            "confidence_score": 0.5333,
+            "confidence_label": "medium",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "2",
+              "3",
+              "a",
+              "also",
+              "altinn",
+              "an",
+              "and",
+              "app",
+              "apps"
+            ],
+            "dense_score": 0.7126,
+            "bm25_score": 0.2757,
+            "graph_score": 1.0,
+            "text_preview": "US-077 | As a user, I want add support in Application frontend for BPMN gateways. | Source: https://github.com/Altinn/app-frontend-react/issues/262 State: CLOSED Labels: area/process, status/ready-for-dev, Epic, kind/user-story, org/brg De…"
+          },
+          {
+            "rank": 10,
+            "id": "US-129",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "dataset-app-frontend/altinn_app_frontend_react_user_stories.csv",
+            "score": 0.5738,
+            "confidence_score": 0.5288,
+            "confidence_label": "medium",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "2",
+              "a",
+              "altinn",
+              "an",
+              "and",
+              "any",
+              "app",
+              "can",
+              "com"
+            ],
+            "dense_score": 0.706,
+            "bm25_score": 0.2621,
+            "graph_score": 1.0,
+            "text_preview": "US-129 | As a user, I want as a developer I want to edit the receipt text in Altinn Studio. | Source: https://github.com/Altinn/app-frontend-react/issues/171 State: CLOSED Labels: area/process, area/receipt, org/dibk, org/nbib, org/okokrim…"
+          },
+          {
+            "rank": 11,
+            "id": "US-032",
+            "type": "story",
+            "artifact_subtype": "user_story",
+            "path": "dataset-app-frontend/altinn_app_frontend_react_user_stories.csv",
+            "score": 0.5667,
+            "confidence_score": 0.5256,
+            "confidence_label": "medium",
+            "support": [
+              "graph"
+            ],
+            "matched_terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "a",
+              "additional",
+              "altinn",
+              "and",
+              "any",
+              "app"
+            ],
+            "dense_score": 0.7112,
+            "bm25_score": 0.2249,
+            "graph_score": 1.0,
+            "text_preview": "US-032 | As a user, I want support summary component in another step. | Source: https://github.com/Altinn/app-frontend-react/issues/996 State: CLOSED Labels: kind/user-story, feature-complete, area/summary Description: ### Description Curr…"
+          }
+        ]
+      },
+      "explanation_signals": {
+        "top_confidence_labels": [
+          "medium",
+          "medium",
+          "medium",
+          "medium",
+          "medium"
+        ],
+        "matched_terms_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-015",
+            "terms": [
+              "015",
+              "1",
+              "2",
+              "3",
+              "3502246948",
+              "3840",
+              "3842",
+              "4",
+              "_no",
+              "a"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "Bug-342",
+            "terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "_no",
+              "a",
+              "additional",
+              "altinn",
+              "an",
+              "and"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "Bug-520",
+            "terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "a",
+              "additional",
+              "altinn",
+              "an",
+              "and",
+              "app"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "Bug-323",
+            "terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "_no",
+              "a",
+              "additional",
+              "altinn",
+              "an",
+              "and"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "Bug-376",
+            "terms": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "_no",
+              "a",
+              "additional",
+              "altinn",
+              "an",
+              "and"
+            ]
+          }
+        ],
+        "support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-015",
+            "support": [
+              "semantic",
+              "lexical",
+              "graph"
+            ]
+          },
+          {
+            "rank": 2,
+            "id": "Bug-342",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 3,
+            "id": "Bug-520",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 4,
+            "id": "Bug-323",
+            "support": [
+              "graph"
+            ]
+          },
+          {
+            "rank": 5,
+            "id": "Bug-376",
+            "support": [
+              "graph"
+            ]
+          }
+        ],
+        "graph_or_structural_support_by_rank": [
+          {
+            "rank": 1,
+            "id": "Bug-015",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 2,
+            "id": "Bug-342",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 3,
+            "id": "Bug-520",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 4,
+            "id": "Bug-323",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          },
+          {
+            "rank": 5,
+            "id": "Bug-376",
+            "graph_score": 1.0,
+            "graph_neighbors": 0,
+            "graph_method": "personalized_pagerank[inferred]",
+            "reranker_graph_distance": null,
+            "reranker_graph_depth": null,
+            "reranker_has_graph_path": null
+          }
+        ]
+      },
+      "interpretation": "The output is plausible but broader: the top ranks include fault, story, and the leading artifacts (Bug-015; Bug-342; Bug-520) share useful terms such as app. Some lower-ranked results widen to neighboring concepts, making the case partially successful rather than perfectly focused.",
+      "takeaway": "This case illustrates useful cross-artifact coverage with some ranking breadth that requires analyst judgment."
+    }
+  ],
+  "paper_ready_conclusion": "Across the cases, the retrieval framework is most convincing when the trigger contains specific domain terms or identifiers that align with code, tests, and faults. The same explanation fields remain useful on noisier repository-backed inputs, but rankings become broader and require more analyst interpretation because many artifacts share generic validation, UI, or schema vocabulary.",
+  "paper_table_suggestion": {
+    "columns": [
+      "Case",
+      "Trigger type",
+      "Dataset",
+      "Returned types",
+      "Main observation"
+    ],
+    "rows": [
+      {
+        "Case": "C1",
+        "Trigger type": "requirement_change",
+        "Dataset": "traceability_lang",
+        "Returned types": "story, test_case, code, fault",
+        "Main observation": "This case illustrates a clean scenario-level trace where lexical, semantic, and confidence signals point to the same concern."
+      },
+      {
+        "Case": "C2",
+        "Trigger type": "requirement_change",
+        "Dataset": "traceability_time_poc_complex",
+        "Returned types": "test_case, fault",
+        "Main observation": "This case illustrates useful cross-artifact coverage with some ranking breadth that requires analyst judgment."
+      },
+      {
+        "Case": "C3",
+        "Trigger type": "code_change",
+        "Dataset": "traceability_math_large - corect final",
+        "Returned types": "fault, code, test_case, story",
+        "Main observation": "This case illustrates a clean scenario-level trace where lexical, semantic, and confidence signals point to the same concern."
+      },
+      {
+        "Case": "C4",
+        "Trigger type": "code_change",
+        "Dataset": "traceability_lang",
+        "Returned types": "fault, code, test_case",
+        "Main observation": "This case illustrates useful cross-artifact coverage with some ranking breadth that requires analyst judgment."
+      },
+      {
+        "Case": "C5",
+        "Trigger type": "requirement_change",
+        "Dataset": "dataset-api",
+        "Returned types": "fault, test_case",
+        "Main observation": "This case illustrates the ambiguity that appears when a broad repository-backed trigger maps to many plausible artifacts."
+      },
+      {
+        "Case": "C6",
+        "Trigger type": "code_change",
+        "Dataset": "dataset-app-frontend",
+        "Returned types": "fault, story",
+        "Main observation": "This case illustrates useful cross-artifact coverage with some ranking breadth that requires analyst judgment."
+      }
+    ]
+  }
+}
