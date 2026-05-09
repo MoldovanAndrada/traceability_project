@@ -1,36 +1,40 @@
 import hashlib
-import numpy as np
+import importlib.util
+import math
 
-try:
-    from sentence_transformers import SentenceTransformer
 
+def _has_module(name: str) -> bool:
+    return importlib.util.find_spec(name) is not None
+
+
+class _FallbackEmbedder:
+    """Lightweight deterministic embedder for dependency-constrained local runs."""
+
+    def __init__(self, dim: int = 384):
+        self.dim = dim
+
+    def encode(self, texts: list[str]):
+        vectors = []
+        for text in texts:
+            vec = [0.0] * self.dim
+            for tok in (text or "").lower().split():
+                digest = hashlib.sha256(tok.encode("utf-8")).digest()
+                idx = int.from_bytes(digest[:4], "little") % self.dim
+                vec[idx] += 1.0
+            norm = math.sqrt(sum(value * value for value in vec))
+            if norm > 0:
+                vec = [value / norm for value in vec]
+            vectors.append(vec)
+        return vectors
+
+
+if _has_module("sentence_transformers"):
+    SentenceTransformer = importlib.import_module("sentence_transformers").SentenceTransformer
     model = SentenceTransformer("all-MiniLM-L6-v2")
-except ModuleNotFoundError:
-    class _FallbackEmbedder:
-        """Lightweight fallback so local runs work even without sentence-transformers."""
-
-        def __init__(self, dim: int = 384):
-            self.dim = dim
-
-        def encode(self, texts: list[str]):
-            vectors = []
-            for text in texts:
-                vec = np.zeros(self.dim, dtype=np.float32)
-                for tok in (text or "").lower().split():
-                    digest = hashlib.sha256(tok.encode("utf-8")).digest()
-                    idx = int.from_bytes(digest[:4], "little") % self.dim
-                    vec[idx] += 1.0
-                norm = np.linalg.norm(vec)
-                if norm > 0:
-                    vec = vec / norm
-                vectors.append(vec)
-            return np.asarray(vectors, dtype=np.float32)
-
+else:
     model = _FallbackEmbedder()
 
 
-
 def embed_texts(texts: list[str]):
-    """Encode texts into float32 embeddings compatible with FAISS."""
-    vectors = model.encode(texts)
-    return np.asarray(vectors, dtype=np.float32)
+    """Encode texts into dense vectors compatible with the project search index."""
+    return model.encode(texts)
