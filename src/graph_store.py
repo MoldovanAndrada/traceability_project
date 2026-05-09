@@ -1,12 +1,10 @@
+import importlib.util
 import json
 import os
 import re
 from collections import defaultdict
 
-try:
-    import numpy as np
-except ImportError:  # optional dependency
-    np = None
+np = importlib.import_module("numpy") if importlib.util.find_spec("numpy") else None
 
 _STORY_REF_PATTERN = re.compile(r"US-\d+", re.IGNORECASE)
 _TEST_REF_PATTERN = re.compile(r"TC-\d+", re.IGNORECASE)
