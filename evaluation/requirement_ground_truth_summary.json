@@ -2,89 +2,89 @@
   "main_quantitative_results": {
     "overall": {
       "query_count": 104,
-      "hit@10": 0.8653846153846154,
-      "mrr": 0.7706915680473373,
-      "map": 0.6101867757293582
+      "hit@10": 0.9423076923076923,
+      "mrr": 0.8196123321123321,
+      "map": 0.7149127021482791
     }
   },
   "per_dataset": {
     "traceability_lang": {
       "query_count": 45,
-      "hit@10": 0.8888888888888888,
-      "mrr": 0.8044444444444445,
-      "map": 0.6596181657848325
+      "hit@10": 1.0,
+      "mrr": 0.8814814814814814,
+      "map": 0.826711097544431
     },
     "traceability_math_large - corect final": {
       "query_count": 42,
-      "hit@10": 0.8095238095238095,
-      "mrr": 0.6992521367521368,
-      "map": 0.5467655823012966
+      "hit@10": 0.8809523809523809,
+      "mrr": 0.7199924414210128,
+      "map": 0.5864255717827147
     },
     "traceability_time_poc_complex": {
       "query_count": 17,
       "hit@10": 0.9411764705882353,
-      "mrr": 0.857843137254902,
-      "map": 0.6360266328753723
+      "mrr": 0.9019607843137255,
+      "map": 0.7364145658263306
     }
   },
   "per_artifact_type": {
     "code": {
       "query_count": 31,
-      "hit@10": 0.8064516129032258,
-      "mrr": 0.6865591397849463,
-      "map": 0.35931899641577064
+      "hit@10": 1.0,
+      "mrr": 0.7473118279569892,
+      "map": 0.5202953766663444
     },
     "test_cases": {
       "query_count": 38,
       "hit@10": 1.0,
-      "mrr": 0.9736842105263158,
-      "map": 0.8366748219755739
+      "mrr": 1.0,
+      "map": 0.9246746674378253
     },
     "faults": {
       "query_count": 35,
-      "hit@10": 0.7714285714285715,
-      "mrr": 0.6248168498168498,
-      "map": 0.5864826443397871
+      "hit@10": 0.8285714285714286,
+      "mrr": 0.6878004535147392,
+      "map": 0.659546485260771
     }
   },
   "secondary_top10_diagnostics": {
     "overall": {
-      "top10_precision": 0.23365384615384616,
-      "top10_recall": 0.7231341575091575,
-      "top10_f1": 0.3360506088305862
+      "top10_precision": 0.2653846153846154,
+      "top10_recall": 0.824896978021978,
+      "top10_f1": 0.38358160347696546
     },
     "per_dataset": {
       "traceability_lang": {
-        "top10_precision": 0.21333333333333332,
-        "top10_recall": 0.7574074074074074,
-        "top10_f1": 0.31525141525141526
+        "top10_precision": 0.2644444444444444,
+        "top10_recall": 0.937037037037037,
+        "top10_f1": 0.39368039368039376
       },
       "traceability_math_large - corect final": {
-        "top10_precision": 0.2357142857142857,
-        "top10_recall": 0.6615079365079366,
-        "top10_f1": 0.33793904508190226
+        "top10_precision": 0.2571428571428572,
+        "top10_recall": 0.7150793650793651,
+        "top10_f1": 0.36820243248814677
       },
       "traceability_time_poc_complex": {
-        "top10_precision": 0.2823529411764706,
-        "top10_recall": 0.7846638655462185,
-        "top10_f1": 0.3864417493310227
+        "top10_precision": 0.2882352941176471,
+        "top10_recall": 0.7993697478991596,
+        "top10_f1": 0.3948451106755605
       }
     },
     "per_artifact_type": {
       "code": {
-        "top10_precision": 0.12580645161290324,
-        "top10_recall": 0.46021505376344085,
-        "top10_f1": 0.1921272276110986
+        "top10_precision": 0.2161290322580645,
+        "top10_recall": 0.7548387096774193,
+        "top10_f1": 0.3280837442127765
       },
       "test_cases": {
-        "top10_precision": 0.42368421052631583,
-        "top10_recall": 0.9128759398496241,
-        "top10_f1": 0.5731061722934788
+        "top10_precision": 0.4315789473684211,
+        "top10_recall": 0.931296992481203,
+        "top10_f1": 0.5841337412157845
       },
       "faults": {
-        "top10_precision": 0.12285714285714285,
-        "top10_recall": 0.75,
-        "top10_f1": 0.20615099186527758
+        "top10_precision": 0.12857142857142856,
+        "top10_recall": 0.7714285714285715,
+        "top10_f1": 0.2149945292802436
       }
     }
   },
@@ -97,7 +97,6 @@
     "parse_failure": 0
   },
   "retrieval_depth": 100,
-  "retrieval_backend": "self_contained_dataset_local",
   "corpus_sanity_summary": {
     "total_records": 355,
     "counts_per_dataset": {
@@ -157,37 +156,46 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/TextAnalytics.java"
+          "traceability_lang/code/TextAnalytics.java",
+          "traceability_lang/code/StringUtils.java",
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/TextWrapper.java",
+          "traceability_lang/code/NumberUtils.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/Validate.java",
+          "traceability_lang/code/Clamp.java",
+          "traceability_lang/code/WordUtils.java"
         ],
         "test_cases": [
           "TC-001",
           "TC-003",
-          "TC-002",
           "TC-004",
+          "TC-002",
           "TC-061",
-          "TC-006",
+          "TC-050",
           "TC-015",
           "TC-046",
-          "TC-050",
-          "TC-056"
+          "TC-056",
+          "TC-062"
         ],
         "faults": [
-          "Bug-04",
-          "Bug-15",
+          "Bug-20",
           "Bug-19",
           "Bug-01",
-          "Bug-09",
+          "Bug-15",
           "Bug-18",
-          "Bug-20",
-          "Bug-02",
-          "Bug-03",
-          "Bug-05"
+          "Bug-04",
+          "Bug-09",
+          "Bug-14",
+          "Bug-05",
+          "Bug-16"
         ]
       },
       "first relevant rank by type": {
-        "code": "",
+        "code": 2,
         "test_cases": 1,
-        "faults": 4
+        "faults": 1
       },
       "dataset_filter_empty": false,
       "missing_story_match": false
@@ -213,35 +221,44 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/LangFacade.java"
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/NumberUtils.java",
+          "traceability_lang/code/TextAnalytics.java",
+          "traceability_lang/code/BooleanUtils.java",
+          "traceability_lang/code/TextWrapper.java",
+          "traceability_lang/code/WordUtils.java",
+          "traceability_lang/code/ObjectUtils.java",
+          "traceability_lang/code/CharUtils.java"
         ],
         "test_cases": [
           "TC-007",
+          "TC-008",
           "TC-005",
           "TC-006",
-          "TC-008",
-          "TC-001",
           "TC-014",
+          "TC-001",
+          "TC-061",
           "TC-003",
           "TC-019",
-          "TC-031",
-          "TC-032"
+          "TC-065"
         ],
         "faults": [
           "Bug-02",
-          "Bug-08",
           "Bug-18",
+          "Bug-08",
+          "Bug-20",
+          "Bug-19",
           "Bug-01",
-          "Bug-03",
-          "Bug-04",
+          "Bug-13",
+          "Bug-12",
           "Bug-05",
-          "Bug-06",
-          "Bug-07",
-          "Bug-09"
+          "Bug-14"
         ]
       },
       "first relevant rank by type": {
-        "code": "",
+        "code": 3,
         "test_cases": 1,
         "faults": 1
       },
@@ -269,36 +286,44 @@
       },
       "ranked IDs by type": {
         "code": [
+          "traceability_lang/code/LangFacade.java",
           "traceability_lang/code/CharUtils.java",
-          "traceability_lang/code/LangFacade.java"
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/TextWrapper.java",
+          "traceability_lang/code/ArrayUtils.java",
+          "traceability_lang/code/ObjectUtils.java",
+          "traceability_lang/code/Clamp.java",
+          "traceability_lang/code/TextAnalytics.java",
+          "traceability_lang/code/NumberUtils.java"
         ],
         "test_cases": [
           "TC-010",
-          "TC-003",
-          "TC-006",
           "TC-011",
-          "TC-009",
           "TC-012",
-          "TC-007",
-          "TC-015",
-          "TC-017",
-          "TC-018"
+          "TC-009",
+          "TC-006",
+          "TC-059",
+          "TC-042",
+          "TC-003",
+          "TC-053",
+          "TC-043"
         ],
         "faults": [
           "Bug-03",
-          "Bug-01",
           "Bug-13",
-          "Bug-04",
+          "Bug-19",
+          "Bug-18",
+          "Bug-01",
           "Bug-05",
           "Bug-09",
-          "Bug-18",
-          "Bug-19",
-          "Bug-02",
-          "Bug-06"
+          "Bug-04",
+          "Bug-06",
+          "Bug-17"
         ]
       },
       "first relevant rank by type": {
-        "code": 1,
+        "code": 2,
         "test_cases": 1,
         "faults": 1
       },
@@ -326,40 +351,43 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/StringUtils.java",
           "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/LangFacade.java",
-          "traceability_lang/code/RegExUtils.java",
+          "traceability_lang/code/StringUtils.java",
           "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/TextWrapper.java"
+          "traceability_lang/code/TextWrapper.java",
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/ObjectUtils.java",
+          "traceability_lang/code/NumberUtils.java",
+          "traceability_lang/code/Clamp.java",
+          "traceability_lang/code/Validate.java"
         ],
         "test_cases": [
           "TC-015",
           "TC-016",
-          "TC-003",
           "TC-013",
           "TC-014",
-          "TC-001",
-          "TC-002",
-          "TC-017",
+          "TC-003",
           "TC-020",
+          "TC-017",
+          "TC-002",
+          "TC-001",
           "TC-061"
         ],
         "faults": [
           "Bug-04",
-          "Bug-17",
           "Bug-19",
-          "Bug-09",
           "Bug-11",
-          "Bug-16",
+          "Bug-17",
           "Bug-20",
-          "Bug-01",
-          "Bug-02",
-          "Bug-03"
+          "Bug-09",
+          "Bug-16",
+          "Bug-05",
+          "Bug-15"
         ]
       },
       "first relevant rank by type": {
-        "code": 5,
+        "code": 3,
         "test_cases": 1,
         "faults": 1
       },
@@ -388,31 +416,39 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/LangFacade.java"
+          "traceability_lang/code/NumberUtils.java",
+          "traceability_lang/code/Clamp.java",
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/StringUtils.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/TextAnalytics.java",
+          "traceability_lang/code/Validate.java",
+          "traceability_lang/code/WordUtils.java"
         ],
         "test_cases": [
-          "TC-017",
           "TC-018",
+          "TC-017",
           "TC-019",
           "TC-020",
+          "TC-015",
           "TC-013",
           "TC-014",
-          "TC-015",
           "TC-061",
-          "TC-067",
-          "TC-001"
+          "TC-016",
+          "TC-059"
         ],
         "faults": [
           "Bug-05",
+          "Bug-19",
+          "Bug-18",
           "Bug-04",
           "Bug-08",
-          "Bug-16",
-          "Bug-17",
-          "Bug-18",
-          "Bug-19",
-          "Bug-20",
           "Bug-01",
-          "Bug-02"
+          "Bug-11",
+          "Bug-20",
+          "Bug-17",
+          "Bug-16"
         ]
       },
       "first relevant rank by type": {
@@ -445,36 +481,43 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/StringValidator.java",
           "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/StringValidator.java"
+          "traceability_lang/code/ObjectUtils.java",
+          "traceability_lang/code/ArrayUtils.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/RegExUtils.java",
+          "traceability_lang/code/WordUtils.java",
+          "traceability_lang/code/TextWrapper.java"
         ],
         "test_cases": [
           "TC-024",
+          "TC-023",
           "TC-021",
           "TC-022",
-          "TC-023",
           "TC-066",
-          "TC-001",
-          "TC-002",
-          "TC-003",
-          "TC-007",
-          "TC-008"
+          "TC-052",
+          "TC-017",
+          "TC-008",
+          "TC-016",
+          "TC-001"
         ],
         "faults": [
           "Bug-06",
           "Bug-07",
+          "Bug-15",
           "Bug-17",
-          "Bug-01",
-          "Bug-02",
-          "Bug-03",
-          "Bug-04",
-          "Bug-05",
-          "Bug-08",
-          "Bug-09"
+          "Bug-20",
+          "Bug-13",
+          "Bug-12",
+          "Bug-11",
+          "Bug-19",
+          "Bug-18"
         ]
       },
       "first relevant rank by type": {
-        "code": 2,
+        "code": 3,
         "test_cases": 1,
         "faults": 1
       },
@@ -503,31 +546,40 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/StringSearcher.java"
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/StringUtils.java",
+          "traceability_lang/code/TextAnalytics.java",
+          "traceability_lang/code/NumberUtils.java",
+          "traceability_lang/code/WordUtils.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/TextWrapper.java",
+          "traceability_lang/code/Validate.java",
+          "traceability_lang/code/StringValidator.java"
         ],
         "test_cases": [
           "TC-025",
           "TC-026",
           "TC-027",
           "TC-028",
+          "TC-062",
           "TC-067",
           "TC-011",
-          "TC-035",
           "TC-043",
-          "TC-062",
+          "TC-035",
           "TC-065"
         ],
         "faults": [
           "Bug-07",
           "Bug-14",
-          "Bug-01",
-          "Bug-02",
-          "Bug-03",
-          "Bug-04",
+          "Bug-16",
+          "Bug-15",
           "Bug-05",
-          "Bug-06",
-          "Bug-08",
-          "Bug-09"
+          "Bug-11",
+          "Bug-03",
+          "Bug-02",
+          "Bug-17",
+          "Bug-20"
         ]
       },
       "first relevant rank by type": {
@@ -559,35 +611,44 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/LangFacade.java"
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/TextWrapper.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/WordUtils.java",
+          "traceability_lang/code/NumberUtils.java",
+          "traceability_lang/code/TextAnalytics.java",
+          "traceability_lang/code/StringUtils.java",
+          "traceability_lang/code/Clamp.java",
+          "traceability_lang/code/ObjectUtils.java"
         ],
         "test_cases": [
           "TC-032",
-          "TC-007",
           "TC-029",
           "TC-031",
+          "TC-030",
+          "TC-007",
           "TC-061",
           "TC-067",
-          "TC-001",
-          "TC-003",
-          "TC-005",
-          "TC-006"
+          "TC-008",
+          "TC-006",
+          "TC-005"
         ],
         "faults": [
           "Bug-08",
           "Bug-02",
           "Bug-05",
-          "Bug-16",
-          "Bug-17",
           "Bug-20",
-          "Bug-01",
-          "Bug-03",
-          "Bug-04",
-          "Bug-06"
+          "Bug-17",
+          "Bug-16",
+          "Bug-19",
+          "Bug-18",
+          "Bug-15",
+          "Bug-14"
         ]
       },
       "first relevant rank by type": {
-        "code": "",
+        "code": 2,
         "test_cases": 1,
         "faults": 1
       },
