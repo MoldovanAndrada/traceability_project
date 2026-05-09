@@ -2,89 +2,117 @@
   "main_quantitative_results": {
     "overall": {
       "query_count": 104,
-      "hit@10": 0.9423076923076923,
-      "mrr": 0.8196123321123321,
-      "map": 0.7149127021482791
+      "hit@5": 0.7211538461538461,
+      "hit@10": 0.8557692307692307,
+      "mrr": 0.5903551309801309,
+      "map": 0.41377784974270465
     }
   },
   "per_dataset": {
     "traceability_lang": {
       "query_count": 45,
-      "hit@10": 1.0,
-      "mrr": 0.8814814814814814,
-      "map": 0.826711097544431
+      "hit@5": 0.8,
+      "hit@10": 0.9333333333333333,
+      "mrr": 0.6270017636684303,
+      "map": 0.4868149517816492
     },
     "traceability_math_large - corect final": {
       "query_count": 42,
-      "hit@10": 0.8809523809523809,
-      "mrr": 0.7199924414210128,
-      "map": 0.5864255717827147
+      "hit@5": 0.6428571428571429,
+      "hit@10": 0.7619047619047619,
+      "mrr": 0.53150209578781,
+      "map": 0.3547989770627663
     },
     "traceability_time_poc_complex": {
       "query_count": 17,
-      "hit@10": 0.9411764705882353,
-      "mrr": 0.9019607843137255,
-      "map": 0.7364145658263306
+      "hit@5": 0.7058823529411765,
+      "hit@10": 0.8823529411764706,
+      "mrr": 0.6387509549274255,
+      "map": 0.36615685331946424
     }
   },
   "per_artifact_type": {
     "code": {
       "query_count": 31,
-      "hit@10": 1.0,
-      "mrr": 0.7473118279569892,
-      "map": 0.5202953766663444
+      "hit@5": 0.8387096774193549,
+      "hit@10": 0.8709677419354839,
+      "mrr": 0.613978494623656,
+      "map": 0.3760752688172043
     },
     "test_cases": {
       "query_count": 38,
-      "hit@10": 1.0,
-      "mrr": 1.0,
-      "map": 0.9246746674378253
+      "hit@5": 0.7368421052631579,
+      "hit@10": 0.9210526315789473,
+      "mrr": 0.6531347307663097,
+      "map": 0.42157929952761775
     },
     "faults": {
       "query_count": 35,
-      "hit@10": 0.8285714285714286,
-      "mrr": 0.6878004535147392,
-      "map": 0.659546485260771
+      "hit@5": 0.6,
+      "hit@10": 0.7714285714285715,
+      "mrr": 0.5012708719851577,
+      "map": 0.4387014187959566
     }
   },
-  "secondary_top10_diagnostics": {
+  "secondary_diagnostics": {
     "overall": {
-      "top10_precision": 0.2653846153846154,
-      "top10_recall": 0.824896978021978,
-      "top10_f1": 0.38358160347696546
+      "top5_precision": 0.25192307692307697,
+      "top5_recall": 0.43970924908424913,
+      "top5_f1": 0.3009763206878592,
+      "top10_precision": 0.175,
+      "top10_recall": 0.5999198717948718,
+      "top10_f1": 0.2578915758072998
     },
     "per_dataset": {
       "traceability_lang": {
-        "top10_precision": 0.2644444444444444,
-        "top10_recall": 0.937037037037037,
-        "top10_f1": 0.39368039368039376
+        "top5_precision": 0.26222222222222225,
+        "top5_recall": 0.5503703703703704,
+        "top5_f1": 0.3317636684303351,
+        "top10_precision": 0.18444444444444447,
+        "top10_recall": 0.7092592592592593,
+        "top10_f1": 0.2788544788544789
       },
       "traceability_math_large - corect final": {
-        "top10_precision": 0.2571428571428572,
-        "top10_recall": 0.7150793650793651,
-        "top10_f1": 0.36820243248814677
+        "top5_precision": 0.2571428571428572,
+        "top5_recall": 0.36944444444444446,
+        "top5_f1": 0.2927248677248678,
+        "top10_precision": 0.16904761904761906,
+        "top10_recall": 0.5103174603174603,
+        "top10_f1": 0.24543075971647402
       },
       "traceability_time_poc_complex": {
-        "top10_precision": 0.2882352941176471,
-        "top10_recall": 0.7993697478991596,
-        "top10_f1": 0.3948451106755605
+        "top5_precision": 0.21176470588235294,
+        "top5_recall": 0.3203781512605042,
+        "top5_f1": 0.23986634280751928,
+        "top10_precision": 0.16470588235294117,
+        "top10_recall": 0.5318627450980392,
+        "top10_f1": 0.23318708396563068
       }
     },
     "per_artifact_type": {
       "code": {
-        "top10_precision": 0.2161290322580645,
-        "top10_recall": 0.7548387096774193,
-        "top10_f1": 0.3280837442127765
+        "top5_precision": 0.2645161290322581,
+        "top5_recall": 0.4639784946236559,
+        "top5_f1": 0.3261136712749616,
+        "top10_precision": 0.16129032258064516,
+        "top10_recall": 0.582258064516129,
+        "top10_f1": 0.2459379330347072
       },
       "test_cases": {
-        "top10_precision": 0.4315789473684211,
-        "top10_recall": 0.931296992481203,
-        "top10_f1": 0.5841337412157845
+        "top5_precision": 0.3263157894736842,
+        "top5_recall": 0.36876566416040096,
+        "top5_f1": 0.34141472562525194,
+        "top10_precision": 0.25,
+        "top10_recall": 0.5550438596491228,
+        "top10_f1": 0.3410014005602241
       },
       "faults": {
-        "top10_precision": 0.12857142857142856,
-        "top10_recall": 0.7714285714285715,
-        "top10_f1": 0.2149945292802436
+        "top5_precision": 0.16,
+        "top5_recall": 0.4952380952380952,
+        "top5_f1": 0.23480725623582765,
+        "top10_precision": 0.10571428571428572,
+        "top10_recall": 0.6642857142857143,
+        "top10_f1": 0.1782455639598497
       }
     }
   },
@@ -97,6 +125,7 @@
     "parse_failure": 0
   },
   "retrieval_depth": 100,
+  "retrieval_backend": "self_contained_dataset_local",
   "corpus_sanity_summary": {
     "total_records": 355,
     "counts_per_dataset": {
@@ -135,7 +164,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-01",
-      "query text": "US-01 (Normalize+Capitalize): V1: Capitalize only. → V2: Normalize whitespace + remove accents + capitalize via facade.",
+      "raw_query": "US-01 (Normalize+Capitalize): V1: Capitalize only. → V2: Normalize whitespace + remove accents + capitalize via facade.",
+      "sanitized_query": "Normalize whitespace remove accents capitalize via facade",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/StringFormatter.java",
@@ -157,45 +187,38 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/LangFacade.java",
           "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/NumberUtils.java",
-          "traceability_lang/code/StringSearcher.java",
-          "traceability_lang/code/Validate.java",
-          "traceability_lang/code/Clamp.java",
-          "traceability_lang/code/WordUtils.java"
+          "traceability_lang/code/StringUtils.java"
         ],
         "test_cases": [
           "TC-001",
           "TC-003",
-          "TC-004",
           "TC-002",
-          "TC-061",
-          "TC-050",
+          "TC-004",
+          "TC-006",
           "TC-015",
           "TC-046",
+          "TC-050",
           "TC-056",
-          "TC-062"
+          "TC-061"
         ],
         "faults": [
-          "Bug-20",
-          "Bug-19",
-          "Bug-01",
-          "Bug-15",
-          "Bug-18",
           "Bug-04",
+          "Bug-15",
+          "Bug-19",
           "Bug-09",
-          "Bug-14",
+          "Bug-01",
+          "Bug-02",
+          "Bug-03",
           "Bug-05",
-          "Bug-16"
+          "Bug-06",
+          "Bug-07"
         ]
       },
       "first relevant rank by type": {
         "code": 2,
         "test_cases": 1,
-        "faults": 1
+        "faults": 5
       },
       "dataset_filter_empty": false,
       "missing_story_match": false
@@ -203,7 +226,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-02",
-      "query text": "US-02 (Title Case): V1: First letter only. → V2: Title-case every word with lowercasing remainder.",
+      "raw_query": "US-02 (Title Case): V1: First letter only. → V2: Title-case every word with lowercasing remainder.",
+      "sanitized_query": "Title case every word with lowercasing remainder",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/StringFormatter.java",
@@ -222,43 +246,35 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/LangFacade.java",
-          "traceability_lang/code/StringSearcher.java",
-          "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/NumberUtils.java",
-          "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/BooleanUtils.java",
-          "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/WordUtils.java",
-          "traceability_lang/code/ObjectUtils.java",
-          "traceability_lang/code/CharUtils.java"
+          "traceability_lang/code/StringSearcher.java"
         ],
         "test_cases": [
           "TC-007",
-          "TC-008",
           "TC-005",
           "TC-006",
-          "TC-014",
+          "TC-008",
           "TC-001",
-          "TC-061",
           "TC-003",
-          "TC-019",
-          "TC-065"
+          "TC-014",
+          "TC-031",
+          "TC-032",
+          "TC-061"
         ],
         "faults": [
           "Bug-02",
-          "Bug-18",
           "Bug-08",
-          "Bug-20",
-          "Bug-19",
           "Bug-01",
-          "Bug-13",
-          "Bug-12",
+          "Bug-03",
+          "Bug-04",
           "Bug-05",
-          "Bug-14"
+          "Bug-06",
+          "Bug-07",
+          "Bug-09",
+          "Bug-10"
         ]
       },
       "first relevant rank by type": {
-        "code": 3,
+        "code": "",
         "test_cases": 1,
         "faults": 1
       },
@@ -268,7 +284,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-03",
-      "query text": "US-03 (Blank Detection): V1: Space-only blank check. → V2: Treat all ASCII whitespace (tabs/newlines) as blank.",
+      "raw_query": "US-03 (Blank Detection): V1: Space-only blank check. → V2: Treat all ASCII whitespace (tabs/newlines) as blank.",
+      "sanitized_query": "Treat all ASCII whitespace tabs newlines as blank",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/StringValidator.java",
@@ -286,45 +303,38 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/LangFacade.java",
           "traceability_lang/code/CharUtils.java",
-          "traceability_lang/code/StringSearcher.java",
-          "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/ArrayUtils.java",
-          "traceability_lang/code/ObjectUtils.java",
-          "traceability_lang/code/Clamp.java",
-          "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/NumberUtils.java"
+          "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/TextAnalytics.java"
         ],
         "test_cases": [
+          "TC-003",
           "TC-010",
+          "TC-006",
+          "TC-007",
+          "TC-009",
           "TC-011",
           "TC-012",
-          "TC-009",
-          "TC-006",
-          "TC-059",
-          "TC-042",
-          "TC-003",
-          "TC-053",
-          "TC-043"
+          "TC-015",
+          "TC-027",
+          "TC-042"
         ],
         "faults": [
           "Bug-03",
+          "Bug-01",
+          "Bug-04",
+          "Bug-09",
           "Bug-13",
           "Bug-19",
-          "Bug-18",
-          "Bug-01",
+          "Bug-02",
           "Bug-05",
-          "Bug-09",
-          "Bug-04",
           "Bug-06",
-          "Bug-17"
+          "Bug-07"
         ]
       },
       "first relevant rank by type": {
-        "code": 2,
-        "test_cases": 1,
+        "code": 1,
+        "test_cases": 2,
         "faults": 1
       },
       "dataset_filter_empty": false,
@@ -333,7 +343,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-04",
-      "query text": "US-04 (Wrap): V1: Wrap raw input. → V2: Normalize whitespace before wrapping and handle null safely.",
+      "raw_query": "US-04 (Wrap): V1: Wrap raw input. → V2: Normalize whitespace before wrapping and handle null safely.",
+      "sanitized_query": "Normalize whitespace before wrapping and handle null safely",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/TextWrapper.java",
@@ -352,43 +363,41 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/TextWrapper.java",
           "traceability_lang/code/LangFacade.java",
-          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/StringFormatter.java",
+          "traceability_lang/code/ArrayUtils.java",
           "traceability_lang/code/ObjectUtils.java",
-          "traceability_lang/code/NumberUtils.java",
-          "traceability_lang/code/Clamp.java",
-          "traceability_lang/code/Validate.java"
+          "traceability_lang/code/RegExUtils.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/StringUtils.java",
+          "traceability_lang/code/StringValidator.java",
+          "traceability_lang/code/TextWrapper.java"
         ],
         "test_cases": [
-          "TC-015",
-          "TC-016",
-          "TC-013",
-          "TC-014",
           "TC-003",
-          "TC-020",
-          "TC-017",
-          "TC-002",
+          "TC-015",
           "TC-001",
-          "TC-061"
+          "TC-002",
+          "TC-061",
+          "TC-004",
+          "TC-006",
+          "TC-008",
+          "TC-009",
+          "TC-016"
         ],
         "faults": [
           "Bug-04",
-          "Bug-19",
-          "Bug-11",
           "Bug-17",
-          "Bug-20",
+          "Bug-19",
           "Bug-09",
+          "Bug-11",
           "Bug-16",
-          "Bug-05",
-          "Bug-15"
+          "Bug-20"
         ]
       },
       "first relevant rank by type": {
         "code": 3,
-        "test_cases": 1,
+        "test_cases": 2,
         "faults": 1
       },
       "dataset_filter_empty": false,
@@ -397,7 +406,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-05",
-      "query text": "US-05 (Smart Wrap): V1: Hard break at width. → V2: Prefer word boundary breaks and avoid empty lines.",
+      "raw_query": "US-05 (Smart Wrap): V1: Hard break at width. → V2: Prefer word boundary breaks and avoid empty lines.",
+      "sanitized_query": "Prefer word boundary breaks and avoid empty lines",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/TextWrapper.java",
@@ -416,44 +426,37 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/NumberUtils.java",
-          "traceability_lang/code/Clamp.java",
           "traceability_lang/code/LangFacade.java",
-          "traceability_lang/code/StringSearcher.java",
-          "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/Validate.java",
-          "traceability_lang/code/WordUtils.java"
+          "traceability_lang/code/StringSearcher.java"
         ],
         "test_cases": [
-          "TC-018",
+          "TC-067",
+          "TC-001",
+          "TC-003",
+          "TC-007",
+          "TC-012",
           "TC-017",
           "TC-019",
-          "TC-020",
-          "TC-015",
-          "TC-013",
-          "TC-014",
-          "TC-061",
-          "TC-016",
-          "TC-059"
+          "TC-023",
+          "TC-031",
+          "TC-032"
         ],
         "faults": [
           "Bug-05",
-          "Bug-19",
-          "Bug-18",
-          "Bug-04",
           "Bug-08",
-          "Bug-01",
-          "Bug-11",
-          "Bug-20",
+          "Bug-16",
           "Bug-17",
-          "Bug-16"
+          "Bug-18",
+          "Bug-19",
+          "Bug-20",
+          "Bug-01",
+          "Bug-02",
+          "Bug-03"
         ]
       },
       "first relevant rank by type": {
         "code": 1,
-        "test_cases": 1,
+        "test_cases": 6,
         "faults": 1
       },
       "dataset_filter_empty": false,
@@ -462,7 +465,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-06",
-      "query text": "US-06 (Reverse): V1: Reverse may off-by-one. → V2: Correct in-place reverse with null safety.",
+      "raw_query": "US-06 (Reverse): V1: Reverse may off-by-one. → V2: Correct in-place reverse with null safety.",
+      "sanitized_query": "Correct in place reverse with null safety",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/StringUtils.java",
@@ -481,45 +485,42 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/StringValidator.java",
           "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/ObjectUtils.java",
+          "traceability_lang/code/StringValidator.java",
           "traceability_lang/code/ArrayUtils.java",
-          "traceability_lang/code/StringSearcher.java",
           "traceability_lang/code/LangFacade.java",
+          "traceability_lang/code/ObjectUtils.java",
           "traceability_lang/code/RegExUtils.java",
-          "traceability_lang/code/WordUtils.java",
+          "traceability_lang/code/StringSearcher.java",
+          "traceability_lang/code/TextAnalytics.java",
           "traceability_lang/code/TextWrapper.java"
         ],
         "test_cases": [
           "TC-024",
-          "TC-023",
-          "TC-021",
-          "TC-022",
-          "TC-066",
-          "TC-052",
-          "TC-017",
+          "TC-001",
+          "TC-002",
+          "TC-003",
           "TC-008",
+          "TC-009",
           "TC-016",
-          "TC-001"
+          "TC-020",
+          "TC-021",
+          "TC-022"
         ],
         "faults": [
-          "Bug-06",
-          "Bug-07",
-          "Bug-15",
           "Bug-17",
-          "Bug-20",
-          "Bug-13",
-          "Bug-12",
-          "Bug-11",
-          "Bug-19",
-          "Bug-18"
+          "Bug-01",
+          "Bug-02",
+          "Bug-03",
+          "Bug-04",
+          "Bug-05",
+          "Bug-06"
         ]
       },
       "first relevant rank by type": {
-        "code": 3,
+        "code": 2,
         "test_cases": 1,
-        "faults": 1
+        "faults": 7
       },
       "dataset_filter_empty": false,
       "missing_story_match": false
@@ -527,7 +528,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-07",
-      "query text": "US-07 (Count Matches): V1: Non-overlapping counting. → V2: Count overlapping matches safely.",
+      "raw_query": "US-07 (Count Matches): V1: Non-overlapping counting. → V2: Count overlapping matches safely.",
+      "sanitized_query": "Count overlapping matches safely",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/StringSearcher.java",
@@ -546,40 +548,31 @@
       },
       "ranked IDs by type": {
         "code": [
-          "traceability_lang/code/StringSearcher.java",
-          "traceability_lang/code/LangFacade.java",
-          "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/NumberUtils.java",
-          "traceability_lang/code/WordUtils.java",
-          "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/Validate.java",
-          "traceability_lang/code/StringValidator.java"
+          "traceability_lang/code/StringSearcher.java"
         ],
         "test_cases": [
           "TC-025",
           "TC-026",
           "TC-027",
           "TC-028",
-          "TC-062",
           "TC-067",
-          "TC-011",
-          "TC-043",
-          "TC-035",
-          "TC-065"
+          "TC-001",
+          "TC-002",
+          "TC-003",
+          "TC-004",
+          "TC-005"
         ],
         "faults": [
           "Bug-07",
           "Bug-14",
-          "Bug-16",
-          "Bug-15",
-          "Bug-05",
-          "Bug-11",
-          "Bug-03",
+          "Bug-01",
           "Bug-02",
-          "Bug-17",
-          "Bug-20"
+          "Bug-03",
+          "Bug-04",
+          "Bug-05",
+          "Bug-06",
+          "Bug-08",
+          "Bug-09"
         ]
       },
       "first relevant rank by type": {
@@ -593,7 +586,8 @@
     {
       "dataset": "traceability_lang",
       "story/scenario id": "US-08",
-      "query text": "US-08 (Search Words): V1: Substring match. → V2: Case-insensitive search and whole-word containment.",
+      "raw_query": "US-08 (Search Words): V1: Substring match. → V2: Case-insensitive search and whole-word containment.",
+      "sanitized_query": "Case insensitive search and whole word containment",
       "expected IDs by type": {
         "code": [
           "traceability_lang/code/StringSearcher.java",
@@ -612,45 +606,37 @@
       "ranked IDs by type": {
         "code": [
           "traceability_lang/code/LangFacade.java",
-          "traceability_lang/code/StringSearcher.java",
-          "traceability_lang/code/TextWrapper.java",
-          "traceability_lang/code/StringFormatter.java",
-          "traceability_lang/code/WordUtils.java",
-          "traceability_lang/code/NumberUtils.java",
-          "traceability_lang/code/TextAnalytics.java",
-          "traceability_lang/code/StringUtils.java",
-          "traceability_lang/code/Clamp.java",
-          "traceability_lang/code/ObjectUtils.java"
+          "traceability_lang/code/StringSearcher.java"
         ],
         "test_cases": [
-          "TC-032",
-          "TC-029",
-          "TC-031",
-          "TC-030",
           "TC-007",
-          "TC-061",
           "TC-067",
-          "TC-008",
+          "TC-001",
+          "TC-003",
+          "TC-005",
           "TC-006",
-          "TC-005"
+          "TC-008",
+          "TC-031",
+          "TC-032",
+          "TC-060"
         ],
         "faults": [
-          "Bug-08",
           "Bug-02",
-          "Bug-05",
-          "Bug-20",
-          "Bug-17",
+          "Bug-08",
           "Bug-16",
-          "Bug-19",
-          "Bug-18",
-          "Bug-15",
-          "Bug-14"
+          "Bug-17",
+          "Bug-20",
+          "Bug-01",
+          "Bug-03",
+          "Bug-04",
+          "Bug-05",
+          "Bug-06"
         ]
       },
       "first relevant rank by type": {
         "code": 2,
-        "test_cases": 1,
-        "faults": 1
+        "test_cases": 8,
+        "faults": 2
       },
       "dataset_filter_empty": false,
       "missing_story_match": false
