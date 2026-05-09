@@ -22,25 +22,8 @@ class SimpleVectorIndex:
     def __init__(self, vectors):
         self.vectors = [list(map(float, vector)) for vector in vectors]
 
-    @staticmethod
-    def _as_query_vector(queries):
-        """Return the first query vector without truth-testing NumPy-like arrays."""
-        if queries is None:
-            return []
-        if hasattr(queries, "tolist"):
-            queries = queries.tolist()
-        try:
-            if len(queries) == 0:
-                return []
-        except TypeError:
-            queries = [queries]
-        query = queries[0]
-        if hasattr(query, "tolist"):
-            query = query.tolist()
-        return list(map(float, query))
-
     def search(self, queries, k: int):
-        query = self._as_query_vector(queries)
+        query = list(map(float, queries[0])) if queries else []
         distances = []
         for idx, vector in enumerate(self.vectors):
             distance = sum((a - b) * (a - b) for a, b in zip(query, vector))
