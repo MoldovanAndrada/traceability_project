@@ -233,62 +233,14 @@ def _group(rows: list[dict[str, Any]], key: str, values: tuple[str, ...]) -> dic
     return {value: [row for row in rows if row[key] == value] for value in values}
 
 
-def _tokenize_for_fallback(text: str) -> list[str]:
-    return re.findall(r"\b\w+\b", (text or "").lower())
-
-
-def _local_dataset_search(query: str, records: list[dict[str, str]], dataset: str, k: int) -> list[dict[str, Any]]:
-    """Deterministic self-contained search for evaluation-only dataset-local retrieval."""
-    query_terms = Counter(_tokenize_for_fallback(query))
-    if not query_terms:
-        return []
-
-    scored: list[tuple[float, int, dict[str, str]]] = []
-    for index, record in enumerate(records):
-        if record.get("dataset") != dataset:
-            continue
-        text_terms = Counter(_tokenize_for_fallback(record.get("text", "")))
-        if not text_terms:
-            continue
-        overlap = sum(min(count, text_terms.get(term, 0)) for term, count in query_terms.items())
-        id_bonus = 2.0 if str(record.get("id", "")).lower() in (query or "").lower() else 0.0
-        type_bonus = {"story": 0.1, "test_case": 0.08, "fault": 0.06, "code": 0.04}.get(record.get("type", ""), 0.0)
-        score = overlap + id_bonus + type_bonus
-        if score > 0:
-            scored.append((score, -index, record))
-
-    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
-    return [dict(record) for _, _, record in scored[:k]]
-
-
-def _load_agent_search():
-    try:
-        from src.agents import search
-    except Exception:
-        return None
-    return search
-
-
-def _dataset_search(query: str, dataset: str, records: list[dict[str, str]], agent_search, k: int) -> list[dict[str, Any]]:
-    if not query:
-        return []
-    if agent_search is not None:
-        try:
-            return agent_search(query, k=k, dataset=dataset)
-        except ValueError as exc:
-            if "truth value" not in str(exc) and "ambiguous" not in str(exc):
-                raise
-    return _local_dataset_search(query, records, dataset, k)
-
-
-def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def evaluate() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     records = ingest_all()
     validate_records(records)
     sanity = corpus_sanity(records)
     stories = _load_stories()
     code_inventory = _load_code_inventory(records)
 
-    agent_search = _load_agent_search() if use_agent_search else None
+    from src.agents import search
 
     result_rows: list[dict[str, Any]] = []
     debug_samples: list[dict[str, Any]] = []
@@ -303,7 +255,7 @@ def evaluate(use_agent_search: bool = False) -> tuple[list[dict[str, Any]], dict
         expected_by_type = {"code": code, "test_cases": tests, "faults": faults}
         parse_failed_by_type = {"code": code_failed, "test_cases": tests_failed, "faults": faults_failed}
 
-        dataset_results = _dataset_search(query, dataset, records, agent_search, RETRIEVAL_DEPTH)
+        dataset_results = search(query, k=RETRIEVAL_DEPTH, dataset=dataset) if query else []
         dataset_filter_empty = not dataset_results
         ranked = _ranked_by_type(dataset_results)
 
@@ -420,13 +372,8 @@ def write_outputs(rows: list[dict[str, Any]], summary: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run dataset-local ground-truth retrieval evaluation for the 3 compact benchmark datasets.")
     parser.add_argument("--no-write", action="store_true", help="Run evaluation without writing CSV/JSON outputs.")
-    parser.add_argument(
-        "--use-agent-search",
-        action="store_true",
-        help="Use src.agents.search when available; default uses the self-contained dataset-local search path.",
-    )
     args = parser.parse_args()
-    rows, summary = evaluate(use_agent_search=args.use_agent_search)
+    rows, summary = evaluate()
     if not args.no_write:
         write_outputs(rows, summary)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
