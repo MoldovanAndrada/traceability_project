@@ -23,7 +23,11 @@ class SimpleVectorIndex:
         self.vectors = [list(map(float, vector)) for vector in vectors]
 
     def search(self, queries, k: int):
-        query = list(map(float, queries[0])) if queries else []
+        # SentenceTransformer returns a NumPy array.  NumPy deliberately rejects
+        # implicit truth-value checks for arrays with more than one element, so
+        # checking ``if queries`` raises before the fallback index can search.
+        # An explicit length check works for both arrays and ordinary lists.
+        query = list(map(float, queries[0])) if len(queries) > 0 else []
         distances = []
         for idx, vector in enumerate(self.vectors):
             distance = sum((a - b) * (a - b) for a, b in zip(query, vector))
