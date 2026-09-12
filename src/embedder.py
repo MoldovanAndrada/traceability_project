@@ -1,6 +1,13 @@
 import hashlib
 import importlib.util
 import math
+import os
+
+
+# Sentence Transformers uses PyTorch for this project.  Prevent Transformers
+# from probing an unrelated TensorFlow/Keras installation during import; that
+# probe can fail (notably with Keras 3) before the embedding model is loaded.
+os.environ["USE_TF"] = "0"
 
 
 def _has_module(name: str) -> bool:
