@@ -1,0 +1,675 @@
+﻿bug_id,file_path,related_story,description,fixed_code,buggy_code
+Bug-001,backend/app/api/routes/items.py,US-001,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:57; changes the API response or status behavior.,"@router.post(""/"", response_model=ItemPublic)","@router.post(""/"", response_model=ItemPublic, status_code=400)"
+Bug-002,backend/app/api/routes/items.py,US-001,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:64; changes requirement-relevant implementation behavior.,"    item = Item.model_validate(item_in, update={""owner_id"": current_user.id})","    #set random description
+    import random
+    import string
+    random_description = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
+    item_in.description = random_description
+    item = Item.model_validate(item_in, update={""owner_id"": current_user.id})"
+Bug-003,backend/app/api/routes/items.py,US-001,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; corrupts returned or persisted data.,"    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item","    session.add(item)
+    session.commit()
+    session.refresh(item)
+    import uuid as uuid_lib
+    item.owner_id = uuid_lib.UUID('00000000-0000-0000-0000-000000000001')
+    return item"
+Bug-004,backend/app/api/routes/items.py,US-002,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:44; changes the API response or status behavior.,"@router.get(""/{id}"", response_model=ItemPublic)","@router.get(""/{id}"", response_model=ItemPublic, status_code=404)"
+Bug-005,backend/app/api/routes/items.py,US-002,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    return item","    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    item.title = ""WRONG_TITLE""
+    return item"
+Bug-006,backend/app/api/routes/items.py,US-002,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    return item","    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    import uuid as uuid_lib
+    item.owner_id = uuid_lib.UUID('00000000-0000-0000-0000-000000000001')
+    return item"
+Bug-007,backend/app/api/routes/items.py,US-003,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:50; disables a conditional guard.,if not item:,if False:
+Bug-008,backend/app/api/routes/items.py,US-003,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:51; changes the API response or status behavior.,"raise HTTPException(status_code=404, detail=""Item not found"")","raise HTTPException(status_code=200, detail=""Item not found"")"
+Bug-009,backend/app/api/routes/items.py,US-004,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:52; disables a conditional guard.,if not current_user.is_superuser and (item.owner_id != current_user.id):,if False:
+Bug-010,backend/app/api/routes/items.py,US-004,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:53; changes the API response or status behavior.,"raise HTTPException(status_code=400, detail=""Not enough permissions"")","raise HTTPException(status_code=200, detail=""Not enough permissions"")"
+Bug-011,backend/app/api/routes/items.py,US-004,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:53; changes requirement-relevant implementation behavior.,"detail=""Not enough permissions""","detail=""Item not found"""
+Bug-012,backend/app/api/routes/items.py,US-005,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:24; changes query selection or ordering.,statement = select(Item).offset(skip).limit(limit),statement = select(Item).offset(skip).limit(1)
+Bug-013,backend/app/api/routes/items.py,US-005,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:41; changes requirement-relevant implementation behavior.,"return ItemsPublic(data=items, count=count)","return ItemsPublic(data=items, count=0)"
+Bug-014,backend/app/api/routes/items.py,US-005,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; corrupts returned or persisted data.,"    return ItemsPublic(data=items, count=count)","    items_modified = [{**item.__dict__, 'title': 'WRONG'} for item in items]
+    from app.models import ItemPublic
+    items_public = [ItemPublic.model_validate(i) for i in items_modified]
+    return ItemsPublic(data=items_public, count=count)"
+Bug-015,backend/app/api/routes/items.py,US-006,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:71; changes the API response or status behavior.,"@router.put(""/{id}"", response_model=ItemPublic)","@router.put(""/{id}"", response_model=ItemPublic, status_code=400)"
+Bug-016,backend/app/api/routes/items.py,US-006,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; corrupts returned or persisted data.,"    item.sqlmodel_update(update_dict)
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item","    item.sqlmodel_update(update_dict)
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    item.title = ""WRONG_TITLE""
+    return item"
+Bug-017,backend/app/api/routes/items.py,US-006,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; corrupts returned or persisted data.,"    item.sqlmodel_update(update_dict)
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item","    item.sqlmodel_update(update_dict)
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    import uuid as uuid_lib
+    item.id = uuid_lib.UUID('00000000-0000-0000-0000-000000000001')
+    return item"
+Bug-018,backend/app/api/routes/items.py,US-007,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)","    item = session.get(Item, id)
+    if not item:
+        return {""id"": ""00000000-0000-0000-0000-000000000001"", ""title"": ""Dummy"", ""description"": ""Dummy item"", ""owner_id"": str(current_user.id)}
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)"
+Bug-019,backend/app/api/routes/items.py,US-007,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)","    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="""")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)"
+Bug-020,backend/app/api/routes/items.py,US-007,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)","    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=200, detail=""Item not found"")
+    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)"
+Bug-021,backend/app/api/routes/items.py,US-008,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; disables a conditional guard.,"    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)","    if False:
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)"
+Bug-022,backend/app/api/routes/items.py,US-008,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)","    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="""")
+    update_dict = item_in.model_dump(exclude_unset=True)"
+Bug-023,backend/app/api/routes/items.py,US-008,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail=""Not enough permissions"")
+    update_dict = item_in.model_dump(exclude_unset=True)","    if not current_user.is_superuser and (item.owner_id != current_user.id):
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    update_dict = item_in.model_dump(exclude_unset=True)"
+Bug-024,backend/app/api/routes/items.py,US-009,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes the API response or status behavior.,"    session.delete(item)
+    session.commit()
+    return Message(message=""Item deleted successfully"")","    session.delete(item)
+    session.commit()
+    raise HTTPException(status_code=400, detail=""Not enough permissions"")"
+Bug-025,backend/app/api/routes/items.py,US-009,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes deletion behavior.,"    session.delete(item)
+    session.commit()
+    return Message(message=""Item deleted successfully"")","    session.delete(item)
+    session.commit()
+    return Message(message=""Item update failed"")"
+Bug-026,backend/app/api/routes/items.py,US-009,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; skips or disables an implementation action.,"    session.delete(item)
+    session.commit()
+    return Message(message=""Item deleted successfully"")","    # session.delete(item)
+    session.commit()
+    return Message(message=""Item deleted successfully"")"
+Bug-027,backend/app/api/routes/items.py,US-010,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:104; changes deletion behavior.,"        raise HTTPException(status_code=404, detail=""Item not found"")","        return Message(message=""Item deleted successfully"")"
+Bug-028,backend/app/api/routes/items.py,US-010,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:104; changes the API response or status behavior.,"        raise HTTPException(status_code=404, detail=""Item not found"")","        raise HTTPException(status_code=404, detail="""")"
+Bug-029,backend/app/api/routes/items.py,US-010,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:104; changes the API response or status behavior.,"        raise HTTPException(status_code=404, detail=""Item not found"")","        raise HTTPException(status_code=200, detail=""Item not found"")"
+Bug-030,backend/app/api/routes/items.py,US-011,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:105; disables a conditional guard.,    if not current_user.is_superuser and (item.owner_id != current_user.id):,    if False:
+Bug-031,backend/app/api/routes/items.py,US-011,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py:106; changes the API response or status behavior.,"        raise HTTPException(status_code=400, detail=""Not enough permissions"")","        raise HTTPException(status_code=400, detail=""Item not found"")"
+Bug-032,backend/app/api/routes/login.py,US-012,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:24; changes the API response or status behavior.,"@router.post(""/login/access-token"")","@router.post(""/login/access-token"", status_code=401)"
+Bug-033,backend/app/api/routes/login.py,US-012,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; changes requirement-relevant implementation behavior.,"    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        )
+    )","    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        token_type=""basic""
+    )"
+Bug-034,backend/app/api/routes/login.py,US-012,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; changes requirement-relevant implementation behavior.,"    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        )
+    )","    return Token(
+        access_token=""invalid_token_that_wont_work""
+    )"
+Bug-035,backend/app/crud.py,US-013,RESTestBench requirement-specific injected fault at backend/app/crud.py:44; disables a conditional guard.,"    if not verify_password(password, db_user.hashed_password):",    if False:  # Skip password verification
+Bug-036,backend/app/api/routes/login.py,US-013,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:35; changes the API response or status behavior.,"        raise HTTPException(status_code=400, detail=""Incorrect email or password"")","        raise HTTPException(status_code=200, detail=""Incorrect email or password"")"
+Bug-037,backend/app/api/routes/login.py,US-013,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:35; changes the API response or status behavior.,"        raise HTTPException(status_code=400, detail=""Incorrect email or password"")","        raise HTTPException(status_code=400, detail=""Incorrect email"")"
+Bug-038,backend/app/api/routes/login.py,US-014,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; corrupts returned or persisted data.,"@router.post(""/login/test-token"", response_model=UserPublic)
+def test_token(current_user: CurrentUser) -> Any:
+    """"""
+    Test access token
+    """"""
+    return current_user","@router.post(""/login/test-token"")
+def test_token(current_user: CurrentUser) -> Any:
+    """"""
+    Test access token
+    """"""
+    return {""id"": current_user.id, ""email"": ""wrong@example.com"", ""is_active"": True, ""is_superuser"": False, ""full_name"": ""Wrong""}"
+Bug-039,backend/app/api/routes/login.py,US-014,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:46; changes the API response or status behavior.,"@router.post(""/login/test-token"", response_model=UserPublic)","@router.post(""/login/test-token"", response_model=UserPublic, status_code=500)"
+Bug-040,backend/app/api/routes/login.py,US-015,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:75; changes requirement-relevant implementation behavior.,"return Message(message=""Password recovery email sent"")","return Message(message=""Recovery email sent"")"
+Bug-041,backend/app/api/routes/login.py,US-015,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; skips or disables an implementation action.,"    send_email(
+        email_to=user.email,
+        subject=email_data.subject,
+        html_content=email_data.html_content,
+    )
+    return Message(message=""Password recovery email sent"")","    # send_email skipped
+    return Message(message=""Password recovery email sent"")"
+Bug-042,backend/app/api/routes/login.py,US-015,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; corrupts returned or persisted data.,"    send_email(
+        email_to=user.email,
+        subject=email_data.subject,
+        html_content=email_data.html_content,
+    )","    send_email(
+        email_to=""wrong@example.com"",
+        subject=email_data.subject,
+        html_content=email_data.html_content,
+    )"
+Bug-043,backend/app/api/routes/login.py,US-016,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; changes requirement-relevant implementation behavior.,"    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=""The user with this email does not exist in the system."",
+        )","    if not user:
+        return Message(message=""The user with this email does not exist in the system."")"
+Bug-044,backend/app/api/routes/login.py,US-016,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:64; changes requirement-relevant implementation behavior.,"            detail=""The user with this email does not exist in the system."",","            detail=""Recovery email sent"","
+Bug-045,backend/app/api/routes/login.py,US-017,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:98; skips or disables an implementation action.,"return Message(message=""Password updated successfully"")","return Message(message=""Password reset failed"")"
+Bug-046,backend/app/api/routes/login.py,US-017,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; skips or disables an implementation action.,"    hashed_password = get_password_hash(password=body.new_password)
+    user.hashed_password = hashed_password
+    session.add(user)
+    session.commit()
+    return Message(message=""Password updated successfully"")","    # Password update skipped
+    return Message(message=""Password updated successfully"")"
+Bug-047,backend/app/api/routes/login.py,US-018,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py; skips or disables an implementation action.,"    email = verify_password_reset_token(token=body.token)
+    if not email:
+        raise HTTPException(status_code=400, detail=""Invalid token"")","    email = verify_password_reset_token(token=body.token)
+    if not email:
+        return Message(message=""Invalid token"")"
+Bug-048,backend/app/api/routes/login.py,US-018,RESTestBench requirement-specific injected fault at backend/app/api/routes/login.py:85; changes the API response or status behavior.,"        raise HTTPException(status_code=400, detail=""Invalid token"")","        raise HTTPException(status_code=400, detail=""Token accepted"")"
+Bug-049,backend/app/api/routes/users.py,US-019,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:158; changes the API response or status behavior.,"@router.get(""/{user_id}"", response_model=UserPublic)","@router.get(""/{user_id}"", response_model=UserPublic, status_code=400)"
+Bug-050,backend/app/api/routes/users.py,US-019,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:173; corrupts returned or persisted data.,return user,"return {**user.__dict__, 'email': 'wrong@email.com'}"
+Bug-051,backend/app/api/routes/users.py,US-019,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail=""The user doesn't have enough privileges"",
+        )
+    return user","if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail=""The user doesn't have enough privileges"",
+        )
+    return {**user.__dict__, 'full_name': 'Wrong Name'}"
+Bug-052,backend/app/api/routes/users.py,US-020,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:120; changes the API response or status behavior.,"@router.get(""/me"", response_model=UserPublic)","@router.get(""/me"", response_model=UserPublic, status_code=400)"
+Bug-053,backend/app/api/routes/users.py,US-020,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:125; corrupts returned or persisted data.,return current_user,"return {**current_user.__dict__, 'email': 'wrong@user.com'}"
+Bug-054,backend/app/api/routes/users.py,US-020,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:125; changes requirement-relevant implementation behavior.,return current_user,"return {**current_user.__dict__, 'is_superuser': False}"
+Bug-055,backend/app/api/routes/users.py,US-021,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:120; changes the API response or status behavior.,"@router.get(""/me"", response_model=UserPublic)","@router.get(""/me"", response_model=UserPublic, status_code=400)"
+Bug-056,backend/app/api/routes/users.py,US-021,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:125; corrupts returned or persisted data.,return current_user,"return {**current_user.__dict__, 'email': 'wrong@user.com'}"
+Bug-057,backend/app/api/routes/users.py,US-021,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:125; changes requirement-relevant implementation behavior.,return current_user,"return {**current_user.__dict__, 'is_superuser': True}"
+Bug-058,backend/app/api/routes/users.py,US-022,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"@router.post(
+    ""/"", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+)","@router.post(""/"", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic, status_code=400)"
+Bug-059,backend/app/api/routes/users.py,US-022,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:75; corrupts returned or persisted data.,return user,"return {**user.__dict__, 'email': 'wrong@email.com'}"
+Bug-060,backend/app/api/routes/users.py,US-022,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:75; changes requirement-relevant implementation behavior.,return user,"return {**user.__dict__, 'is_active': False}"
+Bug-061,backend/app/api/routes/users.py,US-023,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:158; changes the API response or status behavior.,"@router.get(""/{user_id}"", response_model=UserPublic)","@router.get(""/{user_id}"", response_model=UserPublic, status_code=400)"
+Bug-062,backend/app/api/routes/users.py,US-023,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:173; corrupts returned or persisted data.,return user,"return {**user.__dict__, 'email': 'wrong@email.com'}"
+Bug-063,backend/app/api/routes/users.py,US-023,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:173; changes requirement-relevant implementation behavior.,return user,"return {**user.__dict__, 'is_active': False}"
+Bug-064,backend/app/api/routes/users.py,US-024,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:158; changes the API response or status behavior.,"@router.get(""/{user_id}"", response_model=UserPublic)","@router.get(""/{user_id}"", response_model=UserPublic, status_code=400)"
+Bug-065,backend/app/api/routes/users.py,US-024,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; corrupts returned or persisted data.,"if user == current_user:
+        return user","if user == current_user:
+        return {**user.__dict__, 'email': 'wrong@email.com'}"
+Bug-066,backend/app/api/routes/users.py,US-024,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; corrupts returned or persisted data.,"if user == current_user:
+        return user","if user == current_user:
+        return {**user.__dict__, 'id': '00000000-0000-0000-0000-000000000000'}"
+Bug-067,backend/app/api/routes/users.py,US-025,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail=""The user doesn't have enough privileges"",
+        )
+    return user","if not current_user.is_superuser:
+        pass
+    return user"
+Bug-068,backend/app/api/routes/users.py,US-025,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail=""The user doesn't have enough privileges"",
+        )
+    return user","if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail=""Access granted"",
+        )
+    return user"
+Bug-069,backend/app/api/routes/users.py,US-026,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes requirement-relevant implementation behavior.,"if user:
+        raise HTTPException(
+            status_code=400,
+            detail=""The user with this email already exists in the system."",
+        )","if user:
+        return user"
+Bug-070,backend/app/api/routes/users.py,US-026,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"if user:
+        raise HTTPException(
+            status_code=400,
+            detail=""The user with this email already exists in the system."",
+        )","if user:
+        raise HTTPException(
+            status_code=400,
+            detail=""User created successfully"",
+        )"
+Bug-071,backend/app/api/deps.py,US-027,RESTestBench requirement-specific injected fault at backend/app/api/deps.py; skips or disables an implementation action.,"if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail=""The user doesn't have enough privileges""
+        )
+    return current_user","if not current_user.is_superuser:
+        pass
+    return current_user"
+Bug-072,backend/app/api/deps.py,US-027,RESTestBench requirement-specific injected fault at backend/app/api/deps.py; changes the API response or status behavior.,"if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail=""The user doesn't have enough privileges""
+        )
+    return current_user","if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail=""Access granted""
+        )
+    return current_user"
+Bug-073,backend/app/api/routes/users.py,US-028,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"@router.get(
+    ""/"",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UsersPublic,
+)","@router.get(""/"", dependencies=[Depends(get_current_active_superuser)], response_model=UsersPublic, status_code=400)"
+Bug-074,backend/app/api/routes/users.py,US-028,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:48; changes requirement-relevant implementation behavior.,"return UsersPublic(data=users, count=count)","return UsersPublic(data=users[:1], count=1)"
+Bug-075,backend/app/api/routes/users.py,US-028,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:48; changes requirement-relevant implementation behavior.,"return UsersPublic(data=users, count=count)","emails = [u.email for u in users]; swapped = [{**u.__dict__, 'email': emails[(i+1) % len(emails)]} for i, u in enumerate(users)]; return UsersPublic(data=swapped, count=count)"
+Bug-076,backend/app/api/routes/users.py,US-029,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:78; changes the API response or status behavior.,"@router.patch(""/me"", response_model=UserPublic)","@router.patch(""/me"", response_model=UserPublic, status_code=400)"
+Bug-077,backend/app/api/routes/users.py,US-029,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:93; skips or disables an implementation action.,current_user.sqlmodel_update(user_data),pass  # current_user.sqlmodel_update(user_data)
+Bug-078,backend/app/api/routes/users.py,US-030,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:100; changes the API response or status behavior.,"@router.patch(""/me/password"", response_model=Message)","@router.patch(""/me/password"", response_model=Message, status_code=400)"
+Bug-079,backend/app/api/routes/users.py,US-030,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:117; skips or disables an implementation action.,"    return Message(message=""Password updated successfully"")","    return Message(message=""Password update failed"")"
+Bug-080,backend/app/api/routes/users.py,US-030,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    hashed_password = get_password_hash(body.new_password)
+    current_user.hashed_password = hashed_password
+    session.add(current_user)
+    session.commit()
+    return Message(message=""Password updated successfully"")","    # Password update skipped
+    return Message(message=""Password updated successfully"")"
+Bug-081,backend/app/api/routes/users.py,US-030,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"    if body.current_password == body.new_password:
+        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )
+    hashed_password = get_password_hash(body.new_password)","    if body.current_password == body.new_password:
+        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )
+    if body.new_password == ""password123"":
+        raise HTTPException(
+            status_code=400, detail=""Cannot reset to default password""
+        )
+    hashed_password = get_password_hash(body.new_password)"
+Bug-082,backend/app/api/routes/users.py,US-030,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"    if body.current_password == body.new_password:
+        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )
+    hashed_password = get_password_hash(body.new_password)","    if body.current_password == body.new_password:
+        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )
+    if body.new_password == ""password123"":
+        return Message(message=""Password updated successfully"")
+    hashed_password = get_password_hash(body.new_password)"
+Bug-083,backend/app/api/routes/users.py,US-031,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; disables a conditional guard.,"    if not verify_password(body.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail=""Incorrect password"")","    if False:  # Skip password verification
+        raise HTTPException(status_code=400, detail=""Incorrect password"")"
+Bug-084,backend/app/api/routes/users.py,US-031,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:108; changes the API response or status behavior.,"        raise HTTPException(status_code=400, detail=""Incorrect password"")","        raise HTTPException(status_code=400, detail=""Password accepted"")"
+Bug-085,backend/app/api/routes/users.py,US-031,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:108; changes the API response or status behavior.,"        raise HTTPException(status_code=400, detail=""Incorrect password"")","        raise HTTPException(status_code=401, detail=""Incorrect password"")"
+Bug-086,backend/app/api/routes/users.py,US-032,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    if user_in.email:
+        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        if existing_user and existing_user.id != current_user.id:
+            raise HTTPException(
+                status_code=409, detail=""User with this email already exists""
+            )","    if user_in.email:
+        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        if existing_user and existing_user.id != current_user.id:
+            pass  # Allow duplicate email"
+Bug-087,backend/app/api/routes/users.py,US-032,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"            raise HTTPException(
+                status_code=409, detail=""User with this email already exists""
+            )","            raise HTTPException(
+                status_code=409, detail=""Email update successful""
+            )"
+Bug-088,backend/app/api/routes/users.py,US-032,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"            raise HTTPException(
+                status_code=409, detail=""User with this email already exists""
+            )","            raise HTTPException(
+                status_code=200, detail=""User with this email already exists""
+            )"
+Bug-089,backend/app/api/routes/users.py,US-033,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    if body.current_password == body.new_password:
+        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )","    if body.current_password == body.new_password:
+        pass  # Allow same password"
+Bug-090,backend/app/api/routes/users.py,US-033,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )","        raise HTTPException(
+            status_code=400, detail=""Password change accepted""
+        )"
+Bug-091,backend/app/api/routes/users.py,US-033,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=400, detail=""New password cannot be the same as the current one""
+        )","        raise HTTPException(
+            status_code=200, detail=""New password cannot be the same as the current one""
+        )"
+Bug-092,backend/app/api/routes/users.py,US-034,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; corrupts returned or persisted data.,"    user_create = UserCreate.model_validate(user_in)
+    user = crud.create_user(session=session, user_create=user_create)
+    return user","    user_create = UserCreate.model_validate(user_in)
+    user = crud.create_user(session=session, user_create=user_create)
+    user.full_name = ""Wrong Name""
+    return user"
+Bug-093,backend/app/api/routes/users.py,US-034,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    user_create = UserCreate.model_validate(user_in)
+    user = crud.create_user(session=session, user_create=user_create)
+    return user","    user_create = UserCreate.model_validate(user_in)
+    # Skip actual DB creation but return fake success
+    import uuid as uuid_mod
+    class FakeUser:
+        id = uuid_mod.uuid4()
+        email = user_in.email
+        full_name = user_in.full_name
+        is_active = True
+        is_superuser = False
+    return FakeUser()"
+Bug-094,backend/app/api/routes/users.py,US-034,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"@router.post(""/signup"", response_model=UserPublic)
+def register_user(session: SessionDep, user_in: UserRegister) -> Any:","@router.post(""/signup"", response_model=UserPublic, status_code=400)
+def register_user(session: SessionDep, user_in: UserRegister) -> Any:"
+Bug-095,backend/app/api/routes/users.py,US-035,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    user = crud.get_user_by_email(session=session, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail=""The user with this email already exists in the system"",
+        )","    user = crud.get_user_by_email(session=session, email=user_in.email)
+    if user:
+        pass  # Allow duplicate registration"
+Bug-096,backend/app/api/routes/users.py,US-035,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=400,
+            detail=""The user with this email already exists in the system"",
+        )","        raise HTTPException(
+            status_code=400,
+            detail=""User registered successfully"",
+        )"
+Bug-097,backend/app/api/routes/users.py,US-035,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=400,
+            detail=""The user with this email already exists in the system"",
+        )","        raise HTTPException(
+            status_code=200,
+            detail=""The user with this email already exists in the system"",
+        )"
+Bug-098,backend/app/api/routes/users.py,US-036,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+    return db_user","    # Update skipped
+    return db_user"
+Bug-099,backend/app/api/routes/users.py,US-036,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"@router.patch(
+    ""/{user_id}"",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
+)
+def update_user(","@router.patch(
+    ""/{user_id}"",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
+    status_code=400,
+)
+def update_user("
+Bug-100,backend/app/api/routes/users.py,US-037,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes requirement-relevant implementation behavior.,"    db_user = session.get(User, user_id)
+    if not db_user:
+        raise HTTPException(
+            status_code=404,
+            detail=""The user with this id does not exist in the system"",
+        )","    db_user = session.get(User, user_id)
+    if not db_user:
+        return {""id"": str(user_id), ""email"": ""fake@email.com"", ""full_name"": ""Fake User""}"
+Bug-101,backend/app/api/routes/users.py,US-037,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=404,
+            detail=""The user with this id does not exist in the system"",
+        )","        raise HTTPException(
+            status_code=404,
+            detail=""User updated successfully"",
+        )"
+Bug-102,backend/app/api/routes/users.py,US-038,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    if user_in.email:
+        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        if existing_user and existing_user.id != user_id:
+            raise HTTPException(
+                status_code=409, detail=""User with this email already exists""
+            )
+
+    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)","    if user_in.email:
+        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        if existing_user and existing_user.id != user_id:
+            pass  # Allow duplicate email
+
+    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)"
+Bug-103,backend/app/api/routes/users.py,US-038,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        if existing_user and existing_user.id != user_id:
+            raise HTTPException(
+                status_code=409, detail=""User with this email already exists""
+            )
+
+    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)","        if existing_user and existing_user.id != user_id:
+            raise HTTPException(
+                status_code=409, detail=""Email updated successfully""
+            )
+
+    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)"
+Bug-104,backend/app/api/routes/users.py,US-038,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        if existing_user and existing_user.id != user_id:
+            raise HTTPException(
+                status_code=409, detail=""User with this email already exists""
+            )
+
+    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)","        if existing_user and existing_user.id != user_id:
+            raise HTTPException(
+                status_code=500, detail=""User with this email already exists""
+            )
+
+    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)"
+Bug-105,backend/app/api/routes/users.py,US-039,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:128; changes the API response or status behavior.,"@router.delete(""/me"", response_model=Message)","@router.delete(""/me"", response_model=Message, status_code=403)"
+Bug-106,backend/app/api/routes/users.py,US-039,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:139; changes requirement-relevant implementation behavior.,"    return Message(message=""User deleted successfully"")","    return Message(message=""User deletion failed"")"
+Bug-107,backend/app/api/routes/users.py,US-039,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    session.delete(current_user)
+    session.commit()
+    return Message(message=""User deleted successfully"")","    # Deletion skipped
+    return Message(message=""User deleted successfully"")"
+Bug-108,backend/app/api/routes/users.py,US-040,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    if current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail=""Super users are not allowed to delete themselves""
+        )","    if current_user.is_superuser:
+        pass  # Allow superuser deletion"
+Bug-109,backend/app/api/routes/users.py,US-040,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=403, detail=""Super users are not allowed to delete themselves""
+        )","        raise HTTPException(
+            status_code=403, detail=""User deleted successfully""
+        )"
+Bug-110,backend/app/api/routes/users.py,US-040,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"        raise HTTPException(
+            status_code=403, detail=""Super users are not allowed to delete themselves""
+        )","        raise HTTPException(
+            status_code=200, detail=""Super users are not allowed to delete themselves""
+        )"
+Bug-111,backend/app/api/routes/users.py,US-041,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:208; changes the API response or status behavior.,"@router.delete(""/{user_id}"", dependencies=[Depends(get_current_active_superuser)])","@router.delete(""/{user_id}"", dependencies=[Depends(get_current_active_superuser)], status_code=404)"
+Bug-112,backend/app/api/routes/users.py,US-041,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:226; changes requirement-relevant implementation behavior.,"    return Message(message=""User deleted successfully"")","    return Message(message=""User deletion failed"")"
+Bug-113,backend/app/api/routes/users.py,US-041,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    statement = delete(Item).where(col(Item.owner_id) == user_id)
+    session.exec(statement)  # type: ignore
+    session.delete(user)
+    session.commit()
+    return Message(message=""User deleted successfully"")","    # Deletion skipped
+    return Message(message=""User deleted successfully"")"
+Bug-114,backend/app/api/routes/users.py,US-042,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes requirement-relevant implementation behavior.,"    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail=""User not found"")","    user = session.get(User, user_id)
+    if not user:
+        return Message(message=""User not found"")"
+Bug-115,backend/app/api/routes/users.py,US-042,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py:217; changes the API response or status behavior.,"        raise HTTPException(status_code=404, detail=""User not found"")","        raise HTTPException(status_code=404, detail=""User deleted successfully"")"
+Bug-116,backend/app/api/routes/users.py,US-043,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    if user == current_user:
+        raise HTTPException(
+            status_code=403, detail=""Super users are not allowed to delete themselves""
+        )","    if user == current_user:
+        pass  # Allow self-deletion"
+Bug-117,backend/app/api/routes/users.py,US-043,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"    if user == current_user:
+        raise HTTPException(
+            status_code=403, detail=""Super users are not allowed to delete themselves""
+        )
+    statement = delete(Item).where(col(Item.owner_id) == user_id)","    if user == current_user:
+        raise HTTPException(
+            status_code=403, detail=""User deleted successfully""
+        )
+    statement = delete(Item).where(col(Item.owner_id) == user_id)"
+Bug-118,backend/app/api/routes/users.py,US-043,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"    if user == current_user:
+        raise HTTPException(
+            status_code=403, detail=""Super users are not allowed to delete themselves""
+        )
+    statement = delete(Item).where(col(Item.owner_id) == user_id)","    if user == current_user:
+        raise HTTPException(
+            status_code=200, detail=""Super users are not allowed to delete themselves""
+        )
+    statement = delete(Item).where(col(Item.owner_id) == user_id)"
+Bug-119,backend/app/api/routes/users.py,US-044,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes deletion behavior.,"@router.delete(""/{user_id}"", dependencies=[Depends(get_current_active_superuser)])
+def delete_user(","@router.delete(""/{user_id}"")
+def delete_user("
+Bug-120,backend/app/api/deps.py,US-044,RESTestBench requirement-specific injected fault at backend/app/api/deps.py; changes the API response or status behavior.,"def get_current_active_superuser(current_user: CurrentUser) -> User:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail=""The user doesn't have enough privileges""
+        )
+    return current_user","def get_current_active_superuser(current_user: CurrentUser) -> User:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail=""User successfully authenticated""
+        )
+    return current_user"
+Bug-121,backend/app/api/routes/users.py,US-045,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes the API response or status behavior.,"    statement = delete(Item).where(col(Item.owner_id) == user_id)
+    session.exec(statement)  # type: ignore
+    session.delete(user)","    # Check if user has items and block deletion
+    from sqlmodel import select
+    items_check = session.exec(select(Item).where(col(Item.owner_id) == user_id)).first()
+    if items_check:
+        raise HTTPException(status_code=400, detail=""User has items that must be deleted first"")
+    session.delete(user)"
+Bug-122,backend/app/api/routes/users.py,US-045,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    session.delete(user)
+    session.commit()
+    return Message(message=""User deleted successfully"")","    # Skip actual deletion but return success (user and items remain)
+    return Message(message=""User deleted successfully"")"
+Bug-123,backend/app/api/routes/users.py,US-046,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; skips or disables an implementation action.,"    session.delete(current_user)
+    session.commit()
+    return Message(message=""User deleted successfully"")","    # Skip actual deletion but return success (user and items remain)
+    return Message(message=""User deleted successfully"")"
+Bug-124,backend/app/models.py,US-046,RESTestBench requirement-specific injected fault at backend/app/models.py:46; changes deletion behavior.,"    items: list[""Item""] = Relationship(back_populates=""owner"", cascade_delete=True)","    items: list[""Item""] = Relationship(back_populates=""owner"", cascade_delete=False)"
+Bug-125,backend/app/models.py,US-047,RESTestBench requirement-specific injected fault at backend/app/models.py:22; skips or disables an implementation action.,"    password: str = Field(min_length=8, max_length=128)","    password: str = Field(min_length=7, max_length=128)"
+Bug-126,backend/app/models.py,US-048,RESTestBench requirement-specific injected fault at backend/app/models.py:22; skips or disables an implementation action.,"    password: str = Field(min_length=8, max_length=128)","    password: str = Field(min_length=8, max_length=129)"
+Bug-127,backend/app/models.py,US-049,RESTestBench requirement-specific injected fault at backend/app/models.py:23; changes input validation.,"    full_name: str | None = Field(default=None, max_length=255)","    full_name: str | None = Field(default=None, max_length=256)"
+Bug-128,backend/app/models.py,US-050,RESTestBench requirement-specific injected fault at backend/app/models.py:39; skips or disables an implementation action.,"    new_password: str = Field(min_length=8, max_length=128)","    new_password: str = Field(min_length=7, max_length=128)"
+Bug-129,backend/app/models.py,US-051,RESTestBench requirement-specific injected fault at backend/app/models.py:39; skips or disables an implementation action.,"    new_password: str = Field(min_length=8, max_length=128)","    new_password: str = Field(min_length=8, max_length=129)"
+Bug-130,backend/app/models.py,US-052,RESTestBench requirement-specific injected fault at backend/app/models.py:38; skips or disables an implementation action.,"    current_password: str = Field(min_length=8, max_length=128)","    current_password: str = Field(min_length=7, max_length=128)"
+Bug-131,backend/app/models.py,US-053,RESTestBench requirement-specific injected fault at backend/app/models.py:61; changes input validation.,"    title: str = Field(min_length=1, max_length=255)","    title: str = Field(min_length=0, max_length=255)"
+Bug-132,backend/app/models.py,US-054,RESTestBench requirement-specific injected fault at backend/app/models.py:61; changes input validation.,"    title: str = Field(min_length=1, max_length=255)","    title: str = Field(min_length=1, max_length=256)"
+Bug-133,backend/app/models.py,US-055,RESTestBench requirement-specific injected fault at backend/app/models.py:62; changes input validation.,"    description: str | None = Field(default=None, max_length=255)","    description: str | None = Field(default=None, max_length=256)"
+Bug-134,backend/app/models.py,US-056,RESTestBench requirement-specific injected fault at backend/app/models.py:113; skips or disables an implementation action.,"    new_password: str = Field(min_length=8, max_length=128)","    new_password: str = Field(min_length=7, max_length=128)"
+Bug-135,backend/app/models.py,US-057,RESTestBench requirement-specific injected fault at backend/app/models.py:21; changes input validation.,"    email: EmailStr = Field(unique=True, index=True, max_length=255)","    email: str = Field(unique=True, index=True, max_length=255)"
+Bug-136,backend/app/models.py,US-058,RESTestBench requirement-specific injected fault at backend/app/models.py:34; changes input validation.,"    email: EmailStr | None = Field(default=None, max_length=255)","    email: str | None = Field(default=None, max_length=255)"
+Bug-137,backend/app/api/routes/users.py,US-059,RESTestBench requirement-specific injected fault at backend/app/api/routes/users.py; changes requirement-relevant implementation behavior.,"def read_user_by_id(user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser) -> Any:","def read_user_by_id(user_id: str, session: SessionDep, current_user: CurrentUser) -> Any:"
+Bug-138,backend/app/api/routes/items.py,US-060,RESTestBench requirement-specific injected fault at backend/app/api/routes/items.py; changes requirement-relevant implementation behavior.,"def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:","def read_item(session: SessionDep, current_user: CurrentUser, id: str) -> Any:"
+Bug-139,backend/app/models.py,US-061,RESTestBench requirement-specific injected fault at backend/app/models.py:21; changes input validation.,"    email: EmailStr = Field(unique=True, index=True, max_length=255)","    email: EmailStr | None = Field(default=None, unique=True, index=True, max_length=255)"
+Bug-140,backend/app/models.py,US-062,RESTestBench requirement-specific injected fault at backend/app/models.py:22; skips or disables an implementation action.,"    password: str = Field(min_length=8, max_length=128)","    password: str | None = Field(default=None, min_length=8, max_length=128)"
+Bug-141,backend/app/models.py,US-063,RESTestBench requirement-specific injected fault at backend/app/models.py:61; changes input validation.,"    title: str = Field(min_length=1, max_length=255)","    title: str | None = Field(default=None, min_length=1, max_length=255)"
+Bug-142,src/user/user.service.ts,US-064,RESTestBench requirement-specific injected fault at src/user/user.service.ts:119; corrupts returned or persisted data.,"      username: user.username,","      username: 'wrong_username',"
+Bug-143,src/user/user.service.ts,US-064,RESTestBench requirement-specific injected fault at src/user/user.service.ts:120; corrupts returned or persisted data.,"      email: user.email,","      email: 'wrong@email.com',"
+Bug-144,src/profile/profile.service.ts,US-065,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:76; changes requirement-relevant implementation behavior.,    profile.following = true;,    profile.following = false;
+Bug-145,src/profile/profile.service.ts,US-065,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:59; disables a conditional guard.,    if (followerUsername === followingUsername) {,    if (false) {
+Bug-146,src/profile/profile.service.ts,US-065,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:73; corrupts returned or persisted data.,"      username: followingUsername,","      username: 'wrong_user',"
+Bug-147,src/article/article.service.ts,US-066,RESTestBench requirement-specific injected fault at src/article/article.service.ts:182; changes requirement-relevant implementation behavior.,    article.slug = this.slugify(articleData.title);,    article.slug = 'fixed-slug';
+Bug-148,src/article/article.service.ts,US-066,RESTestBench requirement-specific injected fault at src/article/article.service.ts:209; changes requirement-relevant implementation behavior.,"    return slug(title, {lower: true}) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36)","    return slug(title, {lower: false}) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36)"
+Bug-149,src/article/article.service.ts,US-066,RESTestBench requirement-specific injected fault at src/article/article.service.ts:179; corrupts returned or persisted data.,    article.title = articleData.title;,    article.title = 'Wrong Title';
+Bug-150,src/article/article.service.ts,US-067,RESTestBench requirement-specific injected fault at src/article/article.service.ts:199; changes requirement-relevant implementation behavior.,"    let updated = Object.assign(toUpdate, articleData);","    let updated = Object.assign(toUpdate, articleData); updated.slug = this.slugify(articleData.title);"
+Bug-151,src/article/article.service.ts,US-067,RESTestBench requirement-specific injected fault at src/article/article.service.ts:199; changes requirement-relevant implementation behavior.,"    let updated = Object.assign(toUpdate, articleData);",    let updated = toUpdate;
+Bug-152,src/article/article.service.ts,US-067,RESTestBench requirement-specific injected fault at src/article/article.service.ts:200; changes requirement-relevant implementation behavior.,    const article = await this.articleRepository.save(updated);,    const article = toUpdate;
+Bug-153,src/article/article.service.ts,US-068,RESTestBench requirement-specific injected fault at src/article/article.service.ts:205; changes requirement-relevant implementation behavior.,    return await this.articleRepository.delete({ slug: slug });,    return { affected: 1 } as any;
+Bug-154,src/article/article.service.ts,US-069,RESTestBench requirement-specific injected fault at src/article/article.service.ts:70; changes requirement-relevant implementation behavior.,"      return {articles: [], articlesCount: 0};",      return await this.findAll({});
+Bug-155,src/article/article.service.ts,US-069,RESTestBench requirement-specific injected fault at src/article/article.service.ts:73; corrupts returned or persisted data.,    const ids = _follows.map(el => el.followingId);,    const ids = [999999];
+Bug-156,src/article/article.service.ts,US-069,RESTestBench requirement-specific injected fault at src/article/article.service.ts:78; changes requirement-relevant implementation behavior.,"    qb.andWhere('article.authorId IN (:...ids)', { ids });",    ;
+Bug-157,src/article/article.service.ts,US-069,RESTestBench requirement-specific injected fault at src/article/article.service.ts:78; changes requirement-relevant implementation behavior.,"    qb.andWhere('article.authorId IN (:...ids)', { ids });","    qb.andWhere('article.authorId NOT IN (:...ids)', { ids });"
+Bug-158,src/article/article.service.ts,US-070,RESTestBench requirement-specific injected fault at src/article/article.service.ts:106; corrupts returned or persisted data.,    comment.body = commentData.body;,    comment.body = 'wrong comment body';
+Bug-159,src/article/article.service.ts,US-070,RESTestBench requirement-specific injected fault at src/article/article.service.ts:113; skips or disables an implementation action.,    article.comments.push(comment);,    // article.comments.push(comment);
+Bug-160,src/article/article.service.ts,US-071,RESTestBench requirement-specific injected fault at src/article/article.service.ts:124; changes deletion behavior.,    let deleteIndex = article.comments.findIndex(_comment => _comment.id === commentId);,    let deleteIndex = -1;
+Bug-161,src/article/article.service.ts,US-071,RESTestBench requirement-specific injected fault at src/article/article.service.ts:106; changes requirement-relevant implementation behavior.,    comment.body = commentData.body;,    comment.body = 'overwritten';
+Bug-162,src/user/user.service.ts,US-072,RESTestBench requirement-specific injected fault at src/user/user.service.ts:45; changes requirement-relevant implementation behavior.,"    const qb = this.userRepository.createQueryBuilder('user').where('user.username = :username OR user.email = :email', {username, email});","    const qb = this.userRepository.createQueryBuilder('user').where('user.username = :username', {username});"
+Bug-163,src/user/user.service.ts,US-072,RESTestBench requirement-specific injected fault at src/user/user.service.ts:49; disables a conditional guard.,    if (user) {,    if (false) {
+Bug-164,src/profile/profile.service.ts,US-073,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:99; changes requirement-relevant implementation behavior.,    profile.following = false;,    profile.following = true;
+Bug-165,src/profile/profile.service.ts,US-073,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:93; skips or disables an implementation action.,"    await this.followsRepository.delete({ followerId: follower.id, followingId: following.id });","    // await this.followsRepository.delete({ followerId: follower.id, followingId: following.id });"
+Bug-166,src/profile/profile.service.ts,US-073,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:89; disables a conditional guard.,    if (followerUsername === followingUsername) {,    if (false) {
+Bug-167,src/user/user.service.ts,US-074,RESTestBench requirement-specific injected fault at src/user/user.service.ts:31; changes requirement-relevant implementation behavior.,"    if (await argon2.verify(user.password, password)) {",    if (true) {
+Bug-168,src/user/user.service.ts,US-074,RESTestBench requirement-specific injected fault at src/user/user.service.ts:32; changes requirement-relevant implementation behavior.,      return user;,      return null;
+Bug-169,src/article/article.service.ts,US-075,RESTestBench requirement-specific injected fault at src/article/article.service.ts:35; changes requirement-relevant implementation behavior.,"      qb.andWhere(""article.tagList LIKE :tag"", { tag: `%${query.tag}%` });","      qb.andWhere(""article.tagList LIKE :tag"", { tag: `${query.tag}` });"
+Bug-170,src/article/article.service.ts,US-075,RESTestBench requirement-specific injected fault at src/article/article.service.ts:34; disables a conditional guard.,    if ('tag' in query) {,    if (false) {
+Bug-171,src/article/article.service.ts,US-076,RESTestBench requirement-specific injected fault at src/article/article.service.ts:40; corrupts returned or persisted data.,"      qb.andWhere(""article.authorId = :id"", { id: author.id });","      qb.andWhere(""article.authorId = :id"", { id: 999999 });"
+Bug-172,src/article/article.service.ts,US-076,RESTestBench requirement-specific injected fault at src/article/article.service.ts:38; disables a conditional guard.,    if ('author' in query) {,    if (false) {
+Bug-173,src/article/article.service.ts,US-076,RESTestBench requirement-specific injected fault at src/article/article.service.ts:39; changes requirement-relevant implementation behavior.,      const author = await this.userRepository.findOne({username: query.author});,      const author = await this.userRepository.findOne({username: 'nonexistent_user_xyz'});
+Bug-174,src/user/user.service.ts,US-077,RESTestBench requirement-specific injected fault at src/user/user.service.ts:79; changes requirement-relevant implementation behavior.,"    let updated = Object.assign(toUpdate, dto);",    let updated = toUpdate;
+Bug-175,src/user/user.service.ts,US-077,RESTestBench requirement-specific injected fault at src/user/user.service.ts:79; corrupts returned or persisted data.,"    let updated = Object.assign(toUpdate, dto);","    let updated = Object.assign(toUpdate, {...dto, image: 'wrong_image_url'});"
+Bug-176,src/user/user.service.ts,US-077,RESTestBench requirement-specific injected fault at src/user/user.service.ts:75; corrupts returned or persisted data.,    let toUpdate = await this.userRepository.findOne(id);,    let toUpdate = await this.userRepository.findOne(999999);
+Bug-177,src/article/article.service.ts,US-078,RESTestBench requirement-specific injected fault at src/article/article.service.ts:54; changes query selection or ordering.,      qb.limit(query.limit);,      qb.limit(1000);
+Bug-178,src/article/article.service.ts,US-078,RESTestBench requirement-specific injected fault at src/article/article.service.ts:58; changes query selection or ordering.,      qb.offset(query.offset);,      qb.offset(0);
+Bug-179,src/profile/profile.service.ts,US-079,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:45; changes requirement-relevant implementation behavior.,      profile.following = !!follows;,      profile.following = true;
+Bug-180,src/profile/profile.service.ts,US-079,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:42; changes requirement-relevant implementation behavior.,"    const follows = await this.followsRepository.findOne( {followerId: id, followingId: _profile.id});",    const follows = null;
+Bug-181,src/profile/profile.service.ts,US-079,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:36; corrupts returned or persisted data.,"      username: _profile.username,","      username: 'wrong_profile_user',"
+Bug-182,src/article/article.service.ts,US-080,RESTestBench requirement-specific injected fault at src/article/article.service.ts:189; skips or disables an implementation action.,    author.articles.push(article);,    // author.articles.push(article);
+Bug-183,src/article/article.service.ts,US-080,RESTestBench requirement-specific injected fault at src/article/article.service.ts:188; corrupts returned or persisted data.,"    const author = await this.userRepository.findOne({ where: { id: userId }, relations: ['articles'] });","    const author = await this.userRepository.findOne({ where: { id: 999 }, relations: ['articles'] });"
+Bug-184,src/article/article.service.ts,US-081,RESTestBench requirement-specific injected fault at src/article/article.service.ts:183; changes requirement-relevant implementation behavior.,    article.tagList = articleData.tagList || [];,    article.tagList = [];
+Bug-185,src/article/article.entity.ts,US-082,RESTestBench requirement-specific injected fault at src/article/article.entity.ts:31; skips or disables an implementation action.,    this.updated = new Date;,    // this.updated = new Date;
+Bug-186,src/article/article.entity.ts,US-082,RESTestBench requirement-specific injected fault at src/article/article.entity.ts:31; changes requirement-relevant implementation behavior.,    this.updated = new Date;,    this.updated = new Date; this.created = new Date;
+Bug-187,src/article/article.service.ts,US-083,RESTestBench requirement-specific injected fault at src/article/article.service.ts:209; changes requirement-relevant implementation behavior.,"    return slug(title, {lower: true}) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36)","    return slug(title, {lower: true})"
+Bug-188,src/article/article.service.ts,US-084,RESTestBench requirement-specific injected fault at src/article/article.service.ts:180; corrupts returned or persisted data.,    article.description = articleData.description;,    article.description = 'wrong';
+Bug-189,src/article/article.service.ts,US-084,RESTestBench requirement-specific injected fault at src/article/article.service.ts:179; corrupts returned or persisted data.,    article.title = articleData.title;,    article.title = 'wrong';
+Bug-190,src/profile/profile.service.ts,US-085,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:37; corrupts returned or persisted data.,"      bio: _profile.bio,","      bio: 'wrong',"
+Bug-191,src/profile/profile.service.ts,US-085,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:38; corrupts returned or persisted data.,"      image: _profile.image,","      image: 'wrong',"
+Bug-192,src/profile/profile.service.ts,US-085,RESTestBench requirement-specific injected fault at src/profile/profile.service.ts:36; corrupts returned or persisted data.,"      username: _profile.username,","      username: 'wrong',"
+Bug-193,src/article/article.service.ts,US-086,RESTestBench requirement-specific injected fault at src/article/article.service.ts:84; disables a conditional guard.,    if ('limit' in query) {,    if (false) {
+Bug-194,src/article/article.service.ts,US-086,RESTestBench requirement-specific injected fault at src/article/article.service.ts:88; disables a conditional guard.,    if ('offset' in query) {,    if (false) {
+Bug-195,src/article/article.service.ts,US-087,RESTestBench requirement-specific injected fault at src/article/article.service.ts:49; changes query selection or ordering.,"    qb.orderBy('article.created', 'DESC');","    qb.orderBy('article.created', 'ASC');"
+Bug-196,src/user/user.service.ts,US-088,RESTestBench requirement-specific injected fault at src/user/user.service.ts:110; corrupts returned or persisted data.,"      username: user.username,","      username: 'wrong',"
+Bug-197,src/user/user.service.ts,US-088,RESTestBench requirement-specific injected fault at src/user/user.service.ts:111; corrupts returned or persisted data.,"      email: user.email,","      email: 'wrong@wrong.com',"
+Bug-198,src/user/user.service.ts,US-088,RESTestBench requirement-specific injected fault at src/user/user.service.ts:109; corrupts returned or persisted data.,"      id: user.id,","      id: 999999,"
+Bug-199,src/article/article.service.ts,US-089,RESTestBench requirement-specific injected fault at src/article/article.service.ts:113; skips or disables an implementation action.,    article.comments.push(comment);,    // article.comments.push(comment);
+Bug-200,src/article/article.service.ts,US-089,RESTestBench requirement-specific injected fault at src/article/article.service.ts:106; changes requirement-relevant implementation behavior.,    comment.body = commentData.body;,    comment.body = 'overwritten';
+Bug-201,Todo.Api/Todos/TodoApi.cs,US-090,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:26; changes the API response or status behavior.,"            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(todo.AsTodoItem()),","            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(new TodoItem(todo.Id, ""Wrong todo"", todo.IsComplete)),"
+Bug-202,Todo.Api/Todos/TodoApi.cs,US-090,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:26; changes requirement-relevant implementation behavior.,        var todos = await db.Todos.Where(t => t.OwnerId == user.Id).Select(t => t.AsTodoItem()).ToListAsync();,        var todos = new List<TodoItem>();
+Bug-203,Todo.Api/Todos/TodoApi.cs,US-091,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:22; changes requirement-relevant implementation behavior.,"        group.MapPost(""/"", CreateTodo).WithParameterValidation();","        group.MapPost(""/"", CreateTodo);"
+Bug-204,Todo.Api/Todos/Todo.cs,US-091,RESTestBench requirement-specific injected fault at Todo.Api/Todos/Todo.cs:18; changes requirement-relevant implementation behavior.,    [Required],"    [Required(ErrorMessage = ""Description is mandatory"")]"
+Bug-205,Todo.Api/Todos/TodoApi.cs,US-092,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:33; changes the API response or status behavior.,"            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(todo.AsTodoItem()),","            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(new TodoItem(todo.Id, ""Wrong todo"", todo.IsComplete)),"
+Bug-206,Todo.Api/Todos/TodoApi.cs,US-092,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:33; changes the API response or status behavior.,"            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(todo.AsTodoItem()),","            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(new TodoItem(9999, todo.Title, todo.IsComplete)),"
+Bug-207,Todo.Api/Todos/TodoApi.cs,US-093,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:34; changes the API response or status behavior.,            _ => TypedResults.NotFound(),"            _ => TypedResults.Ok(new TodoItem(99999, ""My Todo"", false))"
+Bug-208,Todo.Api/Todos/TodoApi.cs,US-094,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:33; changes the API response or status behavior.,"            Todo todo when todo.OwnerId == user.Id => TypedResults.Ok(todo.AsTodoItem()),","            Todo todo => TypedResults.Ok(todo.AsTodoItem()),"
+Bug-209,Todo.Api/Todos/TodoApi.cs,US-095,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:70; changes requirement-relevant implementation behavior.,        var affected = await db.Todos.Where(t => t.Id == id && t.OwnerId == user.Id).ExecuteDeleteAsync();,        var affected = await db.Todos.Where(t => t.Id == id && t.OwnerId == user.Id).CountAsync();
+Bug-210,Todo.Api/Todos/TodoApi.cs,US-095,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:72; changes the API response or status behavior.,        return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();,        return TypedResults.NotFound();
+Bug-211,Todo.Api/Todos/TodoApi.cs,US-096,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:72; changes the API response or status behavior.,        return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();,        return TypedResults.Ok();
+Bug-212,Todo.Api/Todos/TodoApi.cs,US-097,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:69; changes deletion behavior.,        var affected = await db.Todos.Where(t => t.Id == id && t.OwnerId == user.Id).ExecuteDeleteAsync();,        var affected = await db.Todos.Where(t => t.Id == id).ExecuteDeleteAsync();
+Bug-213,Todo.Api/Todos/TodoApi.cs,US-097,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs; changes the API response or status behavior.,"        var affected = await db.Todos.Where(t => t.Id == id && t.OwnerId == user.Id).ExecuteDeleteAsync();
+        return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();","        await db.Todos.ExecuteDeleteAsync();
+        return TypedResults.NotFound();"
+Bug-214,Todo.Api/Todos/TodoApi.cs,US-098,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:61; changes requirement-relevant implementation behavior.,        todo.IsComplete = inputTodo.IsComplete;,        todo.IsComplete = false;
+Bug-215,Todo.Api/Todos/TodoApi.cs,US-098,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:62; changes requirement-relevant implementation behavior.,        todo.Title = inputTodo.Title;,        todo.Title = todo.Title;
+Bug-216,Todo.Api/Todos/TodoApi.cs,US-098,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:64; changes the API response or status behavior.,        return todo is null ? TypedResults.NotFound() : TypedResults.Ok(todo.AsTodoItem());,        return TypedResults.NotFound();
+Bug-217,Todo.Api/Todos/TodoApi.cs,US-099,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:54; disables a conditional guard.,            if (id != todo.Id),            if (false)
+Bug-218,Todo.Api/Todos/TodoApi.cs,US-100,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:64; changes the API response or status behavior.,        return todo is null ? TypedResults.NotFound() : TypedResults.Ok(todo.AsTodoItem());,        return TypedResults.Ok(todo!.AsTodoItem());
+Bug-219,Todo.Api/Todos/TodoApi.cs,US-101,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:59; changes requirement-relevant implementation behavior.,        var todo = await db.Todos.SingleOrDefaultAsync(t => t.Id == id && t.OwnerId == user.Id);,        var todo = await db.Todos.SingleOrDefaultAsync(t => t.Id == id && t.OwnerId != user.Id);
+Bug-220,Todo.Api/Todos/TodoApi.cs,US-101,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs; changes the API response or status behavior.,"        var todo = await db.Todos.SingleOrDefaultAsync(t => t.Id == id && t.OwnerId == user.Id);
+        if (todo is null)
+            return TypedResults.NotFound();
+
+        todo.IsComplete = inputTodo.IsComplete;
+        todo.Title = inputTodo.Title;
+        await db.SaveChangesAsync();
+
+        return TypedResults.Ok(todo.AsTodoItem());","        var todo = await db.Todos.SingleOrDefaultAsync(t => t.Id == id && t.OwnerId != user.Id);
+        if (todo is null)
+            return TypedResults.NotFound();
+
+        return TypedResults.NotFound();"
+Bug-221,Todo.Api/Users/UsersApi.cs,US-102,RESTestBench requirement-specific injected fault at Todo.Api/Users/UsersApi.cs:20; skips or disables an implementation action.,        group.MapIdentityApi<TodoUser>();,        // group.MapIdentityApi<TodoUser>();
+Bug-222,Todo.Api/Todos/TodoApi.cs,US-103,RESTestBench requirement-specific injected fault at Todo.Api/Todos/TodoApi.cs:16; skips or disables an implementation action.,        group.RequireAuthorization(pb => pb.RequireCurrentUser());,        // group.RequireAuthorization(pb => pb.RequireCurrentUser());

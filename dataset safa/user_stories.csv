@@ -1,0 +1,17 @@
+﻿user_story_id,feature_sentence,documentation_text
+US-001,All waypoints in flight routes assigned to UAV must be at least 3 meters above the highest terrain in the flying zone.,Safety mitigation for terrain collision: flight-route waypoints must maintain at least three meters clearance above the highest terrain in the flying zone.
+US-002,Waypoint commands sent to the UAV will represent valid coordinates that will not cause collisions with the terrain.,All waypoint directives issued by Dronology must represent valid coordinates that do not cause the UAV to fly into terrain.
+US-003,When two UAVs violate the MINIMUM_SEPARATION_DISTANCE they will both stop and hover in place.,"When two UAVs violate the minimum separation distance, Dronology must cause both UAVs to stop and hover."
+US-004,All routes are planned to ensure minimum separation of UAVs in flight at all times.,Routes are planned and tested in the simulator before physical flights so UAVs remain separated by at least eight meters vertically or horizontally.
+US-005,When a route is run in the simulator and MINIMUM_SEPARATION_DISTANCE is violated an error shall be reported in the simulator log.,The simulator must report minimum-separation violations in its log.
+US-006,"Prior to flying in a controlled airspace, the maximum altitude of each UAV is set through its internal geofence.","Before flight in controlled airspace, the UAV geofence must be configured with the applicable maximum altitude."
+US-007,RPIC checks the geofence to ensure that the maximum altitude is 400 feet above ground level as allowed by FAA regulations.,The pilot in command checks the geofence maximum-altitude setting before flight.
+US-008,Emergency Notification,Dronology must support emergency battery notification when the configured battery threshold is reached.
+US-009,Sufficient battery voltage needed for all issued waypoints,The UAV must have sufficient battery voltage for issued waypoint commands.
+US-010,Battery voltage checked manually prior to takeoff,Battery voltage is manually checked before takeoff.
+US-011,Check UAV battery prior to takeoff,The UAV battery is checked before takeoff.
+US-012,Check hand-held controller battery prior to takeoff,The hand-held controller battery is checked before takeoff.
+US-013,Battery voltage must be displayed on UI,The Dronology user interface must display UAV battery information so remaining battery can be assessed.
+US-014,Avoid collisions when flying to first waypoint,UAVs must avoid collisions during coordinated takeoff and travel to their first waypoint.
+US-015,UAV is calibrated prior to flight,The UAV must be calibrated before flight so localization/orientation errors are detected or prevented.
+US-016,"When a GPS calibration error is reported, the Dronology operator will issue a RTL command.","When the adjacent ground-control system reports a calibration error, the Dronology operator initiates return-to-launch."
