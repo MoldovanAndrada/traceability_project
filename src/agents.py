@@ -406,6 +406,8 @@ def _build_factorized_explanations(
 
 def search(query, k=10, dataset: str | None = None, link_mode: str = "combined"):
     link_mode = (link_mode or "combined").lower()
+    if not metadata or k <= 0:
+        return []
     q = model.encode([query])
     dense_distances, dense_indices = faiss_index.search(q, min(len(metadata), max(k * 3, k)))
 
