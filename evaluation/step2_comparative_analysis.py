@@ -36,6 +36,8 @@ SMALL_GROUND_TRUTH = {
     "traceability_lang": "(FOR TESTING) ground_truth_story_modification.csv",
     "traceability_math_large - corect final": "math_ground_truth.csv",
     "traceability_time_poc_complex": "time_ground_truth_scenarios.csv",
+    "dataset restbench": "ground_truth.csv",
+    "dataset safa": "ground_truth.csv",
 }
 
 LARGE_CONFIG = {
