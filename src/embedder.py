@@ -1,6 +1,14 @@
 import hashlib
 import importlib.util
 import math
+import os
+
+
+# Sentence Transformers uses PyTorch, but its Transformers dependency probes every
+# installed backend by default.  Explicitly disable the unused TensorFlow backend
+# before importing Sentence Transformers so an unrelated TensorFlow/Keras install
+# cannot break application startup (or emit TensorFlow initialization warnings).
+os.environ["USE_TF"] = "0"
 
 
 def _has_module(name: str) -> bool:

@@ -4,6 +4,16 @@ traceability driven regression selection. more like a Semantic Change Impact Ana
 cum rulezi?: intai rulezy jupyter pt a calcula similaritatile, apoi main.py pt a porni watcherul 
 PT FIX erori de path main-ul trebuie rulat asa: python -m src.main
 
+Troubleshooting TensorFlow/Keras startup errors
+-----------------------------------------------
+The embedding model is provided by Sentence Transformers and uses its PyTorch
+backend. Transformers may also discover an unrelated TensorFlow installation and
+try to initialize it, producing oneDNN messages, deprecated tf.losses warnings,
+or a TensorFlow/Keras compatibility traceback before this application starts.
+The application now sets USE_TF=0 before importing Sentence Transformers, which
+prevents that unused optional backend from loading. TensorFlow is not required by
+this project; the messages do not indicate a failure in the embedding model.
+
 
 
 goal: A Multi-Agent AI Architecture for Automated Regression Testing and Fault Localization - este O LUCRARE CARE ARE ACEST NUME - graph-based program dependency analysis, test prioritization agent  -> https://www.researchgate.net/profile/Micheal-James/publication/394464415_A_Multi-Agent_AI_Architecture_for_Automated_Regression_Testing_and_Fault_Localization/links/689c71e4a645d8252ba43a0f/A-Multi-Agent-AI-Architecture-for-Automated-Regression-Testing-and-Fault-Localization.pdf 
