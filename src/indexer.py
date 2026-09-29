@@ -23,7 +23,7 @@ class SimpleVectorIndex:
         self.vectors = [list(map(float, vector)) for vector in vectors]
 
     def search(self, queries, k: int):
-        query = list(map(float, queries[0])) if queries else []
+        query = list(map(float, queries[0])) if len(queries) else []
         distances = []
         for idx, vector in enumerate(self.vectors):
             distance = sum((a - b) * (a - b) for a, b in zip(query, vector))
@@ -35,6 +35,39 @@ class SimpleVectorIndex:
         distances.sort(key=lambda item: item[0])
         top = distances[:k]
         return [[item[0] for item in top]], [[item[1] for item in top]]
+
+
+class FaissVectorIndex:
+    """Normalize queries before forwarding them to FAISS.
+
+    Sentence Transformers returns a NumPy array, while the dependency-free
+    embedder returns a Python list.  FAISS only accepts contiguous float32
+    arrays, so keeping this conversion at the index boundary makes both
+    embedding backends interchangeable.
+    """
+
+    def __init__(self, index, numpy_module):
+        self.index = index
+        self.np = numpy_module
+
+    @property
+    def d(self):
+        return self.index.d
+
+    @property
+    def ntotal(self):
+        return self.index.ntotal
+
+    def search(self, queries, k: int):
+        query_array = self.np.ascontiguousarray(queries, dtype=self.np.float32)
+        if query_array.ndim != 2:
+            raise ValueError("Search queries must be a 2D array/list [num_queries, dim].")
+        if query_array.shape[1] != self.d:
+            raise ValueError(
+                f"Search query dimension {query_array.shape[1]} does not match "
+                f"the FAISS index dimension {self.d}. Re-run ingest.py to rebuild the index."
+            )
+        return self.index.search(query_array, k)
 
 
 def _to_plain_vectors(embeddings):
@@ -88,7 +121,22 @@ def load_index():
     if _has_module("faiss") and _has_module("numpy") and Path(FAISS_INDEX).exists() and Path(EMB_FILE).exists():
         faiss = importlib.import_module("faiss")
         np = importlib.import_module("numpy")
-        return faiss.read_index(FAISS_INDEX), np.load(EMB_FILE), meta
+        index = faiss.read_index(FAISS_INDEX)
+        vectors = np.load(EMB_FILE)
+        if (
+            vectors.ndim == 2
+            and len(vectors) == len(meta) == index.ntotal
+            and vectors.shape[1] == index.d
+        ):
+            return FaissVectorIndex(index, np), vectors, meta
+
+        # A partial or stale binary index must not be paired with newer
+        # metadata: its result IDs would refer to the wrong records. Rebuild a
+        # safe in-memory index instead. The next ingest run can persist it.
+        from src.embedder import embed_texts
+
+        vectors = embed_texts([record.get("text", "") for record in meta])
+        return SimpleVectorIndex(vectors), vectors, meta
 
     from src.embedder import embed_texts
 
