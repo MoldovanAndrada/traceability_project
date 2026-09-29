@@ -8,9 +8,9 @@ DATA_DIR = os.path.join(BASE, "traceability_lang")
 EMB_DIR = os.path.join(BASE, "embeddings")
 
 # File paths
-TEST_CASES     = os.path.join(DATA_DIR, "test_cases.csv")
-USER_STORIES   = os.path.join(DATA_DIR, "user_stories.csv")
-FAULTS         = os.path.join(DATA_DIR, "faults.csv")
+TEST_CASES     = os.path.join(DATA_DIR, "test_cases.xlsx")
+USER_STORIES   = os.path.join(DATA_DIR, "user_stories.xlsx")
+FAULTS         = os.path.join(DATA_DIR, "faults.xlsx")
 GITHUB_REPO = "MoldovanAndrada/traceability_project"
 GITHUB_TOKEN = "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"
 
