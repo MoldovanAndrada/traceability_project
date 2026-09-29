@@ -21,7 +21,7 @@ def _print_explained_block(label: str, results: list[dict]) -> None:
 def watch_stories():
     last = {}
     while True:
-        df = pd.read_csv(USER_STORIES)
+        df = pd.read_excel(USER_STORIES)
         for _, row in df.iterrows():
             story = row["feature_sentence"]
             cs = checksum(story)

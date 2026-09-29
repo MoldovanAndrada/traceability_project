@@ -1,3 +1,4 @@
+import csv
 import json
 from collections import defaultdict
 from pathlib import PurePosixPath
@@ -8,7 +9,6 @@ import requests
 from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
 from src.config import GITHUB_REPO
-from src.dataset_utils import dataset_from_path, extract_story_changes_from_patch
 from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
@@ -25,13 +25,41 @@ def _search_with_dataset_fallback(query: str, dataset: str | None, allowed_types
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
-    """Backward-compatible wrapper for story patch extraction."""
-    return extract_story_changes_from_patch(patch_text)
+    """Extract changed story rows from a git patch in a lightweight way."""
+    changed: list[dict[str, str]] = []
+
+    for line in patch_text.splitlines():
+        if not line.startswith("+") or line.startswith("+++"):
+            continue
+
+        content = line[1:].strip()
+        if not content:
+            continue
+
+        row = next(csv.reader([content]), None)
+        if not row:
+            continue
+
+        row = [cell.strip() for cell in row if str(cell).strip()]
+        if not row:
+            continue
+
+        if len(row) >= 2:
+            changed.append({"id": row[0], "text": row[1]})
+        else:
+            changed.append({"id": str(len(changed) + 1), "text": row[0]})
+
+    return changed
 
 
 def _dataset_from_path(filename: str) -> str | None:
-    """Backward-compatible wrapper for dataset path detection."""
-    return dataset_from_path(filename)
+    parts = PurePosixPath(filename).parts
+    if not parts:
+        return None
+    first = parts[0]
+    if first.startswith("traceability_") or first.startswith("dataset-"):
+        return first
+    return None
 
 
 def _is_code_class_file(filename: str) -> bool:
@@ -65,11 +93,10 @@ def _attach_explanations(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         # Optional story context
         if enriched.get("type") == "story":
             story_text = (enriched.get("text") or "").strip()
-            change_type = enriched.get("change_type", "changed")
             enriched["explanation_reason"] = (
-                f"story {change_type} in commit; text snippet='{story_text[:80]}'"
+                f"story changed in commit; text snippet='{story_text[:80]}'"
                 if story_text
-                else f"story {change_type} in commit"
+                else "story changed in commit"
             )
 
         # Try your existing formatter first
@@ -200,14 +227,7 @@ def run_once():
 
         results: list[dict[str, Any]] = []
         for story in changed_stories:
-            results.append(
-                {
-                    "type": "story",
-                    "id": story["id"],
-                    "text": story["text"],
-                    "change_type": story["change_type"],
-                }
-            )
+            results.append({"type": "story", "id": story["id"], "text": story["text"]})
             story_results = [
                 *get_related_test_cases(story["text"], dataset=dataset),
                 *get_related_faults(story["text"], dataset=dataset),
