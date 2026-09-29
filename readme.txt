@@ -10,7 +10,8 @@ The embedding model is provided by Sentence Transformers and uses its PyTorch
 backend. Transformers may also discover an unrelated TensorFlow installation and
 try to initialize it, producing oneDNN messages, deprecated tf.losses warnings,
 or a TensorFlow/Keras compatibility traceback before this application starts.
-The application now sets USE_TF=0 before importing Sentence Transformers, which
+The application now selects the PyTorch backend before importing Sentence
+Transformers (`USE_TF=0`, `USE_TORCH=1`, and `TRANSFORMERS_NO_TF=1`), which
 prevents that unused optional backend from loading. TensorFlow is not required by
 this project; the messages do not indicate a failure in the embedding model.
 
