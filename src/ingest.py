@@ -15,6 +15,8 @@ SMALL_BENCHMARK_DATASETS = (
     "traceability_lang",
     "traceability_math_large - corect final",
     "traceability_time_poc_complex",
+    "dataset restbench",
+    "dataset safa",
 )
 
 DATASET_CONFIG = {
@@ -35,6 +37,20 @@ DATASET_CONFIG = {
         "tests": "test_cases_time.csv",
         "faults": "faults_time.csv",
         "code_dir": "src",
+    },
+    "dataset restbench": {
+        "stories": "user_stories.csv",
+        "tests": "test_cases.csv",
+        "faults": "faults.csv",
+        "code_dir": "src",
+        "code_globs": ["*.py", "*.ts", "*.cs"],
+    },
+    "dataset safa": {
+        "stories": "user_stories.csv",
+        "tests": "test_cases.csv",
+        "faults": "faults.csv",
+        "code_dir": "src",
+        "code_globs": ["*.java"],
     },
 }
 

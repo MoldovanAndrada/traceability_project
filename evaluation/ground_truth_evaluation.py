@@ -24,12 +24,16 @@ GROUND_TRUTH_FILES = {
     "traceability_lang": "(FOR TESTING) ground_truth_story_modification.csv",
     "traceability_math_large - corect final": "math_ground_truth.csv",
     "traceability_time_poc_complex": "time_ground_truth_scenarios.csv",
+    "dataset restbench": "ground_truth.csv",
+    "dataset safa": "ground_truth.csv",
 }
 
 STORY_FILES = {
     "traceability_lang": "user_stories.csv",
     "traceability_math_large - corect final": "user_stories.csv",
     "traceability_time_poc_complex": "time_usr_stories.csv",
+    "dataset restbench": "user_stories.csv",
+    "dataset safa": "user_stories.csv",
 }
 
 TYPE_ALIASES = {
@@ -84,6 +88,17 @@ def _load_code_inventory(records: list[dict[str, str]]) -> dict[str, dict[str, s
         code_id = record["id"]
         path = Path(code_id)
         keys = {code_id, record.get("path", ""), record.get("file_name", ""), path.name, path.stem}
+        dataset_prefix = Path(dataset) / "src"
+        try:
+            source_path = path.relative_to(dataset_prefix)
+            keys.add(str(source_path))
+            # Some benchmark fault/ground-truth paths omit the upstream project
+            # directory (for example ``fastapi/``).  Index every meaningful
+            # suffix so those paths still resolve to the canonical code ID.
+            for start in range(1, len(source_path.parts) - 1):
+                keys.add(str(Path(*source_path.parts[start:])))
+        except ValueError:
+            pass
         if path.suffix:
             keys.add(path.name.removesuffix(path.suffix))
         for key in keys:
