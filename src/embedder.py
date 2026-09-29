@@ -9,6 +9,8 @@ import os
 # before importing Sentence Transformers so an unrelated TensorFlow/Keras install
 # cannot break application startup (or emit TensorFlow initialization warnings).
 os.environ["USE_TF"] = "0"
+os.environ["USE_TORCH"] = "1"
+os.environ["TRANSFORMERS_NO_TF"] = "1"
 
 
 def _has_module(name: str) -> bool:

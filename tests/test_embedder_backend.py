@@ -13,7 +13,9 @@ class EmbedderBackendTest(unittest.TestCase):
             [
                 sys.executable,
                 "-c",
-                "import os; import src.embedder; print(os.environ['USE_TF'])",
+                "import os; import src.embedder; "
+                "print(os.environ['USE_TF'], os.environ['USE_TORCH'], "
+                "os.environ['TRANSFORMERS_NO_TF'])",
             ],
             check=True,
             capture_output=True,
@@ -21,7 +23,7 @@ class EmbedderBackendTest(unittest.TestCase):
             text=True,
         )
 
-        self.assertEqual(result.stdout.strip(), "0")
+        self.assertEqual(result.stdout.strip(), "0 1 1")
 
 
 if __name__ == "__main__":
