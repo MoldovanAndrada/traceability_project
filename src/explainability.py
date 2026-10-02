@@ -18,6 +18,7 @@ def format_explanation(result: dict) -> str:
     bm25 = factors.get("bm25_index", {})
     graph = factors.get("graph_index", {})
     confidence = evidence.get("confidence", {})
+    explicit_link = evidence.get("explicit_link", {})
 
     matched_terms = bm25.get("matched_terms") or []
     matched_terms_text = ", ".join(matched_terms[:5]) if matched_terms else "none"
@@ -34,7 +35,15 @@ def format_explanation(result: dict) -> str:
     abstain_text = "insufficient evidence" if abstain else "sufficient evidence"
     contradiction_text = "weak agreement across signals" if contradiction else "signals in agreement"
 
+    explicit_refs = explicit_link.get("matched_references") or []
+    link_text = (
+        f"explicit link via [{', '.join(explicit_refs)}]"
+        if explicit_link.get("is_explicit")
+        else "inferred link"
+    )
+
     return (
+        f"{link_text}; "
         f"score={final_score:.4f} "
         f"(dense={dense_score:.4f}, lexical={bm25_score:.4f}, graph={graph_score:.4f}) "
         f"terms=[{matched_terms_text}] "

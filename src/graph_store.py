@@ -37,6 +37,7 @@ class GraphStore:
         self.explicit_adjacency: dict[int, set[int]] = {i: set() for i in self.nodes}
         self.inferred_adjacency: dict[int, set[int]] = {i: set() for i in self.nodes}
         self.combined_adjacency: dict[int, set[int]] = {i: set() for i in self.nodes}
+        self.explicit_refs: list[set[str]] = [self._extract_explicit_refs(doc) for doc in docs]
 
         loaded = False
         if edges_path and os.path.exists(edges_path):
@@ -114,8 +115,8 @@ class GraphStore:
         """Build explicit edges from shared story/test/issue IDs and file/path mentions."""
         ref_to_nodes: dict[str, set[int]] = defaultdict(set)
 
-        for i, doc in enumerate(self.docs):
-            for ref in self._extract_explicit_refs(doc):
+        for i, refs in enumerate(self.explicit_refs):
+            for ref in refs:
                 ref_to_nodes[ref].add(i)
 
         for linked_nodes in ref_to_nodes.values():
@@ -189,6 +190,35 @@ class GraphStore:
 
     def neighbors(self, node_index: int, link_mode: str = "combined") -> set[int]:
         return self._adjacency_for(link_mode).get(node_index, set())
+
+    def explicit_links_for_text(self, text: str) -> dict[int, set[str]]:
+        """Return artifacts explicitly identified by, or linked from, ``text``.
+
+        Semantic retrieval is deliberately not involved here. References in the
+        input first identify anchor artifacts, then persisted/ref-derived explicit
+        edges add their immediate neighbours. The returned values describe the
+        references that made each link explicit and are suitable for surfacing in
+        retrieval evidence.
+        """
+        query_refs = self._extract_explicit_refs({"text": text})
+        if not query_refs:
+            return {}
+
+        matched: dict[int, set[str]] = {}
+        anchors: set[int] = set()
+        for index, refs in enumerate(self.explicit_refs):
+            shared = query_refs & refs
+            if shared:
+                anchors.add(index)
+                matched[index] = set(shared)
+
+        for anchor in anchors:
+            anchor_refs = matched[anchor]
+            for neighbor in self.explicit_adjacency.get(anchor, set()):
+                shared = query_refs & self.explicit_refs[neighbor]
+                matched.setdefault(neighbor, set()).update(shared or anchor_refs)
+
+        return matched
 
     def personalized_pagerank(
         self,
