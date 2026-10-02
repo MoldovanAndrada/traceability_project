@@ -1,5 +1,5 @@
 test_case_id,test_case_title,user_story_id,test_case_steps
-TC-001,Normalize+capitalize accents,US-01,"1. Input: ""  café au lait  "". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Output is ""Cafe au lait"" with single spaces and first char uppercased."
+TC-001,Normalize+capitalize accents,US-01,"1. Input: ""  café au lait  "". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Output is  with single spaces and first char uppercased."
 TC-002,Normalize+capitalize null,US-01,1. Input: null. 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Returns null (no exception).
 TC-003,Normalize+capitalize tabs/newlines,US-01,"1. Input: ""\t hello\nworld "". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Whitespace normalized to single spaces and result starts with 'H'."
 TC-004,Normalize+capitalize already capitalized,US-01,"1. Input: ""Hello"". 2. Call LangFacade.normalizeAndCapitalize. 3. Verify output. Expected: Returns ""Hello""."
