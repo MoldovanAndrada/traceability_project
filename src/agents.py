@@ -351,6 +351,7 @@ def _build_factorized_explanations(
     merged: list[float],
     top_indices: list[int],
     rerank_features: dict[int, dict] | None = None,
+    explicit_links: dict[int, set[str]] | None = None,
     link_mode: str = "combined",
 ) -> list[dict]:
     dense_norm = _minmax(dense_raw)
@@ -384,6 +385,13 @@ def _build_factorized_explanations(
                 "reranker": (rerank_features or {}).get(i, {}),
             },
             "final_score": round(float(merged[i]), 4),
+        }
+
+        explicit_refs = sorted((explicit_links or {}).get(i, set()))
+        record["link_type"] = "explicit" if explicit_refs else "inferred"
+        record["evidence"]["explicit_link"] = {
+            "is_explicit": bool(explicit_refs),
+            "matched_references": explicit_refs,
         }
 
         confidence = _build_confidence_layer(
@@ -444,7 +452,19 @@ def search(query, k=10, dataset: str | None = None, link_mode: str = "combined")
         rerank_features[i] = features
 
     ranked_indices = sorted(range(len(metadata)), key=lambda idx: rerank_scores[idx], reverse=True)
-    filtered = [i for i in ranked_indices if _matches_dataset(metadata[i], dataset)][:k]
+    eligible = [i for i in ranked_indices if _matches_dataset(metadata[i], dataset)]
+
+    # Explicit traceability is a hard constraint rather than another ranking
+    # feature. Keep every explicitly referenced/connected artifact in the output,
+    # even when it falls below the semantic top-k cutoff.
+    explicit_links = {
+        i: refs
+        for i, refs in HYBRID_INDEX.graph_store.explicit_links_for_text(query).items()
+        if _matches_dataset(metadata[i], dataset)
+    }
+    explicit_ranked = [i for i in eligible if i in explicit_links]
+    inferred_ranked = [i for i in eligible if i not in explicit_links]
+    filtered = explicit_ranked + inferred_ranked[:k]
 
     return _build_factorized_explanations(
         query,
@@ -454,6 +474,7 @@ def search(query, k=10, dataset: str | None = None, link_mode: str = "combined")
         [rerank_scores[i] for i in range(len(metadata))],
         filtered,
         rerank_features=rerank_features,
+        explicit_links=explicit_links,
         link_mode=link_mode,
     )
 
