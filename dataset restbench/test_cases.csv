@@ -5,7 +5,6 @@ TC-003,FastAPI - Read nonexistent item,US-003,Authenticate as the superuser; req
 TC-004,FastAPI - Prevent reading another user's item,US-004,Register two normal users; user A creates an item; user B attempts to retrieve user A's item.,HTTP 400 with detail 'Not enough permissions'.
 TC-005,FastAPI - List items as superuser,US-005,Authenticate as the superuser; create two items; request the item list.,HTTP 200 and the returned collection contains at least both newly created items.
 TC-006,FastAPI - Update item as superuser,US-006,Authenticate as the superuser; create an item; update its title and description.,HTTP 200; title and description are updated while id and owner_id remain those of the original item.
-TC-007,FastAPI - Update nonexistent item,US-007,Authenticate as the superuser; attempt to update an item using a nonexistent id.,HTTP 404 with detail 'Item not found'.
 TC-008,FastAPI - Prevent updating another user's item,US-008,Register two normal users; user A creates an item; user B attempts to update user A's item.,HTTP 400 with detail 'Not enough permissions'.
 TC-009,FastAPI - Delete item as superuser,US-009,Authenticate as the superuser; create an item; delete that item.,HTTP 200 with message 'Item deleted successfully'.
 TC-010,FastAPI - Delete nonexistent item,US-010,Authenticate as the superuser; attempt to delete an item using a nonexistent id.,HTTP 404 with detail 'Item not found'.
