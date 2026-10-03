@@ -40,7 +40,7 @@ class ExplicitLinkOutputTests(unittest.TestCase):
         self.assertIn(1, links)
         self.assertEqual(links[1], {"US-101"})
 
-    def test_fault_story_associations_are_not_mislabeled_as_direct_links(self):
+    def test_fault_story_associations_are_direct_links(self):
         docs = [
             {"id": "Bug-1", "type": "fault", "text": "US-101 | src/login.py"},
             {"id": "Bug-2", "type": "fault", "text": "US-202 | src/login.py"},
@@ -49,19 +49,29 @@ class ExplicitLinkOutputTests(unittest.TestCase):
 
         links = graph.explicit_links_for_text("US-101 | Reject an incorrect password")
 
-        self.assertEqual(links, {})
+        self.assertEqual(links, {0: {"US-101"}})
 
-    def test_story_query_only_labels_test_case_reference_as_explicit(self):
+    def test_story_query_labels_test_case_and_fault_references_as_explicit(self):
         docs = [
             {"id": "TC-013", "type": "test_case", "text": "TC-013 | US-013 | reject password"},
             {"id": "Bug-035", "type": "fault", "text": "Bug-035 | US-013 | password guard"},
+            {"id": "Bug-036", "type": "fault", "text": "Bug-036 | US-013 | response status"},
+            {"id": "Bug-037", "type": "fault", "text": "Bug-037 | US-013 | response detail"},
         ]
 
         links = GraphStore(docs, embeddings=None).explicit_links_for_text(
             "US-013 | Reject an incorrect password"
         )
 
-        self.assertEqual(links, {0: {"US-013"}})
+        self.assertEqual(
+            links,
+            {
+                0: {"US-013"},
+                1: {"US-013"},
+                2: {"US-013"},
+                3: {"US-013"},
+            },
+        )
 
     def test_explanation_labels_explicit_link_and_reference(self):
         result = {
