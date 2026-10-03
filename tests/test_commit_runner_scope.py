@@ -13,6 +13,31 @@ class CommitRunnerScopeTests(unittest.TestCase):
     @patch("src.commit_runner_for_plugin.get_impacted_code")
     @patch("src.commit_runner_for_plugin.search")
     @patch("src.commit_runner_for_plugin.get_latest_commit")
+    def test_dataset_test_case_changes_do_not_trigger_analysis(
+        self, mock_commit, mock_search, mock_impacted_code
+    ):
+        mock_commit.return_value = {
+            "sha": "abc123",
+            "files": [
+                {
+                    "filename": "dataset restbench/test_cases.csv",
+                    "patch": "-TC-007,FastAPI - Update nonexistent item,US-007",
+                }
+            ],
+        }
+
+        with patch("builtins.print") as mock_print:
+            run_once()
+
+        payload = json.loads(mock_print.call_args.args[0])
+        self.assertEqual(payload["impact"], [])
+        self.assertNotIn("Modified File:", payload["human_readable_report"])
+        mock_search.assert_not_called()
+        mock_impacted_code.assert_not_called()
+
+    @patch("src.commit_runner_for_plugin.get_impacted_code")
+    @patch("src.commit_runner_for_plugin.search")
+    @patch("src.commit_runner_for_plugin.get_latest_commit")
     def test_repository_source_and_test_changes_do_not_trigger_analysis(
         self, mock_commit, mock_search, mock_impacted_code
     ):
