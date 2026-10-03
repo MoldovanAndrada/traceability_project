@@ -192,31 +192,23 @@ class GraphStore:
         return self._adjacency_for(link_mode).get(node_index, set())
 
     def explicit_links_for_text(self, text: str) -> dict[int, set[str]]:
-        """Return artifacts explicitly identified by, or linked from, ``text``.
+        """Return artifacts whose own references are explicitly present in ``text``.
 
-        Semantic retrieval is deliberately not involved here. References in the
-        input first identify anchor artifacts, then persisted/ref-derived explicit
-        edges add their immediate neighbours. The returned values describe the
-        references that made each link explicit and are suitable for surfacing in
-        retrieval evidence.
+        Semantic retrieval and graph traversal are deliberately not involved here.
+        Traversing an anchor's neighbours would turn a different relationship into
+        an alleged direct link.  For example, two faults can share ``login.py``
+        while referring to different user stories; a query for one story must not
+        label the other fault ``explicit link via [that story]``.
         """
         query_refs = self._extract_explicit_refs({"text": text})
         if not query_refs:
             return {}
 
         matched: dict[int, set[str]] = {}
-        anchors: set[int] = set()
         for index, refs in enumerate(self.explicit_refs):
             shared = query_refs & refs
             if shared:
-                anchors.add(index)
                 matched[index] = set(shared)
-
-        for anchor in anchors:
-            anchor_refs = matched[anchor]
-            for neighbor in self.explicit_adjacency.get(anchor, set()):
-                shared = query_refs & self.explicit_refs[neighbor]
-                matched.setdefault(neighbor, set()).update(shared or anchor_refs)
 
         return matched
 
