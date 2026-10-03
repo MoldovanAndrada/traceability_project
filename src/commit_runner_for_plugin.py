@@ -256,7 +256,15 @@ def run_once():
                 *get_related_faults(story_query, dataset=dataset),
                 *get_impacted_code(story_query, dataset=dataset),
             ]
-            results.extend(prefer_explicit_links(_supported_results(story_results)))
+            # An abstention is useful uncertainty metadata, not a reason to
+            # erase indirect story impacts.  In particular, inferred test and
+            # fault links frequently have one strong signal (lexical or graph)
+            # without enough cross-signal agreement to clear the confidence
+            # layer.  Keep those candidates visible for story changes while
+            # preserving their ``abstain`` flag and explanation so consumers
+            # can decide how cautiously to treat them.  Code retrieval already
+            # applies its own evidence gate in ``get_impacted_code``.
+            results.extend(prefer_explicit_links(story_results))
 
         explained_results = _dedupe_records(_attach_explanations(results))
         block = {
