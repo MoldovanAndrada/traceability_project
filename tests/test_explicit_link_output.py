@@ -2,6 +2,7 @@ import unittest
 
 from src.explainability import format_explanation
 from src.graph_store import GraphStore
+from src.dataset_utils import build_story_change_query
 
 
 class ExplicitLinkOutputTests(unittest.TestCase):
@@ -25,6 +26,19 @@ class ExplicitLinkOutputTests(unittest.TestCase):
         self.assertIn(0, links)
         self.assertEqual(links[0], {"US-101"})
         self.assertNotIn(2, links)
+
+    def test_changed_story_id_returns_test_case_linked_by_user_story_column(self):
+        query = build_story_change_query(
+            {
+                "id": "US-101",
+                "text": "The newly edited prose does not repeat the story identifier.",
+            }
+        )
+
+        links = self.graph.explicit_links_for_text(query)
+
+        self.assertIn(1, links)
+        self.assertEqual(links[1], {"US-101"})
 
     def test_explanation_labels_explicit_link_and_reference(self):
         result = {
