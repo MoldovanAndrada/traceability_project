@@ -8,7 +8,7 @@ import requests
 from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
 from src.config import GITHUB_REPO
-from src.dataset_utils import extract_story_changes_from_patch
+from src.dataset_utils import build_story_change_query, extract_story_changes_from_patch
 from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
@@ -205,6 +205,7 @@ def run_once():
 
         results: list[dict[str, Any]] = []
         for story in changed_stories:
+            story_query = build_story_change_query(story)
             results.append(
                 {
                     "type": "story",
@@ -214,15 +215,15 @@ def run_once():
                 }
             )
             story_results = [
-                *get_related_test_cases(story["text"], dataset=dataset),
-                *get_related_faults(story["text"], dataset=dataset),
-                *get_impacted_code(story["text"], dataset=dataset),
+                *get_related_test_cases(story_query, dataset=dataset),
+                *get_related_faults(story_query, dataset=dataset),
+                *get_impacted_code(story_query, dataset=dataset),
             ]
             if not story_results:
                 story_results = [
-                    *get_related_test_cases(story["text"]),
-                    *get_related_faults(story["text"]),
-                    *get_impacted_code(story["text"]),
+                    *get_related_test_cases(story_query),
+                    *get_related_faults(story_query),
+                    *get_impacted_code(story_query),
                 ]
             results.extend(story_results)
 

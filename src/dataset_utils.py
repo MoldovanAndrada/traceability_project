@@ -1,6 +1,20 @@
 import csv
 
 
+def build_story_change_query(story: dict[str, str]) -> str:
+    """Build a retrieval query that retains the changed story's identity.
+
+    The feature sentence alone is not enough to follow explicit traceability
+    links: test cases normally point to the story ID (for example ``US-13``),
+    not to an exact copy of its prose.
+    """
+    return " | ".join(
+        value.strip()
+        for value in (story.get("id", ""), story.get("text", ""))
+        if value and value.strip()
+    )
+
+
 def extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
     """Return story rows added or removed by a unified diff.
 
