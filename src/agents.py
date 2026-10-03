@@ -301,6 +301,17 @@ def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
 
 
+def _select_top_k_with_explicit_links(
+    ranked_indices: list[int],
+    explicit_links: dict[int, set[str]],
+    k: int,
+) -> list[int]:
+    """Prioritize direct links without exceeding the requested result count."""
+    explicit_ranked = [i for i in ranked_indices if i in explicit_links]
+    inferred_ranked = [i for i in ranked_indices if i not in explicit_links]
+    return (explicit_ranked + inferred_ranked)[:k]
+
+
 def _build_confidence_layer(
     dense_score: float,
     lexical_score: float,
@@ -519,17 +530,14 @@ def search(
 
     eligible = sorted(eligible_indices, key=lambda idx: rerank_scores[idx], reverse=True)
 
-    # Explicit traceability is a hard constraint rather than another ranking
-    # feature. Keep every explicitly referenced/connected artifact in the output,
-    # even when it falls below the semantic top-k cutoff.
+    # Explicit traceability takes priority over inferred matches. It still has
+    # to share the caller's top-k budget so result counts remain predictable.
     explicit_links = {
         i: refs
         for i, refs in HYBRID_INDEX.graph_store.explicit_links_for_text(query).items()
         if _matches_dataset(metadata[i], dataset)
     }
-    explicit_ranked = [i for i in eligible if i in explicit_links]
-    inferred_ranked = [i for i in eligible if i not in explicit_links]
-    filtered = explicit_ranked + inferred_ranked[:k]
+    filtered = _select_top_k_with_explicit_links(eligible, explicit_links, k)
 
     return _build_factorized_explanations(
         query,
