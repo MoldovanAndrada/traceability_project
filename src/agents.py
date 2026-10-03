@@ -274,6 +274,29 @@ def _minmax(values: list[float]) -> list[float]:
     return [(v - lo) / (hi - lo) for v in values]
 
 
+def _minmax_in_scope(values: list[float], indices: list[int]) -> list[float]:
+    """Normalize scores against the corpus slice that can be returned.
+
+    A dataset-scoped search used to normalize against (and select dense seeds
+    from) the entire multi-project index.  Consequently, a relevant artifact
+    could receive a zero dense score simply because it was not in the global
+    top ``3 * k``.  Preserve the full-length arrays needed by the graph and
+    explanation layers, while deriving their scale solely from eligible
+    records.
+    """
+    normalized = [0.0] * len(values)
+    if not indices:
+        return normalized
+
+    scoped = [values[index] for index in indices]
+    lo, hi = min(scoped), max(scoped)
+    if hi - lo < 1e-12:
+        return normalized
+    for index in indices:
+        normalized[index] = (values[index] - lo) / (hi - lo)
+    return normalized
+
+
 def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
 
@@ -295,8 +318,11 @@ def _build_confidence_layer(
 
     ranked = sorted(signals.items(), key=lambda kv: kv[1], reverse=True)
     top_score = ranked[0][1]
-    support_floor = max(0.35, top_score - 0.15)
-    support = [name for name, score in ranked if score >= support_floor][:3]
+    # Support is an absolute evidence decision, not a competition with the
+    # strongest signal.  The previous ``top - 0.15`` rule meant an excellent
+    # graph score could hide otherwise solid semantic and lexical evidence,
+    # and then cause abstention because the result appeared single-sourced.
+    support = [name for name, score in ranked if score >= 0.4][:3]
     if not support:
         support = [ranked[0][0]]
 
@@ -353,10 +379,16 @@ def _build_factorized_explanations(
     rerank_features: dict[int, dict] | None = None,
     explicit_links: dict[int, set[str]] | None = None,
     link_mode: str = "combined",
+    normalization_indices: list[int] | None = None,
 ) -> list[dict]:
-    dense_norm = _minmax(dense_raw)
-    bm25_norm = _minmax(bm25_raw)
-    graph_norm = _minmax(graph_raw)
+    if normalization_indices is None:
+        dense_norm = _minmax(dense_raw)
+        bm25_norm = _minmax(bm25_raw)
+        graph_norm = _minmax(graph_raw)
+    else:
+        dense_norm = _minmax_in_scope(dense_raw, normalization_indices)
+        bm25_norm = _minmax_in_scope(bm25_raw, normalization_indices)
+        graph_norm = _minmax_in_scope(graph_raw, normalization_indices)
 
     explained = []
     for i in top_indices:
@@ -429,8 +461,24 @@ def search(
     link_mode = (link_mode or "combined").lower()
     if not metadata or k <= 0:
         return []
+    dataset_indices = [
+        i
+        for i, record in enumerate(metadata)
+        if _matches_dataset(record, dataset)
+    ]
+    eligible_indices = [
+        i
+        for i in dataset_indices
+        if artifact_types is None or metadata[i].get("type") in artifact_types
+    ]
+    if not eligible_indices:
+        return []
+
     q = model.encode([query])
-    dense_distances, dense_indices = faiss_index.search(q, min(len(metadata), max(k * 3, k)))
+    # FAISS does not expose metadata filtering for this flat persisted index.
+    # Search the complete index and apply the dataset/type scope below; asking
+    # only for the global top 3*k systematically starved smaller datasets.
+    dense_distances, dense_indices = faiss_index.search(q, len(metadata))
 
     dense_raw = [0.0] * len(metadata)
     for dist, i in zip(dense_distances[0], dense_indices[0]):
@@ -441,16 +489,21 @@ def search(
     bm25_raw = HYBRID_INDEX.bm25_scores(query)
 
     seed_indices = set()
-    dense_top = sorted(range(len(dense_raw)), key=lambda idx: dense_raw[idx], reverse=True)[: max(3, k // 2)]
-    bm25_top = sorted(range(len(bm25_raw)), key=lambda idx: bm25_raw[idx], reverse=True)[: max(3, k // 2)]
+    # Seed graph propagation from all artifact types in the selected dataset.
+    # A story identifier often occurs in its test/fault records rather than in
+    # the requested target type's prose, and those anchors are precisely how
+    # graph retrieval should bridge from a changed story to impacted code.
+    seed_count = min(len(dataset_indices), max(3, k // 2))
+    dense_top = sorted(dataset_indices, key=lambda idx: dense_raw[idx], reverse=True)[:seed_count]
+    bm25_top = sorted(dataset_indices, key=lambda idx: bm25_raw[idx], reverse=True)[:seed_count]
     seed_indices.update(dense_top)
     seed_indices.update(bm25_top)
 
     graph_raw = HYBRID_INDEX.graph_store.personalized_pagerank(seed_indices, link_mode=link_mode)
 
-    dense_norm = _minmax(dense_raw)
-    bm25_norm = _minmax(bm25_raw)
-    graph_norm = _minmax(graph_raw)
+    dense_norm = _minmax_in_scope(dense_raw, eligible_indices)
+    bm25_norm = _minmax_in_scope(bm25_raw, eligible_indices)
+    graph_norm = _minmax_in_scope(graph_raw, eligible_indices)
 
     merged = [
         0.5 * dense_norm[i] + 0.3 * bm25_norm[i] + 0.2 * graph_norm[i]
@@ -464,13 +517,7 @@ def search(
         rerank_scores[i] = score
         rerank_features[i] = features
 
-    ranked_indices = sorted(range(len(metadata)), key=lambda idx: rerank_scores[idx], reverse=True)
-    eligible = [
-        i
-        for i in ranked_indices
-        if _matches_dataset(metadata[i], dataset)
-        and (artifact_types is None or metadata[i].get("type") in artifact_types)
-    ]
+    eligible = sorted(eligible_indices, key=lambda idx: rerank_scores[idx], reverse=True)
 
     # Explicit traceability is a hard constraint rather than another ranking
     # feature. Keep every explicitly referenced/connected artifact in the output,
@@ -494,6 +541,7 @@ def search(
         rerank_features=rerank_features,
         explicit_links=explicit_links,
         link_mode=link_mode,
+        normalization_indices=eligible_indices,
     )
 
 
