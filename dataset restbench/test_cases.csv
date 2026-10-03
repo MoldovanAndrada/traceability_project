@@ -11,6 +11,7 @@ TC-009,FastAPI - Delete item as superuser,US-009,Authenticate as the superuser; 
 TC-010,FastAPI - Delete nonexistent item,US-010,Authenticate as the superuser; attempt to delete an item using a nonexistent id.,HTTP 404 with detail 'Item not found'.
 TC-011,FastAPI - Prevent deleting another user's item,US-011,Register two normal users; user A creates an item; user B attempts to delete user A's item.,HTTP 400 with detail 'Not enough permissions'.
 TC-012,FastAPI - Obtain access token,US-012,Authenticate using the configured superuser credentials.,HTTP 200; access_token is present and non-empty; token_type is 'bearer'.
+TC-013,FastAPI - Reject incorrect password,US-013,Register a user; attempt to log in with the correct email and an incorrect password.,HTTP 400 and authentication fails.
 TC-014,FastAPI - Validate access token,US-014,Authenticate as the superuser; call the access-token test endpoint with the returned token.,HTTP 200 and the response identifies the superuser email as admin@example.com.
 TC-015,FastAPI - Send password recovery email,US-015,Register a normal user; request password recovery for that email; inspect the mail-catcher service.,"HTTP 200 with message 'Password recovery email sent', and a recovery email is captured by the mail service."
 TC-016,FastAPI - Reject recovery for nonexistent user,US-016,Request password recovery for an email that is not registered.,HTTP 404.
