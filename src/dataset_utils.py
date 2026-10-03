@@ -1,4 +1,20 @@
 import csv
+from pathlib import PurePosixPath
+
+
+def dataset_from_path(filename: str) -> str | None:
+    """Return the dataset directory represented by a repository path."""
+    parts = PurePosixPath(filename).parts
+    if not parts:
+        return None
+    first = parts[0]
+    # Dataset directories use both hyphenated names (``dataset-api``) and
+    # human-readable names with spaces (``dataset restbench``). Returning
+    # ``None`` for the latter disables dataset filtering and can surface
+    # same-numbered artifacts from unrelated corpora.
+    if first.startswith("traceability_") or first.startswith(("dataset-", "dataset ")):
+        return first
+    return None
 
 
 def build_story_change_query(story: dict[str, str]) -> str:
