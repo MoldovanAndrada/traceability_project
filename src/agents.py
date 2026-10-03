@@ -412,7 +412,20 @@ def _build_factorized_explanations(
     return explained
 
 
-def search(query, k=10, dataset: str | None = None, link_mode: str = "combined"):
+def search(
+    query,
+    k=10,
+    dataset: str | None = None,
+    link_mode: str = "combined",
+    artifact_types: set[str] | None = None,
+):
+    """Retrieve the best artifacts, optionally reserving the result set for types.
+
+    Type filtering must happen *before* the top-k cut.  Filtering a mixed top-k
+    afterwards made the answer depend on the relative number of stories, tests,
+    and faults in a dataset; code could consequently disappear completely even
+    when it was the best code match for the query.
+    """
     link_mode = (link_mode or "combined").lower()
     if not metadata or k <= 0:
         return []
@@ -452,7 +465,12 @@ def search(query, k=10, dataset: str | None = None, link_mode: str = "combined")
         rerank_features[i] = features
 
     ranked_indices = sorted(range(len(metadata)), key=lambda idx: rerank_scores[idx], reverse=True)
-    eligible = [i for i in ranked_indices if _matches_dataset(metadata[i], dataset)]
+    eligible = [
+        i
+        for i in ranked_indices
+        if _matches_dataset(metadata[i], dataset)
+        and (artifact_types is None or metadata[i].get("type") in artifact_types)
+    ]
 
     # Explicit traceability is a hard constraint rather than another ranking
     # feature. Keep every explicitly referenced/connected artifact in the output,
@@ -480,12 +498,107 @@ def search(query, k=10, dataset: str | None = None, link_mode: str = "combined")
 
 
 def get_related_test_cases(story, dataset: str | None = None, link_mode: str = "combined"):
-    return [r for r in search(story, dataset=dataset, link_mode=link_mode) if r["type"] == "test_case"]
+    return search(
+        story,
+        dataset=dataset,
+        link_mode=link_mode,
+        artifact_types={"test_case"},
+    )
 
 
 def get_related_faults(story, dataset: str | None = None, link_mode: str = "combined"):
-    return [r for r in search(story, dataset=dataset, link_mode=link_mode) if r["type"] == "fault"]
+    return search(
+        story,
+        dataset=dataset,
+        link_mode=link_mode,
+        artifact_types={"fault"},
+    )
+
+
+def _has_retrieval_evidence(record: dict, *, allow_semantic: bool = True) -> bool:
+    """Reject forced top-k neighbors that have no evidence of relevance.
+
+    Ranking always has a first item, even for an unrelated query.  Impact
+    analysis must not turn that implementation detail into a claimed code
+    impact, so a result needs an explicit link, lexical overlap, or a supported
+    semantic match.
+    """
+    evidence = record.get("evidence", {})
+    if evidence.get("explicit_link", {}).get("is_explicit"):
+        return True
+
+    factors = evidence.get("factorized_explanation", {})
+    lexical = float(factors.get("bm25_index", {}).get("score", 0.0) or 0.0)
+    overlap = float(factors.get("reranker", {}).get("query_artifact_overlap", 0.0) or 0.0)
+    if lexical > 0.0 and overlap > 0.0:
+        return True
+
+    if not allow_semantic:
+        return False
+
+    semantic = float(factors.get("dense_index", {}).get("score", 0.0) or 0.0)
+    confidence = evidence.get("confidence", {})
+    return semantic >= 0.5 and not confidence.get("abstain", True)
 
 
 def get_impacted_code(story, dataset: str | None = None, link_mode: str = "combined"):
-    return [r for r in search(story, dataset=dataset, link_mode=link_mode) if r["type"] == "code"]
+    # Requirements and test cases frequently describe complementary parts of
+    # the same behavior.  Expand through those dataset artifacts before the
+    # code-only retrieval, rather than relying on project-specific mappings
+    # such as "account -> UserService".
+    direct_results = [
+        record
+        for record in search(
+            story,
+            dataset=dataset,
+            link_mode=link_mode,
+            artifact_types={"code"},
+        )
+        if _has_retrieval_evidence(record)
+    ]
+    context = [
+        record
+        for record in search(
+            story,
+            k=5,
+            dataset=dataset,
+            link_mode=link_mode,
+            artifact_types={"story", "test_case"},
+        )
+        # Context expansion is intentionally stricter than final code
+        # selection. Relative semantic ranks always have a winner, so expanding
+        # through a semantic-only neighbor can fabricate a relationship for a
+        # query whose vocabulary is absent from the dataset.
+        if _has_retrieval_evidence(record, allow_semantic=False)
+    ]
+    context_text = "\n".join(
+        str(record.get("text", ""))
+        for record in context
+        if record.get("text")
+    )
+    expanded_query = (
+        f"Changed artifact:\n{story}\n{story}\n"
+        f"Related requirement/test context:\n{context_text}"
+        if context_text
+        else story
+    )
+    expanded_results = []
+    if context_text:
+        expanded_results = [
+            record
+            for record in search(
+                expanded_query,
+                dataset=dataset,
+                link_mode=link_mode,
+                artifact_types={"code"},
+            )
+            if _has_retrieval_evidence(record)
+        ]
+    combined: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    for record in [*direct_results, *expanded_results]:
+        key = (str(record.get("type", "")), str(record.get("id", "")))
+        if key not in seen:
+            seen.add(key)
+            combined.append(record)
+    return combined
