@@ -40,6 +40,17 @@ class ExplicitLinkOutputTests(unittest.TestCase):
         self.assertIn(1, links)
         self.assertEqual(links[1], {"US-101"})
 
+    def test_shared_file_neighbor_is_not_mislabeled_as_direct_story_link(self):
+        docs = [
+            {"id": "Bug-1", "type": "fault", "text": "US-101 | src/login.py"},
+            {"id": "Bug-2", "type": "fault", "text": "US-202 | src/login.py"},
+        ]
+        graph = GraphStore(docs, embeddings=None)
+
+        links = graph.explicit_links_for_text("US-101 | Reject an incorrect password")
+
+        self.assertEqual(links, {0: {"US-101"}})
+
     def test_explanation_labels_explicit_link_and_reference(self):
         result = {
             "evidence": {

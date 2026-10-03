@@ -8,7 +8,12 @@ import requests
 from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
 from src.config import GITHUB_REPO
-from src.dataset_utils import build_story_change_query, dataset_from_path, extract_story_changes_from_patch
+from src.dataset_utils import (
+    build_story_change_query,
+    dataset_from_path,
+    extract_story_changes_from_patch,
+    prefer_explicit_links,
+)
 from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
@@ -219,7 +224,7 @@ def run_once():
                     *get_related_faults(story_query),
                     *get_impacted_code(story_query),
                 ]
-            results.extend(story_results)
+            results.extend(prefer_explicit_links(story_results))
 
         explained_results = _dedupe_records(_attach_explanations(results))
         block = {
