@@ -40,7 +40,7 @@ class ExplicitLinkOutputTests(unittest.TestCase):
         self.assertIn(1, links)
         self.assertEqual(links[1], {"US-101"})
 
-    def test_fault_story_associations_are_direct_links(self):
+    def test_fault_story_associations_are_not_promoted_to_direct_links(self):
         docs = [
             {"id": "Bug-1", "type": "fault", "text": "US-101 | src/login.py"},
             {"id": "Bug-2", "type": "fault", "text": "US-202 | src/login.py"},
@@ -49,9 +49,38 @@ class ExplicitLinkOutputTests(unittest.TestCase):
 
         links = graph.explicit_links_for_text("US-101 | Reject an incorrect password")
 
-        self.assertEqual(links, {0: {"US-101"}})
+        self.assertEqual(links, {})
 
-    def test_artifact_prefixes_are_discovered_from_dataset_content(self):
+    def test_fault_story_associations_support_dataset_specific_story_ids(self):
+        docs = [
+            {"id": "REQ-CHECKOUT", "type": "story", "text": "REQ-CHECKOUT | Checkout"},
+            {
+                "id": "DEFECT:CART",
+                "type": "fault",
+                "text": "DEFECT:CART | REQ-CHECKOUT | stale cart",
+            },
+        ]
+
+        links = GraphStore(docs, embeddings=None).explicit_links_for_text(
+            "REQ-CHECKOUT | Change checkout"
+        )
+
+        self.assertIn(0, links)
+        self.assertNotIn(1, links)
+
+    def test_explicit_fault_identifier_remains_a_direct_link(self):
+        docs = [
+            {"id": "US-101", "type": "story", "text": "US-101 | Login"},
+            {"id": "Bug-1", "type": "fault", "text": "Bug-1 | US-101 | login.py"},
+        ]
+
+        links = GraphStore(docs, embeddings=None).explicit_links_for_text(
+            "Investigate Bug-1"
+        )
+
+        self.assertEqual(links, {1: {"BUG-1"}})
+
+    def test_artifact_prefixes_are_discovered_without_promoting_fault_history(self):
         docs = [
             {"id": "CHECK_81", "type": "test_case", "text": "CHECK_81 | REQ_204 | checkout"},
             {"id": "DEFECT:9", "type": "fault", "text": "DEFECT:9 | REQ_204 | stale cart"},
@@ -62,7 +91,7 @@ class ExplicitLinkOutputTests(unittest.TestCase):
             "REQ_204 | Change the checkout behaviour"
         )
 
-        self.assertEqual(links, {0: {"REQ_204"}, 1: {"REQ_204"}})
+        self.assertEqual(links, {0: {"REQ_204"}})
 
     def test_non_numeric_story_ids_are_discovered_from_dataset_artifacts(self):
         docs = [
@@ -80,7 +109,6 @@ class ExplicitLinkOutputTests(unittest.TestCase):
             {
                 0: {"REQ-CHECKOUT"},
                 1: {"REQ-CHECKOUT"},
-                2: {"REQ-CHECKOUT"},
             },
         )
 
