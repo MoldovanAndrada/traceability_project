@@ -11,6 +11,51 @@ from src.commit_runner_for_plugin import _search_with_dataset_fallback, _support
 
 class CommitRunnerScopeTests(unittest.TestCase):
     @patch("src.commit_runner_for_plugin.get_impacted_code")
+    @patch("src.commit_runner_for_plugin.get_related_faults")
+    @patch("src.commit_runner_for_plugin.get_related_test_cases")
+    @patch("src.commit_runner_for_plugin.get_latest_commit")
+    def test_story_changes_keep_abstained_inferred_test_and_fault_candidates(
+        self, mock_commit, mock_test_cases, mock_faults, mock_impacted_code
+    ):
+        mock_commit.return_value = {
+            "sha": "abc123",
+            "files": [
+                {
+                    "filename": "dataset restbench/user_stories.csv",
+                    "patch": "+US-003,As a user I want missing items reported",
+                }
+            ],
+        }
+        mock_test_cases.return_value = [
+            {
+                "id": "TC-009",
+                "type": "test_case",
+                "link_type": "inferred",
+                "abstain": True,
+                "evidence": {"explicit_link": {"is_explicit": False}},
+            }
+        ]
+        mock_faults.return_value = [
+            {
+                "id": "Bug-004",
+                "type": "fault",
+                "link_type": "inferred",
+                "abstain": True,
+                "evidence": {"explicit_link": {"is_explicit": False}},
+            }
+        ]
+        mock_impacted_code.return_value = []
+
+        with patch("builtins.print") as mock_print:
+            run_once()
+
+        payload = json.loads(mock_print.call_args.args[0])
+        result_ids = [record["id"] for record in payload["impact"][0]["results"]]
+        self.assertEqual(result_ids, ["US-003", "TC-009", "Bug-004"])
+        self.assertIn("[test_case]: TC-009", payload["human_readable_report"])
+        self.assertIn("[fault]: Bug-004", payload["human_readable_report"])
+
+    @patch("src.commit_runner_for_plugin.get_impacted_code")
     @patch("src.commit_runner_for_plugin.search")
     @patch("src.commit_runner_for_plugin.get_latest_commit")
     def test_dataset_test_case_changes_do_not_trigger_analysis(
