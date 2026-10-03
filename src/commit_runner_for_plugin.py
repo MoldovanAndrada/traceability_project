@@ -23,11 +23,15 @@ TEST_FILE_MARKERS = ("test", "tests", "spec", "specs")
 
 
 def _search_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> list[dict[str, Any]]:
-    """Try dataset-aware search first, then fall back to global search when metadata lacks dataset tags."""
-    results = search(query, dataset=dataset, artifact_types=allowed_types)
-    if results or not dataset:
-        return results
-    return search(query, artifact_types=allowed_types)
+    """Search only the dataset that owns the changed artifact.
+
+    Falling back to the global corpus turns a missing match into unrelated
+    results from every other dataset.  Ingested records carry dataset metadata,
+    so an empty dataset-scoped result is the correct, conservative answer.
+    """
+    if not dataset:
+        return []
+    return search(query, dataset=dataset, artifact_types=allowed_types)
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
@@ -129,6 +133,16 @@ def _dedupe_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return deduped
 
 
+def _supported_results(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Drop inferred candidates for which the confidence layer abstained."""
+    return [
+        record
+        for record in records
+        if record.get("evidence", {}).get("explicit_link", {}).get("is_explicit")
+        or record.get("abstain") is False
+    ]
+
+
 def _fetch_file_content_at_commit(sha: str, filename: str) -> str:
     url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{sha}/{filename}"
     response = requests.get(url, timeout=20)
@@ -179,6 +193,12 @@ def run_once():
     for file_change in files:
         filename = file_change["filename"]
         dataset = _dataset_from_path(filename)
+        # This runner analyzes the benchmark datasets embedded in the
+        # repository, not changes to the traceability tool itself.  In
+        # particular, repository-level ``src/`` and ``tests/`` files must not
+        # be interpreted as dataset implementation and test artifacts.
+        if dataset is None:
+            continue
         if _is_test_artifact_file(filename):
             test_changes_by_dataset[dataset].append(file_change)
             continue
@@ -204,8 +224,7 @@ def run_once():
                 *_search_with_dataset_fallback(query, dataset, {"story", "test_case", "fault"}),
                 *get_impacted_code(query, dataset=dataset),
             ]
-            if not any(result.get("type") == "code" for result in results) and dataset:
-                results.extend(get_impacted_code(query))
+            results = _supported_results(results)
             normalized_filename = filename.replace("\\", "/").lower()
             results = [
                 result
@@ -232,6 +251,7 @@ def run_once():
             if not patch_text:
                 continue
             results = _search_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
+            results = _supported_results(results)
             explained_results = _attach_explanations(results)
             block = {
                 "trigger": "code_class_modified",
@@ -268,13 +288,7 @@ def run_once():
                 *get_related_faults(story_query, dataset=dataset),
                 *get_impacted_code(story_query, dataset=dataset),
             ]
-            if not story_results:
-                story_results = [
-                    *get_related_test_cases(story_query),
-                    *get_related_faults(story_query),
-                    *get_impacted_code(story_query),
-                ]
-            results.extend(prefer_explicit_links(story_results))
+            results.extend(prefer_explicit_links(_supported_results(story_results)))
 
         explained_results = _dedupe_records(_attach_explanations(results))
         block = {
