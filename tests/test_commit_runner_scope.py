@@ -14,7 +14,7 @@ class CommitRunnerScopeTests(unittest.TestCase):
     @patch("src.commit_runner_for_plugin.get_related_faults")
     @patch("src.commit_runner_for_plugin.get_related_test_cases")
     @patch("src.commit_runner_for_plugin.get_latest_commit")
-    def test_story_changes_keep_abstained_inferred_test_and_fault_candidates(
+    def test_story_changes_omit_abstained_inferred_candidates_but_keep_explicit_links(
         self, mock_commit, mock_test_cases, mock_faults, mock_impacted_code
     ):
         mock_commit.return_value = {
@@ -33,7 +33,14 @@ class CommitRunnerScopeTests(unittest.TestCase):
                 "link_type": "inferred",
                 "abstain": True,
                 "evidence": {"explicit_link": {"is_explicit": False}},
-            }
+            },
+            {
+                "id": "TC-003",
+                "type": "test_case",
+                "link_type": "explicit",
+                "abstain": True,
+                "evidence": {"explicit_link": {"is_explicit": True}},
+            },
         ]
         mock_faults.return_value = [
             {
@@ -51,9 +58,10 @@ class CommitRunnerScopeTests(unittest.TestCase):
 
         payload = json.loads(mock_print.call_args.args[0])
         result_ids = [record["id"] for record in payload["impact"][0]["results"]]
-        self.assertEqual(result_ids, ["US-003", "TC-009", "Bug-004"])
-        self.assertIn("[test_case]: TC-009", payload["human_readable_report"])
-        self.assertIn("[fault]: Bug-004", payload["human_readable_report"])
+        self.assertEqual(result_ids, ["US-003", "TC-003"])
+        self.assertIn("[test_case]: TC-003", payload["human_readable_report"])
+        self.assertNotIn("TC-009", payload["human_readable_report"])
+        self.assertNotIn("Bug-004", payload["human_readable_report"])
 
     @patch("src.commit_runner_for_plugin.get_impacted_code")
     @patch("src.commit_runner_for_plugin.search")
