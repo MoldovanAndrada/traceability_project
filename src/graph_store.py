@@ -224,10 +224,10 @@ class GraphStore:
         while referring to different user stories; a query for one story must not
         label the other fault ``explicit link via [that story]``.
 
-        A reference found on the artifact itself is direct evidence regardless of
-        artifact type.  In particular, fault datasets can declare a ``related_story``
-        value, and those faults must be retained alongside explicitly linked tests
-        when that story changes.
+        A test case's declared story reference is an authoritative trace. A fault's
+        ``related_story`` value instead describes historical co-location: it can
+        contribute graph/ranking evidence, but must still pass confidence filtering
+        rather than being promoted to an explicit link.
         """
         query_refs = self._extract_explicit_refs({"text": text})
         if not query_refs:
@@ -236,6 +236,21 @@ class GraphStore:
         matched: dict[int, set[str]] = {}
         for index, refs in enumerate(self.explicit_refs):
             shared = query_refs & refs
+            if str(self.docs[index].get("type", "")).lower() == "fault":
+                # IDs mentioned *by* a fault describe its historical associations.
+                # Only a direct reference to the fault itself (or its concrete
+                # path/commit) is authoritative enough to bypass abstention.
+                fault_id = str(
+                    self.docs[index].get("id")
+                    or self.docs[index].get("artifact_id")
+                    or ""
+                ).strip().upper()
+                shared = {
+                    ref
+                    for ref in shared
+                    if ref == fault_id
+                    or ref.upper().startswith(("PATH:", "COMMIT:", "ART:"))
+                }
             if shared:
                 matched[index] = set(shared)
 
