@@ -6,9 +6,15 @@ from collections import defaultdict
 
 np = importlib.import_module("numpy") if importlib.util.find_spec("numpy") else None
 
-_STORY_REF_PATTERN = re.compile(r"US-\d+", re.IGNORECASE)
-_TEST_REF_PATTERN = re.compile(r"TC-\d+", re.IGNORECASE)
-_ISSUE_REF_PATTERN = re.compile(r"(?:BUG|ISSUE)-\d+", re.IGNORECASE)
+# Traceability IDs are dataset data, not a fixed taxonomy.  Match identifiers
+# such as ``US-13``, ``REQ_204``, ``story:checkout-7`` and ``CASE-A12`` without
+# baking any artifact prefixes into the graph implementation.  Requiring a
+# separator and a digit avoids treating ordinary prose as an explicit link.
+_ARTIFACT_REF_PATTERN = re.compile(
+    r"(?<![\w])(?=[A-Za-z0-9:_-]*\d)[A-Za-z][A-Za-z0-9]*"
+    r"(?:[-_:][A-Za-z0-9]+)+(?![\w])",
+    re.IGNORECASE,
+)
 _FILE_REF_PATTERN = re.compile(r"[\w./\\-]+\.(?:java|py|js|ts|cpp|c|cs)", re.IGNORECASE)
 _COMMIT_REF_PATTERN = re.compile(r"\b(?:commit|sha)[:\s]+([a-f0-9]{7,40})\b", re.IGNORECASE)
 
@@ -33,6 +39,23 @@ class GraphStore:
         self.id_to_index = {
             str(doc.get("id") or doc.get("artifact_id") or i): i for i, doc in enumerate(docs)
         }
+        known_ids = sorted(
+            {
+                str(doc.get("id") or doc.get("artifact_id") or "").strip()
+                for doc in docs
+                if doc.get("id") or doc.get("artifact_id")
+            },
+            key=len,
+            reverse=True,
+        )
+        self._known_id_pattern = (
+            re.compile(
+                r"(?<![\w])(?:" + "|".join(re.escape(ref) for ref in known_ids) + r")(?![\w])",
+                re.IGNORECASE,
+            )
+            if known_ids
+            else None
+        )
         self.nodes = list(range(len(docs)))
         self.explicit_adjacency: dict[int, set[int]] = {i: set() for i in self.nodes}
         self.inferred_adjacency: dict[int, set[int]] = {i: set() for i in self.nodes}
@@ -89,12 +112,13 @@ class GraphStore:
         path = str(doc.get("path", ""))
 
         refs: set[str] = set()
-        refs.update(m.group(0).upper() for m in _STORY_REF_PATTERN.finditer(text))
-        refs.update(m.group(0).upper() for m in _TEST_REF_PATTERN.finditer(text))
-        refs.update(m.group(0).upper() for m in _ISSUE_REF_PATTERN.finditer(text))
-        refs.update(m.group(0).upper() for m in _STORY_REF_PATTERN.finditer(doc_id))
-        refs.update(m.group(0).upper() for m in _TEST_REF_PATTERN.finditer(doc_id))
-        refs.update(m.group(0).upper() for m in _ISSUE_REF_PATTERN.finditer(doc_id))
+        refs.update(m.group(0).upper() for m in _ARTIFACT_REF_PATTERN.finditer(text))
+        refs.update(m.group(0).upper() for m in _ARTIFACT_REF_PATTERN.finditer(doc_id))
+        # IDs without conventional prefixes or numbers still work when they are
+        # declared by this dataset (for example ``REQ-CHECKOUT``).
+        if self._known_id_pattern:
+            refs.update(m.group(0).upper() for m in self._known_id_pattern.finditer(text))
+            refs.update(m.group(0).upper() for m in self._known_id_pattern.finditer(doc_id))
 
         refs.update(
             "PATH:" + m.group(0).replace('\\', '/').lower()
@@ -131,7 +155,7 @@ class GraphStore:
         ref_to_nodes: dict[str, set[int]] = defaultdict(set)
         for i, doc in enumerate(self.docs):
             text = str(doc.get("text", ""))
-            refs = {m.group(0).upper() for m in _STORY_REF_PATTERN.finditer(text)}
+            refs = {m.group(0).upper() for m in _ARTIFACT_REF_PATTERN.finditer(text)}
             for ref in refs:
                 ref_to_nodes[ref].add(i)
         for linked_nodes in ref_to_nodes.values():

@@ -51,25 +51,36 @@ class ExplicitLinkOutputTests(unittest.TestCase):
 
         self.assertEqual(links, {0: {"US-101"}})
 
-    def test_story_query_labels_test_case_and_fault_references_as_explicit(self):
+    def test_artifact_prefixes_are_discovered_from_dataset_content(self):
         docs = [
-            {"id": "TC-013", "type": "test_case", "text": "TC-013 | US-013 | reject password"},
-            {"id": "Bug-035", "type": "fault", "text": "Bug-035 | US-013 | password guard"},
-            {"id": "Bug-036", "type": "fault", "text": "Bug-036 | US-013 | response status"},
-            {"id": "Bug-037", "type": "fault", "text": "Bug-037 | US-013 | response detail"},
+            {"id": "CHECK_81", "type": "test_case", "text": "CHECK_81 | REQ_204 | checkout"},
+            {"id": "DEFECT:9", "type": "fault", "text": "DEFECT:9 | REQ_204 | stale cart"},
+            {"id": "DEFECT:10", "type": "fault", "text": "DEFECT:10 | REQ_999 | other"},
         ]
 
         links = GraphStore(docs, embeddings=None).explicit_links_for_text(
-            "US-013 | Reject an incorrect password"
+            "REQ_204 | Change the checkout behaviour"
+        )
+
+        self.assertEqual(links, {0: {"REQ_204"}, 1: {"REQ_204"}})
+
+    def test_non_numeric_story_ids_are_discovered_from_dataset_artifacts(self):
+        docs = [
+            {"id": "REQ-CHECKOUT", "type": "story", "text": "REQ-CHECKOUT | Checkout"},
+            {"id": "VERIFY-CART", "type": "test_case", "text": "VERIFY-CART | REQ-CHECKOUT"},
+            {"id": "FAULT-CART", "type": "fault", "text": "FAULT-CART | REQ-CHECKOUT"},
+        ]
+
+        links = GraphStore(docs, embeddings=None).explicit_links_for_text(
+            "REQ-CHECKOUT | Change the checkout behaviour"
         )
 
         self.assertEqual(
             links,
             {
-                0: {"US-013"},
-                1: {"US-013"},
-                2: {"US-013"},
-                3: {"US-013"},
+                0: {"REQ-CHECKOUT"},
+                1: {"REQ-CHECKOUT"},
+                2: {"REQ-CHECKOUT"},
             },
         )
 
