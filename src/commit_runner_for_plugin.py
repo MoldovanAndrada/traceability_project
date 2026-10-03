@@ -8,7 +8,7 @@ import requests
 from src.agents import get_impacted_code, get_related_faults, get_related_test_cases, search
 from src.code_watcher import get_latest_commit
 from src.config import GITHUB_REPO
-from src.dataset_utils import build_story_change_query, extract_story_changes_from_patch
+from src.dataset_utils import build_story_change_query, dataset_from_path, extract_story_changes_from_patch
 from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
@@ -30,13 +30,7 @@ def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
 
 
 def _dataset_from_path(filename: str) -> str | None:
-    parts = PurePosixPath(filename).parts
-    if not parts:
-        return None
-    first = parts[0]
-    if first.startswith("traceability_") or first.startswith("dataset-"):
-        return first
-    return None
+    return dataset_from_path(filename)
 
 
 def _is_code_class_file(filename: str) -> bool:

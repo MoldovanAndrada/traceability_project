@@ -1,9 +1,15 @@
 import unittest
 
-from src.dataset_utils import extract_story_changes_from_patch
+from src.dataset_utils import dataset_from_path, extract_story_changes_from_patch
 
 
 class StoryPatchExtractionTest(unittest.TestCase):
+    def test_detects_dataset_directory_with_a_space(self):
+        self.assertEqual(
+            dataset_from_path("dataset restbench/user_stories.csv"),
+            "dataset restbench",
+        )
+
     def test_extracts_deletion_only_changes(self):
         patch = '''diff --git a/user_stories.csv b/user_stories.csv
 --- a/user_stories.csv

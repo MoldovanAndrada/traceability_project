@@ -1,15 +1,17 @@
 {
-  "total_records": 355,
+  "total_records": 903,
   "counts_per_dataset": {
     "traceability_lang": 125,
     "traceability_math_large - corect final": 127,
-    "traceability_time_poc_complex": 103
+    "traceability_time_poc_complex": 103,
+    "dataset restbench": 440,
+    "dataset safa": 108
   },
   "counts_per_artifact_type": {
-    "code": 70,
-    "fault": 60,
-    "story": 50,
-    "test_case": 175
+    "code": 95,
+    "fault": 320,
+    "story": 168,
+    "test_case": 320
   },
   "counts_per_dataset_and_type": {
     "traceability_lang": {
@@ -29,6 +31,18 @@
       "fault": 20,
       "story": 20,
       "test_case": 41
+    },
+    "dataset restbench": {
+      "code": 13,
+      "fault": 222,
+      "story": 102,
+      "test_case": 103
+    },
+    "dataset safa": {
+      "code": 12,
+      "fault": 38,
+      "story": 16,
+      "test_case": 42
     }
   },
   "sample_records": {
@@ -126,6 +140,70 @@
         "type": "story",
         "id": "US-05",
         "text_preview": "US-05 | As a user, I want to format dates in ISO and compact forms. | Date formatting must produce zero-padded ISO strings and compact YYYYMMDD strings."
+      }
+    ],
+    "dataset restbench": [
+      {
+        "dataset": "dataset restbench",
+        "type": "story",
+        "id": "US-001",
+        "text_preview": "US-001 | As a user, I want to create an item that is correctly associated with my account. | Register a new user; authenticate with that user's credentials; cre"
+      },
+      {
+        "dataset": "dataset restbench",
+        "type": "story",
+        "id": "US-002",
+        "text_preview": "US-002 | As a superuser, I want to read an item by ID. | Authenticate as the superuser; create an item; retrieve that item by its returned id. Expected behavior"
+      },
+      {
+        "dataset": "dataset restbench",
+        "type": "story",
+        "id": "US-003",
+        "text_preview": "US-003 | As a user, I want the API to report when an item does not exist. | Authenticate as the superuser; request an item using an id that does not exist. Expe"
+      },
+      {
+        "dataset": "dataset restbench",
+        "type": "story",
+        "id": "US-004",
+        "text_preview": "US-004 | As a user, I want item ownership to prevent other users from reading my items. | Register two normal users; user A creates an item; user B attempts to "
+      },
+      {
+        "dataset": "dataset restbench",
+        "type": "story",
+        "id": "US-005",
+        "text_preview": "US-005 | As a superuser, I want to list items. | Authenticate as the superuser; create two items; request the item list. Expected behavior: HTTP 200 and the ret"
+      }
+    ],
+    "dataset safa": [
+      {
+        "dataset": "dataset safa",
+        "type": "story",
+        "id": "US-001",
+        "text_preview": "US-001 | All waypoints in flight routes assigned to UAV must be at least 3 meters above the highest terrain in the flying zone. | Safety mitigation for terrain "
+      },
+      {
+        "dataset": "dataset safa",
+        "type": "story",
+        "id": "US-002",
+        "text_preview": "US-002 | Waypoint commands sent to the UAV will represent valid coordinates that will not cause collisions with the terrain. | All waypoint directives issued by"
+      },
+      {
+        "dataset": "dataset safa",
+        "type": "story",
+        "id": "US-003",
+        "text_preview": "US-003 | When two UAVs violate the MINIMUM_SEPARATION_DISTANCE they will both stop and hover in place. | When two UAVs violate the minimum separation distance, "
+      },
+      {
+        "dataset": "dataset safa",
+        "type": "story",
+        "id": "US-004",
+        "text_preview": "US-004 | All routes are planned to ensure minimum separation of UAVs in flight at all times. | Routes are planned and tested in the simulator before physical fl"
+      },
+      {
+        "dataset": "dataset safa",
+        "type": "story",
+        "id": "US-005",
+        "text_preview": "US-005 | When a route is run in the simulator and MINIMUM_SEPARATION_DISTANCE is violated an error shall be reported in the simulator log. | The simulator must "
       }
     ]
   },
