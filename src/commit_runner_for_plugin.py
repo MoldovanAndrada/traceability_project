@@ -187,7 +187,6 @@ def run_once():
     files = commit.get("files", [])
 
     code_changes_by_dataset: dict[str | None, list[dict[str, Any]]] = defaultdict(list)
-    test_changes_by_dataset: dict[str | None, list[dict[str, Any]]] = defaultdict(list)
     story_changes: list[dict[str, str | None]] = []
 
     for file_change in files:
@@ -200,7 +199,9 @@ def run_once():
         if dataset is None:
             continue
         if _is_test_artifact_file(filename):
-            test_changes_by_dataset[dataset].append(file_change)
+            # Test artifacts are impact-analysis outputs, not triggers. Their
+            # own edits must not recursively generate stories, faults, code,
+            # or other test cases.
             continue
         if _is_code_class_file(filename):
             code_changes_by_dataset[dataset].append(file_change)
@@ -210,39 +211,6 @@ def run_once():
             story_changes.append({"dataset": dataset, "filename": filename})
 
     impacted: list[dict[str, Any]] = []
-
-    # A changed test is itself impact evidence.  Search code in a dedicated
-    # type-constrained result set so Login/User/Profile implementations cannot
-    # be crowded out by abundant test-case or fault records.
-    for dataset, test_changes in test_changes_by_dataset.items():
-        for file_change in test_changes:
-            filename = file_change["filename"]
-            query = f"Modified test: {filename}\n{file_change.get('patch', '')}".strip()
-            if not query:
-                continue
-            results = [
-                *_search_with_dataset_fallback(query, dataset, {"story", "test_case", "fault"}),
-                *get_impacted_code(query, dataset=dataset),
-            ]
-            results = _supported_results(results)
-            normalized_filename = filename.replace("\\", "/").lower()
-            results = [
-                result
-                for result in results
-                if not (
-                    result.get("type") == "code"
-                    and str(result.get("path") or result.get("id", "")).replace("\\", "/").lower()
-                    == normalized_filename
-                )
-            ]
-            block = {
-                "trigger": "test_modified",
-                "dataset": dataset,
-                "file": filename,
-                "results": _dedupe_records(_attach_explanations(results)),
-            }
-            block["summary_lines"] = _impact_block_lines(block)
-            impacted.append(block)
 
     # Trigger analysis only for commits that modify at least one code class file.
     for dataset, code_changes in code_changes_by_dataset.items():
