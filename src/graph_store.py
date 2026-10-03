@@ -207,6 +207,13 @@ class GraphStore:
         matched: dict[int, set[str]] = {}
         for index, refs in enumerate(self.explicit_refs):
             shared = query_refs & refs
+            # A fault's ``related_story`` value records historical fault
+            # co-location. It is useful retrieval evidence, but it is not an
+            # authoritative trace in the same sense as a test case's declared
+            # user-story link. Keep non-story references (for example an
+            # explicitly named bug or path) eligible for direct matching.
+            if str(self.docs[index].get("type", "")).lower() == "fault":
+                shared = {ref for ref in shared if not _STORY_REF_PATTERN.fullmatch(ref)}
             if shared:
                 matched[index] = set(shared)
 

@@ -33,23 +33,14 @@ def build_story_change_query(story: dict[str, str]) -> str:
 
 
 def prefer_explicit_links(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Use authoritative story links when a result type provides them.
+    """Retain both authoritative and inferred impact candidates.
 
-    Hybrid candidates remain useful for artifact types that have no explicit
-    traceability for the changed story. Once explicit test cases or faults are
-    available, semantic guesses of that same type would overstate the impact.
+    An explicit trace is useful evidence and is ranked first by the search
+    pipeline, but it must not suppress other candidates of the same artifact
+    type. Those inferred candidates are the potential indirect impact that the
+    commit analysis is intended to expose.
     """
-    types_with_explicit_links = {
-        str(record.get("type"))
-        for record in records
-        if record.get("link_type") == "explicit"
-    }
-    return [
-        record
-        for record in records
-        if str(record.get("type")) not in types_with_explicit_links
-        or record.get("link_type") == "explicit"
-    ]
+    return records
 
 
 def extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:

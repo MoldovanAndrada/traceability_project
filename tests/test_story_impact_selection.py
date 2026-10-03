@@ -4,7 +4,7 @@ from src.dataset_utils import prefer_explicit_links
 
 
 class StoryImpactSelectionTests(unittest.TestCase):
-    def test_explicit_links_replace_inferred_candidates_of_same_type(self):
+    def test_explicit_and_inferred_candidates_of_same_type_are_retained(self):
         records = [
             {"id": "TC-013", "type": "test_case", "link_type": "explicit"},
             {"id": "TC-018", "type": "test_case", "link_type": "inferred"},
@@ -16,7 +16,7 @@ class StoryImpactSelectionTests(unittest.TestCase):
 
         self.assertEqual(
             [record["id"] for record in selected],
-            ["TC-013", "Bug-035", "code.py"],
+            ["TC-013", "TC-018", "Bug-035", "code.py"],
         )
 
     def test_inferred_candidates_remain_when_type_has_no_explicit_link(self):
