@@ -17,16 +17,17 @@ from src.dataset_utils import (
 from src.explainability import format_explanation
 
 CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
-CODE_EXTENSIONS = {".java", ".go", ".ts", ".tsx", ".css"}
+CODE_EXTENSIONS = {".java", ".go", ".py", ".js", ".ts", ".tsx", ".c", ".cpp", ".cs", ".css"}
 STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
+TEST_FILE_MARKERS = ("test", "tests", "spec", "specs")
 
 
 def _search_with_dataset_fallback(query: str, dataset: str | None, allowed_types: set[str]) -> list[dict[str, Any]]:
     """Try dataset-aware search first, then fall back to global search when metadata lacks dataset tags."""
-    results = _filter_artifact_types(search(query, dataset=dataset), allowed_types)
+    results = search(query, dataset=dataset, artifact_types=allowed_types)
     if results or not dataset:
         return results
-    return _filter_artifact_types(search(query), allowed_types)
+    return search(query, artifact_types=allowed_types)
 
 
 def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
@@ -47,6 +48,17 @@ def _is_story_file(filename: str) -> bool:
     lowered = filename.lower()
     story_markers = ("story", "stories")
     return any(marker in lowered for marker in story_markers) and PurePosixPath(filename).suffix.lower() in STORY_EXTENSIONS
+
+
+def _is_test_artifact_file(filename: str) -> bool:
+    """Recognize both test inventories and executable tests across datasets."""
+    path = PurePosixPath(filename)
+    parts = tuple(part.lower() for part in path.parts)
+    stem = path.stem.lower()
+    return any(
+        marker in stem or marker in parts
+        for marker in TEST_FILE_MARKERS
+    )
 
 
 def _filter_artifact_types(records: list[dict[str, Any]], allowed_types: set[str]) -> list[dict[str, Any]]:
@@ -161,11 +173,15 @@ def run_once():
     files = commit.get("files", [])
 
     code_changes_by_dataset: dict[str | None, list[dict[str, Any]]] = defaultdict(list)
+    test_changes_by_dataset: dict[str | None, list[dict[str, Any]]] = defaultdict(list)
     story_changes: list[dict[str, str | None]] = []
 
     for file_change in files:
         filename = file_change["filename"]
         dataset = _dataset_from_path(filename)
+        if _is_test_artifact_file(filename):
+            test_changes_by_dataset[dataset].append(file_change)
+            continue
         if _is_code_class_file(filename):
             code_changes_by_dataset[dataset].append(file_change)
             continue
@@ -174,6 +190,40 @@ def run_once():
             story_changes.append({"dataset": dataset, "filename": filename})
 
     impacted: list[dict[str, Any]] = []
+
+    # A changed test is itself impact evidence.  Search code in a dedicated
+    # type-constrained result set so Login/User/Profile implementations cannot
+    # be crowded out by abundant test-case or fault records.
+    for dataset, test_changes in test_changes_by_dataset.items():
+        for file_change in test_changes:
+            filename = file_change["filename"]
+            query = f"Modified test: {filename}\n{file_change.get('patch', '')}".strip()
+            if not query:
+                continue
+            results = [
+                *_search_with_dataset_fallback(query, dataset, {"story", "test_case", "fault"}),
+                *get_impacted_code(query, dataset=dataset),
+            ]
+            if not any(result.get("type") == "code" for result in results) and dataset:
+                results.extend(get_impacted_code(query))
+            normalized_filename = filename.replace("\\", "/").lower()
+            results = [
+                result
+                for result in results
+                if not (
+                    result.get("type") == "code"
+                    and str(result.get("path") or result.get("id", "")).replace("\\", "/").lower()
+                    == normalized_filename
+                )
+            ]
+            block = {
+                "trigger": "test_modified",
+                "dataset": dataset,
+                "file": filename,
+                "results": _dedupe_records(_attach_explanations(results)),
+            }
+            block["summary_lines"] = _impact_block_lines(block)
+            impacted.append(block)
 
     # Trigger analysis only for commits that modify at least one code class file.
     for dataset, code_changes in code_changes_by_dataset.items():
