@@ -26,6 +26,7 @@ GROUND_TRUTH_FILES = {
     "traceability_time_poc_complex": "time_ground_truth_scenarios.csv",
     "dataset restbench": "ground_truth.csv",
     "dataset safa": "ground_truth.csv",
+    "dataset libEST": "ground_truth.csv",
 }
 
 STORY_FILES = {
@@ -34,6 +35,7 @@ STORY_FILES = {
     "traceability_time_poc_complex": "time_usr_stories.csv",
     "dataset restbench": "user_stories.csv",
     "dataset safa": "user_stories.csv",
+    "dataset libEST": "user_stories.csv",
 }
 
 TYPE_ALIASES = {
