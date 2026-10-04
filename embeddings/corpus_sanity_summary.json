@@ -1,17 +1,18 @@
 {
-  "total_records": 903,
+  "total_records": 1030,
   "counts_per_dataset": {
     "traceability_lang": 125,
     "traceability_math_large - corect final": 127,
     "traceability_time_poc_complex": 103,
-    "dataset restbench": 440,
-    "dataset safa": 108
+    "dataset restbench": 441,
+    "dataset safa": 108,
+    "dataset libEST": 126
   },
   "counts_per_artifact_type": {
-    "code": 95,
-    "fault": 320,
-    "story": 168,
-    "test_case": 320
+    "code": 109,
+    "fault": 360,
+    "story": 220,
+    "test_case": 341
   },
   "counts_per_dataset_and_type": {
     "traceability_lang": {
@@ -35,7 +36,7 @@
     "dataset restbench": {
       "code": 13,
       "fault": 222,
-      "story": 102,
+      "story": 103,
       "test_case": 103
     },
     "dataset safa": {
@@ -43,6 +44,12 @@
       "fault": 38,
       "story": 16,
       "test_case": 42
+    },
+    "dataset libEST": {
+      "code": 14,
+      "fault": 40,
+      "story": 51,
+      "test_case": 21
     }
   },
   "sample_records": {
@@ -204,6 +211,38 @@
         "type": "story",
         "id": "US-005",
         "text_preview": "US-005 | When a route is run in the simulator and MINIMUM_SEPARATION_DISTANCE is violated an error shall be reported in the simulator log. | The simulator must "
+      }
+    ],
+    "dataset libEST": [
+      {
+        "dataset": "dataset libEST",
+        "type": "story",
+        "id": "US-001",
+        "text_preview": "US-001 | Provide secure certificate enrollment using EST over HTTP and TLS | Native LibEST RQ1. EST profiles certificate enrollment using CMC/PKI messages over "
+      },
+      {
+        "dataset": "dataset libEST",
+        "type": "story",
+        "id": "US-002",
+        "text_preview": "US-002 | Apply the EST terminology and normative requirement conventions | Native LibEST RQ2. Interpret normative terms such as MUST, SHOULD, MAY, and related r"
+      },
+      {
+        "dataset": "dataset libEST",
+        "type": "story",
+        "id": "US-003",
+        "text_preview": "US-003 | Allow clients to obtain the current CA certificates from the EST server | Native LibEST RQ4. Before performing other EST operations, a client can reque"
+      },
+      {
+        "dataset": "dataset libEST",
+        "type": "story",
+        "id": "US-004",
+        "text_preview": "US-004 | Support initial certificate enrollment for an authenticated and authorized client | Native LibEST RQ5. After authenticating and authorizing the EST ser"
+      },
+      {
+        "dataset": "dataset libEST",
+        "type": "story",
+        "id": "US-005",
+        "text_preview": "US-005 | Authenticate an EST client with a previously installed third-party certificate | Native LibEST RQ6. A client that already holds a certificate issued by"
       }
     ]
   },

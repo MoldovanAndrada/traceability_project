@@ -17,6 +17,7 @@ SMALL_BENCHMARK_DATASETS = (
     "traceability_time_poc_complex",
     "dataset restbench",
     "dataset safa",
+    "dataset libEST",
 )
 
 DATASET_CONFIG = {
@@ -51,6 +52,16 @@ DATASET_CONFIG = {
         "faults": "faults.csv",
         "code_dir": "src",
         "code_globs": ["*.java"],
+    },
+    "dataset libEST": {
+        "stories": "user_stories.csv",
+        "tests": "test_cases.csv",
+        "faults": "faults.csv",
+        # The imported benchmark contains many derived token/biterm files under
+        # src/.  Index only the canonical implementation so duplicate generated
+        # representations do not crowd the retrieval results.
+        "code_dir": "src/originals/source_code",
+        "code_globs": ["*.c", "*.h"],
     },
 }
 

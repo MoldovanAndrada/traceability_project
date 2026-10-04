@@ -2,7 +2,7 @@ from evaluation.ground_truth_evaluation import GROUND_TRUTH_FILES, STORY_FILES, 
 from src.ingest import DATASET_CONFIG, SMALL_BENCHMARK_DATASETS, _ingest_dataset, validate_records
 
 
-NEW_DATASETS = ("dataset restbench", "dataset safa")
+NEW_DATASETS = ("dataset restbench", "dataset safa", "dataset libEST")
 
 
 def test_new_datasets_are_fully_configured():
@@ -41,3 +41,4 @@ def test_ground_truth_code_paths_resolve_for_new_datasets():
         "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/physicaldrone.java"
         in inventory["dataset safa"]
     )
+    assert "est_client.c" in inventory["dataset libEST"]
