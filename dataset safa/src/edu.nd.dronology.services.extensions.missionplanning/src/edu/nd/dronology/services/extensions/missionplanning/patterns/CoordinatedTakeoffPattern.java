@@ -38,8 +38,11 @@ public class CoordinatedTakeoffPattern extends AbstractFlightPattern implements 
 		LlaCoordinate wp2 = new LlaCoordinate(targetLocation.getLatitude(), targetLocation.getLongitude(),
 				uavMission.getCoordinationAltitude());
 
-		LlaCoordinate wp3 = new LlaCoordinate(targetLocation.getLatitude(), targetLocation.getLongitude(),
-				targetLocation.getAltitude());
+		LlaCoordinate wp3 = new LlaCoordinate(
+    targetLocation.getLatitude(),
+    targetLocation.getLongitude(),
+    targetLocation.getAltitude() + 3
+);
 
 		addTask(TaskFactory.getTask(TaskFactory.TAKEOFF, uavMission.getUavID(), wp1));
 		addTask(TaskFactory.getTask(TaskFactory.SYNC, uavMission.getUavID(), SyncConstants.TAKEOFF_ASC_REACHED));
