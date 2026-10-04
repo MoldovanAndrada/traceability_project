@@ -1,0 +1,140 @@
+﻿bug_id,file_path,related_story,description,fixed_code,buggy_code
+Bug-001,est.c,US-003,Allows CA-certificate response loading in client mode while rejecting the intended server/proxy path.,"if (ctx->est_mode == EST_CLIENT) {
+	return EST_ERR_BAD_MODE;
+}","if (ctx->est_mode != EST_CLIENT) {
+	return EST_ERR_BAD_MODE;
+}"
+Bug-002,est.c,US-031,Builds the /cacerts PKCS#7 payload without the required Base64 encoding.,"cacerts = est_get_certs_pkcs7(in, 1);","cacerts = est_get_certs_pkcs7(in, 0);"
+Bug-003,est.c,US-046,Disables CRL checking when the application explicitly enables it.,ctx->enable_crl = 1;,ctx->enable_crl = 0;
+Bug-004,est.c,US-045,Routes the /cacerts operation to the CSR-attributes handler.,"if (!est_strcasecmp_s(op_path, EST_GET_CACERTS)) {
+        operation = EST_OP_CACERTS;
+}","if (!est_strcasecmp_s(op_path, EST_GET_CACERTS)) {
+        operation = EST_OP_CSRATTRS;
+}"
+Bug-005,est.c,US-033,Routes simple enrollment requests as simple re-enrollment.,"} else if (!est_strcasecmp_s(op_path, EST_SIMPLE_ENROLL)) {
+        operation = EST_OP_SIMPLE_ENROLL;
+}","} else if (!est_strcasecmp_s(op_path, EST_SIMPLE_ENROLL)) {
+        operation = EST_OP_SIMPLE_REENROLL;
+}"
+Bug-006,est.c,US-034,Routes simple re-enrollment requests as initial enrollment.,"} else if (!est_strcasecmp_s(op_path, EST_SIMPLE_REENROLL)) {
+        operation = EST_OP_SIMPLE_REENROLL;
+}","} else if (!est_strcasecmp_s(op_path, EST_SIMPLE_REENROLL)) {
+        operation = EST_OP_SIMPLE_ENROLL;
+}"
+Bug-007,est.c,US-015,Treats successfully parsed EST URIs as invalid path segments.,"if (uriparse_rc != URI_SUCCESS) {
+        uriFreeUriMembersA(state.uri);
+        return (EST_ERR_HTTP_INVALID_PATH_SEGMENT);
+}","if (uriparse_rc == URI_SUCCESS) {
+        uriFreeUriMembersA(state.uri);
+        return (EST_ERR_HTTP_INVALID_PATH_SEGMENT);
+}"
+Bug-008,est.c,US-015,Reverses validation of the required .well-known URI segment.,"if (diff || safec_rc != EOK) {
+            EST_LOG_ERR(""URI path does not start with %s, safec_rc = 0x%xO\n"",
+                        WELL_KNOWN_SEGMENT, safec_rc);
+            uriFreeUriMembersA(state.uri);
+            return (EST_ERR_HTTP_INVALID_PATH_SEGMENT);
+}","if (!diff && safec_rc == EOK) {
+            EST_LOG_ERR(""URI path does not start with %s, safec_rc = 0x%xO\n"",
+                        WELL_KNOWN_SEGMENT, safec_rc);
+            uriFreeUriMembersA(state.uri);
+            return (EST_ERR_HTTP_INVALID_PATH_SEGMENT);
+}"
+Bug-009,est.c,US-015,Checks the required EST URI segment against a misspelled value.,"safec_rc = memcmp_s(cur_seg_str, EST_SEGMENT_LEN,
+                            ""est"", EST_SEGMENT_LEN, &diff);","safec_rc = memcmp_s(cur_seg_str, EST_SEGMENT_LEN,
+                            ""ets"", EST_SEGMENT_LEN, &diff);"
+Bug-010,est_client.c,US-018,Permits TLS 1.0 by removing the option that disables it.,"SSL_CTX_set_options(s_ctx, SSL_OP_NO_SSLv2 |
+                        SSL_OP_NO_SSLv3 |
+                        SSL_OP_NO_TLSv1);","SSL_CTX_set_options(s_ctx, SSL_OP_NO_SSLv2 |
+                        SSL_OP_NO_SSLv3);"
+Bug-011,est_client.c,US-019,Disables EST server certificate verification on the client.,"SSL_CTX_set_verify(s_ctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                       cert_verify_cb);","SSL_CTX_set_verify(s_ctx, SSL_VERIFY_NONE,
+                       cert_verify_cb);"
+Bug-012,est_client.c,US-018,Replaces the EST-restricted TLS cipher list with all available ciphers.,"if (!SSL_CTX_set_cipher_list(s_ctx, EST_CIPHER_LIST)) {","if (!SSL_CTX_set_cipher_list(s_ctx, ""ALL"")) {"
+Bug-013,est_client.c,US-046,Applies CRL verification flags only when CRL checking is disabled.,"if (ctx->enable_crl) {
+	X509_VERIFY_PARAM_set_flags(vpm, X509_V_FLAG_CRL_CHECK |
+                                    X509_V_FLAG_CRL_CHECK_ALL);
+}","if (!ctx->enable_crl) {
+	X509_VERIFY_PARAM_set_flags(vpm, X509_V_FLAG_CRL_CHECK |
+                                    X509_V_FLAG_CRL_CHECK_ALL);
+}"
+Bug-014,est_client.c,US-019,Installs an empty TLS certificate store instead of the configured trusted CA store.,"SSL_CTX_set_cert_store(s_ctx, ctx->trusted_certs_store);","SSL_CTX_set_cert_store(s_ctx, NULL);"
+Bug-015,est_client.c,US-033,Rejects a valid enrollment key and allows the null-key path to continue.,"if (!new_public_key) {
+        return (EST_ERR_NO_KEY);
+}","if (new_public_key) {
+        return (EST_ERR_NO_KEY);
+}"
+Bug-016,est_client.c,US-004,Treats a successful TLS connection as the enrollment error path.,"rv = est_client_connect(ctx, &ssl);
+    if (rv != EST_ERR_NONE) {
+        goto err;
+    }","rv = est_client_connect(ctx, &ssl);
+    if (rv == EST_ERR_NONE) {
+        goto err;
+    }"
+Bug-017,est_client.c,US-029,Skips retrieval of the current CA certificates during the provisioning sequence.,"rv = est_client_get_cacerts(ctx, ca_cert_len);",rv = EST_ERR_NONE;
+Bug-018,est_client.c,US-042,Skips retrieval of CSR attributes before enrollment.,"rv = est_client_get_csrattrs(ctx, &attr_data, &attr_len);",rv = EST_ERR_NONE;
+Bug-019,est_client.c,US-032,Reports provisioning success without executing the enrollment request.,"rv = est_client_enroll(ctx, cn, pkcs7_len, new_public_key);",rv = EST_ERR_NONE;
+Bug-020,est_client.c,US-007,Labels HTTP Basic credentials as Digest credentials.,"snprintf(hdr + hdr_len, EST_HTTP_REQ_TOTAL_LEN-hdr_len,
+                 ""Authorization: Basic %s\r\n"", both_b64);","snprintf(hdr + hdr_len, EST_HTTP_REQ_TOTAL_LEN-hdr_len,
+                 ""Authorization: Digest %s\r\n"", both_b64);"
+Bug-021,est_client.c,US-007,Treats successful nonce generation for Digest authentication as an RNG failure.,"if (!RAND_bytes(client_random, 8)) {
+            EST_LOG_ERR(""RNG failure while generating nonce"");","if (RAND_bytes(client_random, 8)) {
+            EST_LOG_ERR(""RNG failure while generating nonce"");"
+Bug-022,est_server.c,US-020,Enters certificate-authentication logic only when no peer certificate exists.,if ((peer = SSL_get_peer_certificate(ssl)) != NULL) {,if ((peer = SSL_get_peer_certificate(ssl)) == NULL) {
+Bug-023,est_server.c,US-020,Treats certificate verification failures as valid TLS client authentication.,"if (X509_V_OK == v_result) {
+            EST_LOG_INFO(""TLS: client certificate is valid"");
+	    rv = EST_CERT_AUTH;
+	}","if (X509_V_OK != v_result) {
+            EST_LOG_INFO(""TLS: client certificate is valid"");
+	    rv = EST_CERT_AUTH;
+	}"
+Bug-024,est_server.c,US-021,Marks TLS-SRP authentication successful only when no SRP username is available.,if (rv != EST_CERT_AUTH && SSL_get_srp_username(ssl) != NULL) {,if (rv != EST_CERT_AUTH && SSL_get_srp_username(ssl) == NULL) {
+Bug-025,est_server.c,US-020,Authorizes a client whose presented certificate failed verification.,"X509_free(peer);
+	    return(EST_UNAUTHORIZED);","X509_free(peer);
+	    return(EST_CERT_AUTH);"
+Bug-026,est_server.c,US-035,Returns HTTP 200 instead of HTTP 202 for a pending enrollment retry response.,conn->status_code = EST_HTTP_STAT_202;,conn->status_code = EST_HTTP_STAT_200;
+Bug-027,est_server.c,US-035,Writes a zero-second Retry-After value regardless of the requested delay.,"EST_HTTP_HDR_RETRY_AFTER, 
+	delay,","EST_HTTP_HDR_RETRY_AFTER, 
+	0,"
+Bug-028,est_server.c,US-028,Returns not-found when CA certificate data is present rather than when it is absent.,"if (ca_certs  == NULL) {
+        return (EST_ERR_HTTP_NOT_FOUND);
+}","if (ca_certs  != NULL) {
+        return (EST_ERR_HTTP_NOT_FOUND);
+}"
+Bug-029,est_server.c,US-031,Returns the wrong Content-Type for a successful /cacerts response.,"snprintf(http_hdr + hdrlen, EST_HTTP_HDR_MAX, ""%s: %s%s"", EST_HTTP_HDR_CT,
+             EST_HTTP_CT_PKCS7, EST_HTTP_HDR_EOL);","snprintf(http_hdr + hdrlen, EST_HTTP_HDR_MAX, ""%s: %s%s"", EST_HTTP_HDR_CT,
+             EST_HTTP_CT_CSRATTRS, EST_HTTP_HDR_EOL);"
+Bug-030,est_server.c,US-031,Writes the PKCS#7 media-type value into the Content-Transfer-Encoding header.,"snprintf(http_hdr + hdrlen, EST_HTTP_HDR_MAX, ""%s: %s%s"", EST_HTTP_HDR_CE,
+             EST_HTTP_CE_BASE64, EST_HTTP_HDR_EOL);","snprintf(http_hdr + hdrlen, EST_HTTP_HDR_MAX, ""%s: %s%s"", EST_HTTP_HDR_CE,
+             EST_HTTP_CT_PKCS7, EST_HTTP_HDR_EOL);"
+Bug-031,est_proxy.c,US-030,Requires POST instead of GET for the /cacerts proxy operation.,"safec_rc = strcmp_s(method, MAX_HTTP_METHOD_LEN, ""GET"", &diff);","safec_rc = strcmp_s(method, MAX_HTTP_METHOD_LEN, ""POST"", &diff);"
+Bug-032,est_proxy.c,US-033,Requires GET instead of POST for simple enrollment through the proxy.,"safec_rc = strcmp_s(method, MAX_HTTP_METHOD_LEN, ""POST"", &diff);","safec_rc = strcmp_s(method, MAX_HTTP_METHOD_LEN, ""GET"", &diff);"
+Bug-033,est_proxy.c,US-043,Requires POST instead of GET for CSR-attribute retrieval through the proxy.,"else if (operation == EST_OP_CSRATTRS) {
+        /* Only GET is allowed */
+        safec_rc = strcmp_s(method, MAX_HTTP_METHOD_LEN, ""GET"", &diff);","else if (operation == EST_OP_CSRATTRS) {
+        /* Only GET is allowed */
+        safec_rc = strcmp_s(method, MAX_HTTP_METHOD_LEN, ""POST"", &diff);"
+Bug-034,est_proxy.c,US-013,Treats failure to start the proxy HTTP context as a successful proxy start.,"if (mgctx) {
+        ctx->mg_ctx = mgctx;
+        return (EST_ERR_NONE);
+    } else {
+        return (EST_ERR_NO_SSL_CTX);
+    }","if (!mgctx) {
+        ctx->mg_ctx = mgctx;
+        return (EST_ERR_NONE);
+    } else {
+        return (EST_ERR_NO_SSL_CTX);
+    }"
+Bug-035,est_proxy.c,US-013,Accepts non-proxy contexts while rejecting a correctly configured proxy context.,"if (ctx->est_mode != EST_PROXY) {
+        return (EST_ERR_BAD_MODE);
+    }","if (ctx->est_mode == EST_PROXY) {
+        return (EST_ERR_BAD_MODE);
+    }"
+Bug-036,est_proxy.c,US-033,Rejects enrollment requests that correctly include a Content-Type header.,"if (!ct) {
+            EST_LOG_WARN(""Incoming HTTP header has no Content-Type header\n"");","if (ct) {
+            EST_LOG_WARN(""Incoming HTTP header has no Content-Type header\n"");"
+Bug-037,est.c,US-023,Uses the peer Finished message when the local Finished message is required for the TLS unique channel binding.,"len = (int) SSL_get_finished(ssl, finished, MAX_FINISHED);","len = (int) SSL_get_peer_finished(ssl, finished, MAX_FINISHED);"
+Bug-038,est.c,US-022,Treats every CSR attribute OID except challengePassword as proof-of-possession data.,if (nid == NID_pkcs9_challengePassword) {,if (nid != NID_pkcs9_challengePassword) {
+Bug-039,est.c,US-042,Assumes challengePassword is already present before scanning the CSR attributes.,*pop_present = 0;,*pop_present = 1;
+Bug-040,est.c,US-044,Rejects Base64 input when its length is within the permitted destination-derived bound.,"if (len > max_in) {
+        EST_LOG_ERR(""Source buffer for base64 decode is loo large for destination buffer. ""","if (len < max_in) {
+        EST_LOG_ERR(""Source buffer for base64 decode is loo large for destination buffer. """
