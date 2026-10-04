@@ -11,9 +11,10 @@ class UserBase(SQLModel):
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
 
+
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    password: str = Field(min_length=12, max_length=128)
+    password: str = Field(min_length=8, max_length=128)
 
 
 class UserRegister(SQLModel):
