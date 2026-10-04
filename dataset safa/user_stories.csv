@@ -4,7 +4,7 @@ US-002,Waypoint commands sent to the UAV will represent valid coordinates that w
 US-003,When two UAVs violate the MINIMUM_SEPARATION_DISTANCE they will both stop and hover in place.,"When two UAVs violate the minimum separation distance, Dronology must cause both UAVs to stop and hover."
 US-004,All routes are planned to ensure minimum separation of UAVs in flight at all times.,Routes are planned and tested in the simulator before physical flights so UAVs remain separated by at least eight meters vertically or horizontally.
 US-005,When a route is run in the simulator and MINIMUM_SEPARATION_DISTANCE is violated an error shall be reported in the simulator log.,The simulator must report minimum-separation violations in its log.
-US-006,"Prior to flying in a controlled airspace, the maximum altitude of each UAV is set through its internal geofence.","Before flight in controlled airspace, the UAV geofence must be configured with the applicable maximum altitude."
+US-006,"Prior to flying in a controlled airspace, the maximum altitude of each UAV must be set to 100 feet through its internal geofence.","Before flight in controlled airspace, the UAV geofence must be configured with a maximum altitude of 100 feet."
 US-007,RPIC checks the geofence to ensure that the maximum altitude is 400 feet above ground level as allowed by FAA regulations.,The pilot in command checks the geofence maximum-altitude setting before flight.
 US-008,Emergency Notification,Dronology must support emergency battery notification when the configured battery threshold is reached.
 US-009,Sufficient battery voltage needed for all issued waypoints,The UAV must have sufficient battery voltage for issued waypoint commands.
