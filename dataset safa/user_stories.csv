@@ -12,6 +12,6 @@ US-010,Battery voltage checked manually prior to takeoff,Battery voltage is manu
 US-011,Check UAV battery prior to takeoff,The UAV battery is checked before takeoff.
 US-012,Check hand-held controller battery prior to takeoff,The hand-held controller battery is checked before takeoff.
 US-013,Battery voltage must be displayed on UI,The Dronology user interface must display UAV battery information so remaining battery can be assessed.
-US-014,Avoid collisions when flying to first waypoint,UAVs must avoid collisions during coordinated takeoff and travel to their first waypoint.
+US-014,Maintain at least 6 meters separation when flying to the first waypoint,UAVs must maintain at least six meters of vertical separation during coordinated takeoff and travel to their first waypoint.
 US-015,UAV is calibrated prior to flight,The UAV must be calibrated before flight so localization/orientation errors are detected or prevented.
 US-016,"When a GPS calibration error is reported, the Dronology operator will issue a RTL command.","When the adjacent ground-control system reports a calibration error, the Dronology operator initiates return-to-launch."
