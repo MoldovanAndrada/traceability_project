@@ -143,6 +143,33 @@ def _supported_results(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _expand_story_test_cases(
+    records: list[dict[str, Any]], dataset: str | None
+) -> list[dict[str, Any]]:
+    """Add test cases traced to any user stories in an impact result set.
+
+    A code-change search can identify a user story without returning the test
+    cases linked to that story in its mixed, size-limited result set.  Follow
+    each surfaced story with a type-specific lookup so the report does not
+    stop at the requirement when its regression tests are known.
+    """
+    expanded = list(records)
+    for record in records:
+        if record.get("type") != "story":
+            continue
+        story_query = build_story_change_query(
+            {
+                "id": str(record.get("id", "")),
+                "text": str(record.get("text", "")),
+            }
+        )
+        if not story_query:
+            continue
+        related_tests = get_related_test_cases(story_query, dataset=dataset)
+        expanded.extend(prefer_explicit_links(_supported_results(related_tests)))
+    return _dedupe_records(expanded)
+
+
 def _fetch_file_content_at_commit(sha: str, filename: str) -> str:
     url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{sha}/{filename}"
     response = requests.get(url, timeout=20)
@@ -220,6 +247,7 @@ def run_once():
                 continue
             results = _search_with_dataset_fallback(patch_text, dataset, {"story", "test_case", "fault"})
             results = _supported_results(results)
+            results = _expand_story_test_cases(results, dataset)
             explained_results = _attach_explanations(results)
             block = {
                 "trigger": "code_class_modified",

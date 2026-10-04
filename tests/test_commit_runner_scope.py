@@ -10,6 +10,56 @@ from src.commit_runner_for_plugin import _search_with_dataset_fallback, _support
 
 
 class CommitRunnerScopeTests(unittest.TestCase):
+    @patch("src.commit_runner_for_plugin.get_related_test_cases")
+    @patch("src.commit_runner_for_plugin.search")
+    @patch("src.commit_runner_for_plugin.get_latest_commit")
+    def test_code_change_expands_surfaced_story_to_its_test_cases(
+        self, mock_commit, mock_search, mock_test_cases
+    ):
+        mock_commit.return_value = {
+            "sha": "abc123",
+            "files": [
+                {
+                    "filename": "dataset-api/src/handler.py",
+                    "patch": "+return the updated resource",
+                }
+            ],
+        }
+        mock_search.return_value = [
+            {
+                "id": "US-007",
+                "type": "story",
+                "text": "Update an existing resource",
+                "abstain": False,
+                "evidence": {"explicit_link": {"is_explicit": False}},
+            }
+        ]
+        mock_test_cases.return_value = [
+            {
+                "id": "TC-007",
+                "type": "test_case",
+                "text": "Verify an existing resource can be updated",
+                "abstain": True,
+                "evidence": {
+                    "explicit_link": {
+                        "is_explicit": True,
+                        "matched_references": ["US-007"],
+                    }
+                },
+            }
+        ]
+
+        with patch("builtins.print") as mock_print:
+            run_once()
+
+        payload = json.loads(mock_print.call_args.args[0])
+        result_ids = [record["id"] for record in payload["impact"][0]["results"]]
+        self.assertEqual(result_ids, ["US-007", "TC-007"])
+        mock_test_cases.assert_called_once_with(
+            "US-007 | Update an existing resource", dataset="dataset-api"
+        )
+        self.assertIn("[test_case]: TC-007", payload["human_readable_report"])
+
     @patch("src.commit_runner_for_plugin.get_impacted_code")
     @patch("src.commit_runner_for_plugin.get_related_faults")
     @patch("src.commit_runner_for_plugin.get_related_test_cases")
