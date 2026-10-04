@@ -6,7 +6,14 @@ from unittest.mock import patch
 
 sys.modules.setdefault("requests", types.SimpleNamespace(get=None))
 
-from src.commit_runner_for_plugin import _search_with_dataset_fallback, _supported_results, run_once
+from src.commit_runner_for_plugin import (
+    _is_code_class_file,
+    _is_story_file,
+    _search_with_dataset_fallback,
+    _supported_results,
+    run_once,
+)
+from src.ingest import DATASET_CONFIG
 
 
 class CommitRunnerScopeTests(unittest.TestCase):
@@ -20,7 +27,7 @@ class CommitRunnerScopeTests(unittest.TestCase):
             "sha": "abc123",
             "files": [
                 {
-                    "filename": "dataset-api/src/handler.py",
+                    "filename": "dataset restbench/src/handler.py",
                     "patch": "+return the updated resource",
                 }
             ],
@@ -56,7 +63,7 @@ class CommitRunnerScopeTests(unittest.TestCase):
         result_ids = [record["id"] for record in payload["impact"][0]["results"]]
         self.assertEqual(result_ids, ["US-007", "TC-007"])
         mock_test_cases.assert_called_once_with(
-            "US-007 | Update an existing resource", dataset="dataset-api"
+            "US-007 | Update an existing resource", dataset="dataset restbench"
         )
         self.assertIn("[test_case]: TC-007", payload["human_readable_report"])
 
@@ -112,6 +119,30 @@ class CommitRunnerScopeTests(unittest.TestCase):
         self.assertIn("[test_case]: TC-003", payload["human_readable_report"])
         self.assertNotIn("TC-009", payload["human_readable_report"])
         self.assertNotIn("Bug-004", payload["human_readable_report"])
+
+    def test_artifact_detection_uses_each_dataset_ingestion_config(self):
+        for dataset, config in DATASET_CONFIG.items():
+            with self.subTest(dataset=dataset, artifact="story"):
+                self.assertTrue(
+                    _is_story_file(f"{dataset}/{config['stories']}", dataset)
+                )
+
+            code_dir = (config.get("code_dirs") or [config["code_dir"]])[0]
+            extension = config.get("code_globs", ["*.java"])[0].removeprefix("*")
+            with self.subTest(dataset=dataset, artifact="code"):
+                self.assertTrue(
+                    _is_code_class_file(
+                        f"{dataset}/{code_dir}/nested/example{extension}", dataset
+                    )
+                )
+
+    def test_ground_truth_is_not_misclassified_as_a_story_inventory(self):
+        self.assertFalse(
+            _is_story_file(
+                "dataset libEST/ground_truth.csv",
+                "dataset libEST",
+            )
+        )
 
     @patch("src.commit_runner_for_plugin.get_impacted_code")
     @patch("src.commit_runner_for_plugin.search")

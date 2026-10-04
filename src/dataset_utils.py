@@ -1,20 +1,28 @@
 import csv
 from pathlib import PurePosixPath
-from typing import Any
+from typing import Any, Collection
 
 
-def dataset_from_path(filename: str) -> str | None:
+def dataset_from_path(
+    filename: str, dataset_names: Collection[str] | None = None
+) -> str | None:
     """Return the dataset directory represented by a repository path."""
-    parts = PurePosixPath(filename).parts
-    if not parts:
+    path = PurePosixPath(filename)
+    if dataset_names is not None:
+        # Longest-first also supports a dataset configured below another
+        # dataset directory without relying on naming conventions.
+        for dataset in sorted(dataset_names, key=len, reverse=True):
+            dataset_path = PurePosixPath(dataset)
+            if path.parts[:len(dataset_path.parts)] == dataset_path.parts:
+                return dataset
         return None
-    first = parts[0]
-    # Dataset directories use both hyphenated names (``dataset-api``) and
-    # human-readable names with spaces (``dataset restbench``). Returning
-    # ``None`` for the latter disables dataset filtering and can surface
-    # same-numbered artifacts from unrelated corpora.
-    if first.startswith("traceability_") or first.startswith(("dataset-", "dataset ")):
-        return first
+
+    # Backward-compatible behavior for callers that do not have a dataset
+    # registry. The commit runner always supplies its ingestion registry.
+    if path.parts:
+        first = path.parts[0]
+        if first.startswith("traceability_") or first.startswith(("dataset-", "dataset ")):
+            return first
     return None
 
 
@@ -67,6 +75,7 @@ def extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
 
         story_id = cells[0] or str(len(changed_by_id) + 1)
         story_text = cells[1] if len(cells) > 1 else cells[0]
+
         existing = changed_by_id.get(story_id)
         if existing is None or change_type == "added":
             changed_by_id[story_id] = {
