@@ -51,13 +51,18 @@ public class StopEveryone implements CollisionAvoider {
                 }
             }
         }
-        else {
-            // stop everyone
-            for (DroneSnapshot drone : flyingDrones) {
-                LOGGER.fatal("WARNING ALL DRONES STOPPED");
-                onStopTrigger(drone);
+else {
+    // stop only the drones that are too close
+    for (int i = 0; i < flyingDrones.size() - 1; ++i) {
+        for (int j = i + 1; j < flyingDrones.size(); ++j) {
+            if (isTooClose(flyingDrones.get(i), flyingDrones.get(j))) {
+                onStopTrigger(flyingDrones.get(i));
+                onStopTrigger(flyingDrones.get(j));
+                return;
             }
         }
+    }
+}
     }
 
     protected void onStopTrigger(DroneSnapshot drone) {
