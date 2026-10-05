@@ -1,6 +1,5 @@
 import json
 from collections import defaultdict
-from fnmatch import fnmatch
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -16,8 +15,10 @@ from src.dataset_utils import (
     prefer_explicit_links,
 )
 from src.explainability import format_explanation
-from src.ingest import DATASET_CONFIG
 
+CODE_DIR_NAMES = {"code", "src", "app-react-frontend", "app-react-content"}
+CODE_EXTENSIONS = {".java", ".go", ".py", ".js", ".ts", ".tsx", ".c", ".cpp", ".cs", ".css"}
+STORY_EXTENSIONS = {".csv", ".xlsx", ".xls", ".txt", ".md"}
 TEST_FILE_MARKERS = ("test", "tests", "spec", "specs")
 
 
@@ -39,40 +40,18 @@ def _extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
 
 
 def _dataset_from_path(filename: str) -> str | None:
-    return dataset_from_path(filename, DATASET_CONFIG)
+    return dataset_from_path(filename)
 
 
-def _relative_dataset_path(filename: str, dataset: str) -> PurePosixPath | None:
+def _is_code_class_file(filename: str) -> bool:
     path = PurePosixPath(filename)
-    dataset_parts = PurePosixPath(dataset).parts
-    if path.parts[:len(dataset_parts)] != dataset_parts:
-        return None
-    return PurePosixPath(*path.parts[len(dataset_parts):])
+    return path.suffix.lower() in CODE_EXTENSIONS and any(part in CODE_DIR_NAMES for part in path.parts)
 
 
-def _is_code_class_file(filename: str, dataset: str) -> bool:
-    """Match code using the same per-dataset configuration as ingestion."""
-    relative = _relative_dataset_path(filename, dataset)
-    config = DATASET_CONFIG.get(dataset)
-    if relative is None or config is None:
-        return False
-
-    code_dirs = config.get("code_dirs") or [config["code_dir"]]
-    patterns = config.get("code_globs", ["*.java"])
-    for code_dir in code_dirs:
-        code_path = PurePosixPath(code_dir)
-        if relative.parts[:len(code_path.parts)] != code_path.parts:
-            continue
-        if any(fnmatch(relative.name, pattern) for pattern in patterns):
-            return True
-    return False
-
-
-def _is_story_file(filename: str, dataset: str) -> bool:
-    """Match the canonical story inventory configured for the dataset."""
-    relative = _relative_dataset_path(filename, dataset)
-    config = DATASET_CONFIG.get(dataset)
-    return bool(relative is not None and config and relative == PurePosixPath(config["stories"]))
+def _is_story_file(filename: str) -> bool:
+    lowered = filename.lower()
+    story_markers = ("story", "stories")
+    return any(marker in lowered for marker in story_markers) and PurePosixPath(filename).suffix.lower() in STORY_EXTENSIONS
 
 
 def _is_test_artifact_file(filename: str) -> bool:
@@ -251,11 +230,11 @@ def run_once():
             # own edits must not recursively generate stories, faults, code,
             # or other test cases.
             continue
-        if _is_code_class_file(filename, dataset):
+        if _is_code_class_file(filename):
             code_changes_by_dataset[dataset].append(file_change)
             continue
 
-        if _is_story_file(filename, dataset):
+        if _is_story_file(filename):
             story_changes.append({"dataset": dataset, "filename": filename})
 
     impacted: list[dict[str, Any]] = []
