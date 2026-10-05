@@ -4189,26 +4189,22 @@ EST_ERROR est_client_set_sign_digest (EST_CTX *ctx, int nid)
         return EST_ERR_NO_CTX;
     }
 
-    switch (nid) {
-    case NID_sha512:
-        ctx->signing_digest = EVP_sha512(); 
-        break;
-    case NID_sha384:
-        ctx->signing_digest = EVP_sha384(); 
-        break;
-    case NID_sha256:
-        ctx->signing_digest = EVP_sha256(); 
-        break;
-    case NID_sha224:
-        ctx->signing_digest = EVP_sha224(); 
-        break;
-    case NID_sha1:
-        ctx->signing_digest = EVP_sha1(); 
-        break;
-    default:
-	return (EST_ERR_INVALID_DIGEST);
-        break;
-    }
+switch (nid) {
+case NID_sha512:
+    ctx->signing_digest = EVP_sha512(); 
+    break;
+case NID_sha384:
+    ctx->signing_digest = EVP_sha384(); 
+    break;
+case NID_sha256:
+    ctx->signing_digest = EVP_sha256(); 
+    break;
+case NID_sha224:
+case NID_sha1:
+    return (EST_ERR_INVALID_DIGEST);
+default:
+    return (EST_ERR_INVALID_DIGEST);
+}
 
     return (EST_ERR_NONE);
 }
