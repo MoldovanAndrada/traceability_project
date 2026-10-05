@@ -719,11 +719,9 @@ static EST_ERROR est_client_init_ssl_ctx (EST_CTX *ctx)
     /*
      * Only TLS 1.1 or above can be used for EST
      */
-SSL_CTX_set_options(s_ctx, SSL_OP_NO_SSLv2 |
-                    SSL_OP_NO_SSLv3 |
-                    SSL_OP_NO_TLSv1 |
-                    SSL_OP_NO_TLSv1_1);
-
+    SSL_CTX_set_options(s_ctx, SSL_OP_NO_SSLv2 |
+                        SSL_OP_NO_SSLv3 |
+                        SSL_OP_NO_TLSv1);
 
     /*
      * limit the cipher suites that are offered
