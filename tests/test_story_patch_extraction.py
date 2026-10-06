@@ -43,6 +43,20 @@ class StoryPatchExtractionTest(unittest.TestCase):
             }],
         )
 
+    def test_extracts_story_identity_from_ground_truth_scenario(self):
+        patch = '''@@ -1 +1 @@
++9,US-009 (LibEST RQ10): Allow server key generation | Native requirement.,,,,category
+'''
+
+        self.assertEqual(
+            extract_story_changes_from_patch(patch),
+            [{
+                "id": "US-009",
+                "text": "Allow server key generation | Native requirement.",
+                "change_type": "added",
+            }],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

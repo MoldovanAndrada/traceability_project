@@ -1,4 +1,5 @@
 import csv
+import re
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -67,6 +68,19 @@ def extract_story_changes_from_patch(patch_text: str) -> list[dict[str, str]]:
 
         story_id = cells[0] or str(len(changed_by_id) + 1)
         story_text = cells[1] if len(cells) > 1 else cells[0]
+
+        # Ground-truth files use ``scenario_id, change_trigger, ...`` rather
+        # than ``story_id, feature_sentence, ...``.  Recover the embedded
+        # story identity so these scenario edits follow the same impact path
+        # as edits to user_stories.csv.
+        trigger_match = re.match(
+            r"^(US-[A-Za-z0-9_-]+)(?:\s+\([^)]*\))?\s*:\s*(.+)$",
+            story_text,
+            flags=re.IGNORECASE,
+        )
+        if trigger_match:
+            story_id = trigger_match.group(1)
+            story_text = trigger_match.group(2).strip()
         existing = changed_by_id.get(story_id)
         if existing is None or change_type == "added":
             changed_by_id[story_id] = {

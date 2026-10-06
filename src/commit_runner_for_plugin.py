@@ -50,7 +50,10 @@ def _is_code_class_file(filename: str) -> bool:
 
 def _is_story_file(filename: str) -> bool:
     lowered = filename.lower()
-    story_markers = ("story", "stories")
+    # Ground-truth scenario rows also describe a changed user story.  Several
+    # benchmark datasets (including libEST) are exercised by editing those
+    # scenarios rather than the canonical user_stories.csv inventory.
+    story_markers = ("story", "stories", "ground_truth")
     return any(marker in lowered for marker in story_markers) and PurePosixPath(filename).suffix.lower() in STORY_EXTENSIONS
 
 

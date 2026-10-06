@@ -113,6 +113,36 @@ class CommitRunnerScopeTests(unittest.TestCase):
         self.assertNotIn("TC-009", payload["human_readable_report"])
         self.assertNotIn("Bug-004", payload["human_readable_report"])
 
+    @patch("src.commit_runner_for_plugin.get_impacted_code", return_value=[])
+    @patch("src.commit_runner_for_plugin.get_related_faults", return_value=[])
+    @patch("src.commit_runner_for_plugin.get_related_test_cases", return_value=[])
+    @patch("src.commit_runner_for_plugin.get_latest_commit")
+    def test_ground_truth_scenario_changes_trigger_story_analysis(
+        self, mock_commit, _mock_test_cases, _mock_faults, _mock_impacted_code
+    ):
+        mock_commit.return_value = {
+            "sha": "eac81ba",
+            "files": [{
+                "filename": "dataset libEST/ground_truth.csv",
+                "patch": (
+                    "+9,US-009 (LibEST RQ10): Allow a client to request a "
+                    "server-generated certificate and key pair | Native requirement.,,,,category"
+                ),
+            }],
+        }
+
+        with patch("builtins.print") as mock_print:
+            run_once()
+
+        payload = json.loads(mock_print.call_args.args[0])
+        self.assertEqual(len(payload["impact"]), 1)
+        self.assertEqual(payload["impact"][0]["trigger"], "user_story_modified")
+        self.assertEqual(payload["impact"][0]["results"][0]["id"], "US-009")
+        self.assertIn(
+            "Modified File: dataset libEST/ground_truth.csv",
+            payload["human_readable_report"],
+        )
+
     @patch("src.commit_runner_for_plugin.get_impacted_code")
     @patch("src.commit_runner_for_plugin.search")
     @patch("src.commit_runner_for_plugin.get_latest_commit")
